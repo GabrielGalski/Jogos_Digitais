@@ -1,0 +1,16 @@
+# Godot generated cache and imported resources
+.godot/
+.import/
+
+# Godot export output
+export.cfg
+export_presets.cfg
+*.pck
+
+# Editor and operating-system files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+desktop.ini
+

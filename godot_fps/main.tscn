@@ -1,0 +1,140 @@
+[gd_scene load_steps=9 format=3]
+
+[ext_resource type="Script" path="res://player.gd" id="1_player"]
+[ext_resource type="Script" path="res://dungeon.gd" id="2_dungeon"]
+[ext_resource type="Script" path="res://card_controller.gd" id="3_cards"]
+
+[sub_resource type="Environment" id="Environment_dungeon"]
+background_mode = 1
+background_color = Color(0, 0, 0, 1)
+background_energy_multiplier = 0.0
+ambient_light_source = 2
+ambient_light_color = Color(0.12, 0.15, 0.24, 1)
+ambient_light_energy = 0.48
+reflected_light_source = 1
+tonemap_mode = 2
+fog_enabled = true
+fog_light_color = Color(0.018, 0.026, 0.045, 1)
+fog_light_energy = 0.24
+fog_density = 0.038
+fog_sky_affect = 0.12
+
+[sub_resource type="Shader" id="Shader_border_fog"]
+code = "shader_type spatial;
+render_mode unshaded, fog_disabled, cull_disabled, blend_mix, depth_draw_never;
+
+varying float local_height;
+
+void vertex() {
+	local_height = VERTEX.y;
+}
+
+void fragment() {
+	float height_fade = 1.0 - smoothstep(-2.3, 2.3, local_height);
+	float soft_variation = 0.92 + 0.08 * sin(UV.x * 38.0);
+	vec3 border_color = vec3(0.035, 0.05, 0.08);
+	ALBEDO = border_color;
+	EMISSION = border_color;
+	ALPHA = height_fade * soft_variation * 0.86;
+}"
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_border_fog"]
+render_priority = 1
+shader = SubResource("Shader_border_fog")
+
+[sub_resource type="QuadMesh" id="QuadMesh_border_fog"]
+material = SubResource("ShaderMaterial_border_fog")
+size = Vector2(64, 5)
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_player"]
+radius = 0.35
+height = 1.8
+
+[node name="Main" type="Node3D"]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_dungeon")
+
+[node name="Dungeon" type="Node3D" parent="."]
+script = ExtResource("2_dungeon")
+
+[node name="BorderFog" type="Node3D" parent="."]
+
+[node name="North" type="MeshInstance3D" parent="BorderFog"]
+position = Vector3(0, 3.0, -15.05)
+mesh = SubResource("QuadMesh_border_fog")
+
+[node name="South" type="MeshInstance3D" parent="BorderFog"]
+position = Vector3(0, 3.0, 15.05)
+mesh = SubResource("QuadMesh_border_fog")
+
+[node name="West" type="MeshInstance3D" parent="BorderFog"]
+position = Vector3(-15.05, 3.0, 0)
+rotation_degrees = Vector3(0, 90, 0)
+mesh = SubResource("QuadMesh_border_fog")
+
+[node name="East" type="MeshInstance3D" parent="BorderFog"]
+position = Vector3(15.05, 3.0, 0)
+rotation_degrees = Vector3(0, 90, 0)
+mesh = SubResource("QuadMesh_border_fog")
+
+[node name="DungeonLights" type="Node3D" parent="."]
+
+[node name="CenterLight" type="OmniLight3D" parent="DungeonLights"]
+position = Vector3(0, 2.65, 0)
+light_color = Color(0.38, 0.5, 1, 1)
+light_energy = 3.2
+shadow_enabled = true
+omni_range = 13.0
+omni_attenuation = 1.15
+
+[node name="NorthLight" type="OmniLight3D" parent="DungeonLights"]
+position = Vector3(0, 2.4, -11)
+light_color = Color(0.95, 0.16, 0.13, 1)
+light_energy = 3.0
+omni_range = 10.0
+omni_attenuation = 1.25
+
+[node name="SouthLight" type="OmniLight3D" parent="DungeonLights"]
+position = Vector3(0, 2.4, 11)
+light_color = Color(0.95, 0.16, 0.13, 1)
+light_energy = 3.0
+omni_range = 10.0
+omni_attenuation = 1.25
+
+[node name="WestLight" type="OmniLight3D" parent="DungeonLights"]
+position = Vector3(-12, 2.4, 0)
+light_color = Color(0.18, 0.44, 1, 1)
+light_energy = 2.5
+omni_range = 9.0
+omni_attenuation = 1.3
+
+[node name="EastLight" type="OmniLight3D" parent="DungeonLights"]
+position = Vector3(12, 2.4, 0)
+light_color = Color(0.18, 0.44, 1, 1)
+light_energy = 2.5
+omni_range = 9.0
+omni_attenuation = 1.3
+
+[node name="Player" type="CharacterBody3D" parent="."]
+position = Vector3(0, 0.05, 6)
+script = ExtResource("1_player")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Player"]
+position = Vector3(0, 0.9, 0)
+shape = SubResource("CapsuleShape3D_player")
+
+[node name="ViewPivot" type="Node3D" parent="Player"]
+position = Vector3(0, 1.62, 0)
+
+[node name="CameraTilt" type="Node3D" parent="Player/ViewPivot"]
+
+[node name="CameraEffects" type="Node3D" parent="Player/ViewPivot/CameraTilt"]
+
+[node name="Camera3D" type="Camera3D" parent="Player/ViewPivot/CameraTilt/CameraEffects"]
+current = true
+fov = 84.0
+near = 0.05
+
+[node name="CardSystem" type="Node" parent="Player"]
+script = ExtResource("3_cards")
