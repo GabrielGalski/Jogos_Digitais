@@ -7,7 +7,6 @@ extends CharacterBody3D
 @export_group("Dash")
 @export var dash_speed: float = 10.5
 @export var dash_duration: float = 0.12
-@export var dash_double_tap_window: float = 0.25
 @export var dash_cooldown: float = 0.18
 @export_group("Dash Camera Effects")
 @export var dash_fov_kick: float = 7.0
@@ -39,19 +38,6 @@ var dash_cooldown_remaining := 0.0
 var dash_camera_strength := 0.0
 var dash_impact_strength := 0.0
 var dash_effect_phase := 0.0
-var last_tap_time := {
-	&"move_forward": -10.0,
-	&"move_backward": -10.0,
-	&"move_left": -10.0,
-	&"move_right": -10.0,
-}
-
-const MOVE_ACTIONS: Array[StringName] = [
-	&"move_forward",
-	&"move_backward",
-	&"move_left",
-	&"move_right",
-]
 
 
 func _ready() -> void:
@@ -69,11 +55,10 @@ func _unhandled_input(event: InputEvent) -> void:
 			deg_to_rad(85.0)
 		)
 
-	if event is InputEventKey and event.pressed and not event.echo:
-		for action in MOVE_ACTIONS:
-			if event.is_action_pressed(action):
-				_register_movement_tap(action)
-				break
+	if event.is_action_pressed(&"dash"):
+		if event is InputEventKey and event.echo:
+			return
+		_start_dash()
 
 	if event.is_action_pressed("ui_cancel"):
 		Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
@@ -134,23 +119,11 @@ func _physics_process(delta: float) -> void:
 		_respawn()
 
 
-func _register_movement_tap(action: StringName) -> void:
-	var now := Time.get_ticks_msec() / 1000.0
-	var elapsed := now - float(last_tap_time[action])
-	last_tap_time[action] = now
-
-	if elapsed > dash_double_tap_window:
+func _start_dash() -> void:
+	if dash_cooldown_remaining > 0.0 or dash_time_remaining > 0.0:
 		return
 
-	last_tap_time[action] = -10.0
-	if dash_cooldown_remaining <= 0.0:
-		_start_dash(action)
-	elif dash_time_remaining > 0.0:
-		_merge_adjacent_dash(action)
-
-
-func _start_dash(trigger_action: StringName) -> void:
-	var input_vector := _get_movement_input(trigger_action)
+	var input_vector := _get_movement_input()
 	if input_vector.is_zero_approx():
 		return
 
@@ -160,17 +133,6 @@ func _start_dash(trigger_action: StringName) -> void:
 	dash_cooldown_remaining = dash_cooldown
 	dash_camera_strength = 1.0
 	_trigger_dash_impact(0.28)
-
-
-func _merge_adjacent_dash(trigger_action: StringName) -> void:
-	var input_vector := _get_movement_input(trigger_action)
-	if is_zero_approx(input_vector.x) or is_zero_approx(input_vector.y):
-		return
-
-	var candidate := (transform.basis * Vector3(input_vector.x, 0.0, input_vector.y)).normalized()
-	if candidate.dot(dash_direction) > 0.0:
-		dash_direction = candidate
-		dash_local_direction = Vector3(input_vector.x, 0.0, input_vector.y).normalized()
 
 
 func _trigger_dash_impact(strength: float) -> void:
@@ -216,11 +178,11 @@ func _update_dash_camera_effects(delta: float) -> void:
 	camera.fov = lerpf(camera.fov, target_fov, blend_weight)
 
 
-func _get_movement_input(forced_action: StringName = &"") -> Vector2:
-	var left := Input.is_action_pressed("move_left") or forced_action == &"move_left"
-	var right := Input.is_action_pressed("move_right") or forced_action == &"move_right"
-	var forward := Input.is_action_pressed("move_forward") or forced_action == &"move_forward"
-	var backward := Input.is_action_pressed("move_backward") or forced_action == &"move_backward"
+func _get_movement_input() -> Vector2:
+	var left := Input.is_action_pressed("move_left")
+	var right := Input.is_action_pressed("move_right")
+	var forward := Input.is_action_pressed("move_forward")
+	var backward := Input.is_action_pressed("move_backward")
 	var horizontal := (1.0 if right else 0.0) - (1.0 if left else 0.0)
 	var vertical := (1.0 if backward else 0.0) - (1.0 if forward else 0.0)
 	return Vector2(horizontal, vertical).normalized()

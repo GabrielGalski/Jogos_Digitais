@@ -1,7 +1,9 @@
 extends Node3D
 
-const FLOOR_TEXTURE: Texture2D = preload("res://sprites/Sprite_floor.png")
-const WALL_TEXTURE: Texture2D = preload("res://sprites/Sprite_wall.png")
+const NORMAL_FLOOR_TEXTURE: Texture2D = preload("res://sprites/Sprite_floor.png")
+const NORMAL_WALL_TEXTURE: Texture2D = preload("res://sprites/Sprite_wall.png")
+const UPSIDE_FLOOR_TEXTURE: Texture2D = preload("res://sprites/Sprite_floor_upside.png")
+const UPSIDE_WALL_TEXTURE: Texture2D = preload("res://sprites/Sprite_wall_upside.png")
 
 const GRID_WIDTH := 32
 const GRID_DEPTH := 32
@@ -9,15 +11,36 @@ const HALF_WIDTH := GRID_WIDTH / 2
 const HALF_DEPTH := GRID_DEPTH / 2
 const TILE_SIZE := 1.0
 const FLOOR_THICKNESS := 0.25
-const WALL_HEIGHT := 1
+const WALL_HEIGHT := 4
+const CEILING_HEIGHT := float(WALL_HEIGHT)
+
+var floor_material: StandardMaterial3D
+var wall_material: StandardMaterial3D
+var is_upside := false
 
 
 func _ready() -> void:
-	var floor_material := _create_material(FLOOR_TEXTURE, 0.16)
-	var wall_material := _create_material(WALL_TEXTURE, 0.12)
+	floor_material = _create_material(NORMAL_FLOOR_TEXTURE, 0.16)
+	wall_material = _create_material(NORMAL_WALL_TEXTURE, 0.12)
 	_create_floor(floor_material)
+	_create_ceiling(wall_material)
 	_create_walls(wall_material)
 	_create_collision_geometry()
+
+
+func set_world(upside: bool) -> void:
+	is_upside = upside
+	var floor_texture := UPSIDE_FLOOR_TEXTURE if is_upside else NORMAL_FLOOR_TEXTURE
+	var wall_texture := UPSIDE_WALL_TEXTURE if is_upside else NORMAL_WALL_TEXTURE
+	_set_material_texture(floor_material, floor_texture)
+	_set_material_texture(wall_material, wall_texture)
+
+
+func _set_material_texture(material: StandardMaterial3D, texture: Texture2D) -> void:
+	if material == null:
+		return
+	material.albedo_texture = texture
+	material.emission_texture = texture
 
 
 func _create_material(texture: Texture2D, emission_strength: float) -> StandardMaterial3D:
@@ -44,6 +67,24 @@ func _create_floor(material: Material) -> void:
 			floor_transforms.append(Transform3D(Basis.IDENTITY, tile_position))
 
 	_create_multimesh("FloorBlocks", tile_mesh, floor_transforms)
+
+
+func _create_ceiling(material: Material) -> void:
+	var tile_mesh := BoxMesh.new()
+	tile_mesh.size = Vector3(TILE_SIZE, FLOOR_THICKNESS, TILE_SIZE)
+	tile_mesh.material = material
+
+	var ceiling_transforms: Array[Transform3D] = []
+	for x in range(-HALF_WIDTH, HALF_WIDTH):
+		for z in range(-HALF_DEPTH, HALF_DEPTH):
+			var tile_position := Vector3(
+				x + 0.5,
+				CEILING_HEIGHT + FLOOR_THICKNESS * 0.5,
+				z + 0.5
+			)
+			ceiling_transforms.append(Transform3D(Basis.IDENTITY, tile_position))
+
+	_create_multimesh("CeilingBlocks", tile_mesh, ceiling_transforms)
 
 
 func _create_walls(material: Material) -> void:
@@ -83,6 +124,12 @@ func _create_collision_geometry() -> void:
 		geometry,
 		"FloorCollision",
 		Vector3(0.0, -FLOOR_THICKNESS * 0.5, 0.0),
+		Vector3(GRID_WIDTH, FLOOR_THICKNESS, GRID_DEPTH)
+	)
+	_add_box_collision(
+		geometry,
+		"CeilingCollision",
+		Vector3(0.0, CEILING_HEIGHT + FLOOR_THICKNESS * 0.5, 0.0),
 		Vector3(GRID_WIDTH, FLOOR_THICKNESS, GRID_DEPTH)
 	)
 	var wall_index := 0

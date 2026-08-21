@@ -1,8 +1,11 @@
-[gd_scene load_steps=9 format=3]
+[gd_scene load_steps=12 format=3]
 
 [ext_resource type="Script" path="res://player.gd" id="1_player"]
 [ext_resource type="Script" path="res://dungeon.gd" id="2_dungeon"]
 [ext_resource type="Script" path="res://card_controller.gd" id="3_cards"]
+[ext_resource type="Script" path="res://world_controller.gd" id="4_world_controller"]
+[ext_resource type="AudioStream" path="res://sfx/songs/normal_base.wav" id="5_normal_music"]
+[ext_resource type="AudioStream" path="res://sfx/songs/upside_base.wav" id="6_upside_music"]
 
 [sub_resource type="Environment" id="Environment_dungeon"]
 background_mode = 1
@@ -13,7 +16,7 @@ ambient_light_color = Color(0.12, 0.15, 0.24, 1)
 ambient_light_energy = 0.48
 reflected_light_source = 1
 tonemap_mode = 2
-fog_enabled = true
+fog_enabled = false
 fog_light_color = Color(0.018, 0.026, 0.045, 1)
 fog_light_energy = 0.24
 fog_density = 0.038
@@ -58,7 +61,20 @@ environment = SubResource("Environment_dungeon")
 [node name="Dungeon" type="Node3D" parent="."]
 script = ExtResource("2_dungeon")
 
+[node name="WorldController" type="Node" parent="."]
+script = ExtResource("4_world_controller")
+
+[node name="NormalMusic" type="AudioStreamPlayer" parent="WorldController"]
+stream = ExtResource("5_normal_music")
+volume_db = -2.0
+autoplay = true
+
+[node name="UpsideMusic" type="AudioStreamPlayer" parent="WorldController"]
+stream = ExtResource("6_upside_music")
+volume_db = -60.0
+
 [node name="BorderFog" type="Node3D" parent="."]
+visible = false
 
 [node name="North" type="MeshInstance3D" parent="BorderFog"]
 position = Vector3(0, 3.0, -15.05)
