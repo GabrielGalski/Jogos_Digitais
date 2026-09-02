@@ -1,0 +1,46 @@
+[gd_scene load_steps=12 format=3]
+
+[ext_resource type="Script" path="res://scripts/enemies/elites/mimic.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://assets/enemies/mimic/run/mimic_run_01.png" id="2_run1"]
+[ext_resource type="Texture2D" path="res://assets/enemies/mimic/run/mimic_run_02.png" id="3_run2"]
+[ext_resource type="Texture2D" path="res://assets/enemies/mimic/run/mimic_run_03.png" id="4_run3"]
+[ext_resource type="Texture2D" path="res://assets/enemies/mimic/run/mimic_run_04.png" id="5_run4"]
+[ext_resource type="Texture2D" path="res://assets/enemies/mimic/run/mimic_run_05.png" id="6_run5"]
+[ext_resource type="Texture2D" path="res://assets/enemies/mimic/run/mimic_run_06.png" id="7_run6"]
+[ext_resource type="Texture2D" path="res://assets/enemies/mimic/run/mimic_run_07.png" id="8_run7"]
+[ext_resource type="Texture2D" path="res://assets/enemies/mimic/run/mimic_run_08.png" id="9_run8"]
+[ext_resource type="Script" path="res://scripts/visual/simple_mob_shadow.gd" id="10_shadow"]
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_mimic"]
+animations = [{
+"frames": [{"duration": 1.0, "texture": ExtResource("2_run1")}, {"duration": 1.0, "texture": ExtResource("3_run2")}, {"duration": 1.0, "texture": ExtResource("4_run3")}, {"duration": 1.0, "texture": ExtResource("5_run4")}, {"duration": 1.0, "texture": ExtResource("6_run5")}, {"duration": 1.0, "texture": ExtResource("7_run6")}, {"duration": 1.0, "texture": ExtResource("8_run7")}, {"duration": 1.0, "texture": ExtResource("9_run8")}],
+"loop": true,
+"name": &"run",
+"speed": 8.0
+}]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_mimic"]
+radius = 23.0
+
+[node name="Mimic" type="Area2D"]
+collision_layer = 4
+collision_mask = 1
+script = ExtResource("1_script")
+
+[node name="Sprite" type="AnimatedSprite2D" parent="."]
+texture_filter = 1
+scale = Vector2(1.6, 1.6)
+sprite_frames = SubResource("SpriteFrames_mimic")
+animation = &"run"
+autoplay = "run"
+
+[node name="GroundShadow" type="Node2D" parent="."]
+show_behind_parent = true
+z_index = -1
+position = Vector2(0, 16)
+script = ExtResource("10_shadow")
+radius = 10.0
+
+[node name="BodyShape" type="CollisionShape2D" parent="."]
+position = Vector2(0, 2)
+shape = SubResource("CircleShape2D_mimic")
