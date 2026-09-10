@@ -1,5 +1,8 @@
 # Monster Booster
 
+> **Estado do desenvolvimento:** a base Godot atual abre uma cena vazia. O conceito abaixo é a visão inicial; mecânicas e cartas serão refinadas nos documentos de prototipação em `docs/`.
+
+
 **Monster Booster** é um roguelike de ação com perspectiva superior que combina combate contra hordas, confrontos intensos com chefes e a fantasia de construir uma coleção de cartas monstruosas.
 O jogador assume o papel de um pequeno monstro que invade os domínios dos Senhores das Trevas. A jornada começa com recursos simples e cresce à medida que novas coleções são descobertas. Cada vitória amplia as possibilidades do personagem e ajuda a preparar o caminho para criaturas mais poderosas, transformando a progressão em uma busca constante por combinações interessantes e novos estilos de combate.
 
@@ -46,3 +49,37 @@ A arma principal e customízavel armazena 3 espaços para combinações de carta
 ## Experiência pretendida
 
 A ação deve ser fluida e impactante para o jogador, enquanto a abertura de um booster funciona como uma pausa de expectativa e sensação satisfatória. O jogador alterna entre a energia do combate, a curiosidade por novos pacotes e o prazer de observar sua coleção ganhar forma, produzindo runs com crescimento perceptível, liberdade para experimentar e sensação constante de que novos boosters podem mudar a experiência sentida durante a gameplay.
+
+---
+
+## Base de desenvolvimento em Godot
+
+Base limpa em Godot para prototipação iterativa e incremental.
+
+## Abrir o projeto
+
+Importe o `project.godot` desta pasta no Godot 4.7 ou compatível e execute com F6/F5. A cena inicial é vazia: sua função é confirmar que o projeto abre e executa.
+
+A configuração inicial usa o renderizador Compatibility, viewport lógico de 480 × 270, janela de 960 × 540 e texturas sem suavização. São configurações de partida, não requisitos definitivos de gameplay.
+
+## Organização
+
+| Caminho | Uso |
+| --- | --- |
+| `project.godot` | Projeto ativo |
+| `scenes/main.tscn` | Cena inicial vazia |
+| `assets/` | Assets existentes, preservados para reutilização |
+| `docs/GDD.md` | Decisões e definições do novo ciclo de desenvolvimento |
+| `docs/ITERACOES.md` | Forma de delimitar, implementar e validar cada entrega |
+| `docs/TILESET_PAREDES.md` | Dimensões atuais, recortes e regras de composição das paredes |
+| `old/mvp_2026-09-09/` | Backup local do MVP; não é enviado ao GitHub |
+
+O projeto ativo não carrega cenas, scripts ou dados de `old`. Na estação de desenvolvimento, essa pasta possui `.gdignore` para impedir que o Godot importe os recursos e registre as classes do MVP no projeto novo.
+
+## Desenvolvimento
+
+Cada iteração começa com uma mecânica delimitada, uma entrega pequena e critérios de aceitação. A implementação é validada antes de incorporar novas regras. O GDD registra as decisões resultantes da validação.
+
+O pitch, o GDD antigo e as mecânicas demonstradas são referências do MVP. Cartas, inimigos, progressão e regras de combate serão definidos e validados no novo ciclo; não são importados automaticamente para a base ativa.
+
+O backup em `old` existe apenas na estação de desenvolvimento. Todas as pastas chamadas `old`, caches, renders do MVP e cópias de trabalho estão fora do versionamento. As visualizações atuais em `docs` fazem parte deste repositório.
