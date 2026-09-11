@@ -1,0 +1,82 @@
+[gd_scene format=3]
+
+[ext_resource type="Shader" path="res://shaders/chain_depth.gdshader" id="1_222wn"]
+[ext_resource type="Texture2D" path="res://assets/tiles/wall/decor/Chain1.png" id="2_2l0u3"]
+[ext_resource type="Texture2D" path="res://assets/tiles/wall/decor/Chain2.png" id="3_v2pco"]
+[ext_resource type="Texture2D" path="res://assets/tiles/wall/decor/Chain3.png" id="4_adpkm"]
+[ext_resource type="Texture2D" path="res://assets/tiles/wall/decor/Chain4.png" id="5_dvalg"]
+[ext_resource type="Texture2D" path="res://assets/tiles/wall/decor/Chain5.png" id="6_i80xm"]
+[ext_resource type="Texture2D" path="res://assets/tiles/wall/decor/Chain6.png" id="7_dx3en"]
+[ext_resource type="Texture2D" path="res://assets/tiles/wall/decor/Chain7.png" id="8_ehtar"]
+[ext_resource type="Texture2D" path="res://assets/tiles/wall/decor/Chain8.png" id="9_0paro"]
+[ext_resource type="Texture2D" path="res://assets/tiles/wall/decor/Chain9.png" id="10_1h3tp"]
+[ext_resource type="Texture2D" path="res://assets/tiles/wall/decor/Chain10.png" id="11_2tyj8"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_222wn"]
+shader = ExtResource("1_222wn")
+shader_parameter/length_pixels = null
+shader_parameter/cycle_pixels = null
+
+[sub_resource type="Animation" id="Animation_2l0u3"]
+length = 1.25
+loop_mode = 1
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Sprite:texture")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.125, 0.25, 0.375, 0.5, 0.625, 0.75, 0.875, 1, 1.125),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1, 1, 1, 1),
+"update": 1,
+"values": [ExtResource("2_2l0u3"), ExtResource("3_v2pco"), ExtResource("4_adpkm"), ExtResource("5_dvalg"), ExtResource("6_i80xm"), ExtResource("7_dx3en"), ExtResource("8_ehtar"), ExtResource("9_0paro"), ExtResource("10_1h3tp"), ExtResource("11_2tyj8")]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("DepthSprite:texture")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 0.125, 0.25, 0.375, 0.5, 0.625, 0.75, 0.875, 1, 1.125),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1, 1, 1, 1),
+"update": 1,
+"values": [ExtResource("2_2l0u3"), ExtResource("3_v2pco"), ExtResource("4_adpkm"), ExtResource("5_dvalg"), ExtResource("6_i80xm"), ExtResource("7_dx3en"), ExtResource("8_ehtar"), ExtResource("9_0paro"), ExtResource("10_1h3tp"), ExtResource("11_2tyj8")]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_v2pco"]
+_data = {
+&"sway": SubResource("Animation_2l0u3")
+}
+
+[node name="HangingChain" type="Node2D" unique_id=1663991144]
+z_index = 4
+
+[node name="Sprite" type="Sprite2D" parent="." unique_id=538632545]
+z_index = 10
+texture_filter = 1
+material = SubResource("ShaderMaterial_222wn")
+position = Vector2(-12.5, -960)
+scale = Vector2(0.2, 0.2)
+texture = ExtResource("2_2l0u3")
+centered = false
+region_enabled = true
+region_rect = Rect2(0, 0, 124, 4800)
+
+[node name="DepthSprite" type="Sprite2D" parent="."]
+modulate = Color(0.52, 0.43, 0.5, 0.78)
+z_index = -2
+z_as_relative = false
+texture_filter = 1
+material = SubResource("ShaderMaterial_222wn")
+position = Vector2(-12.5, -884.8)
+scale = Vector2(0.2, 0.2)
+texture = ExtResource("2_2l0u3")
+centered = false
+region_enabled = true
+region_rect = Rect2(0, 0, 124, 4800)
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="." unique_id=1614474467]
+libraries/ = SubResource("AnimationLibrary_v2pco")
+autoplay = &"sway"

@@ -1,0 +1,88 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="1090" viewBox="0 0 1280 1090">
+<defs><pattern id="checker" width="24" height="24" patternUnits="userSpaceOnUse"><rect width="24" height="24" fill="#151924" /><path d="M0 0H12V12H0ZM12 12H24V24H12Z" fill="#202532" /></pattern>
+<image id="atlas" width="256" height="256" href="data:image/png;base64,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" style="image-rendering:pixelated" />
+<image id="mox" width="16" height="16" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAABFklEQVQ4jaVSu07DMBQ9fkBLpLAwwEAlKhiYYKBSVKmfwlf1m7oguUO2CguRgQWUiSpViFLM0Nq6duyJO137PO7xA/hnsdjm/WLhrS9/WjxuvxkAs9y8pg2o8OmjNxTTV4ad7ff4HI2xWa2GBjezGTjnmH9xTxjW+loyAM6EU5C/teZlu3Nr2qeSyZBQ5JknDk0s7oY6p/fOUAEl6rqErstoCu8IdLo1okJdl4NEnkFseqyoCQ/BIs88wvN0Hu1tef/g7uIh+oThxfbTU1YpFU8Qiqww9qQDg9/bsUuUElDOwEAIkQrkcWx8IPhIQgj0x3404ayRB1hKCeidAYDzpkkfwVaRZ8jbFpVSqJQ6GBz3T7rO4/4B/j52CPUvNB4AAAAASUVORK5CYII=" style="image-rendering:pixelated" />
+</defs><rect width="1280" height="1090" fill="#10131b" />
+<g font-family="Segoe UI, Arial, sans-serif" fill="#f1f4fb">
+<text x="24" y="35" font-size="25" font-weight="700">Monster Booster · atlas atualizado e extremidades</text>
+<text x="24" y="62" font-size="15" fill="#aebad1">Atlas: 256 × 256 · corpo: 64 × 48 · borda opcional: 1 px · fonte completa: 65 × 48 · avanço: 64 px</text>
+<rect x="24" y="90" width="768" height="768" fill="url(#checker)" />
+<g transform="translate(24 90) scale(3)"><use href="#atlas" /></g>
+<path d="M24 90V858 M24 90H792" stroke="#63718b" stroke-opacity=".25" fill="none" />
+<path d="M72 90V858 M24 138H792" stroke="#63718b" stroke-opacity=".25" fill="none" />
+<path d="M120 90V858 M24 186H792" stroke="#63718b" stroke-opacity=".25" fill="none" />
+<path d="M168 90V858 M24 234H792" stroke="#63718b" stroke-opacity=".25" fill="none" />
+<path d="M216 90V858 M24 282H792" stroke="#63718b" stroke-opacity=".25" fill="none" />
+<path d="M264 90V858 M24 330H792" stroke="#63718b" stroke-opacity=".25" fill="none" />
+<path d="M312 90V858 M24 378H792" stroke="#63718b" stroke-opacity=".25" fill="none" />
+<path d="M360 90V858 M24 426H792" stroke="#63718b" stroke-opacity=".25" fill="none" />
+<path d="M408 90V858 M24 474H792" stroke="#63718b" stroke-opacity=".25" fill="none" />
+<path d="M456 90V858 M24 522H792" stroke="#63718b" stroke-opacity=".25" fill="none" />
+<path d="M504 90V858 M24 570H792" stroke="#63718b" stroke-opacity=".25" fill="none" />
+<path d="M552 90V858 M24 618H792" stroke="#63718b" stroke-opacity=".25" fill="none" />
+<path d="M600 90V858 M24 666H792" stroke="#63718b" stroke-opacity=".25" fill="none" />
+<path d="M648 90V858 M24 714H792" stroke="#63718b" stroke-opacity=".25" fill="none" />
+<path d="M696 90V858 M24 762H792" stroke="#63718b" stroke-opacity=".25" fill="none" />
+<path d="M744 90V858 M24 810H792" stroke="#63718b" stroke-opacity=".25" fill="none" />
+<path d="M792 90V858 M24 858H792" stroke="#63718b" stroke-opacity=".25" fill="none" />
+<rect x="597" y="138" width="195" height="144" fill="none" stroke="#ffd85e" stroke-width="2" />
+<text x="603" y="134" font-size="13" fill="#ffd85e" font-weight="700">W01</text>
+<rect x="597" y="330" width="195" height="144" fill="none" stroke="#ffd85e" stroke-width="2" />
+<text x="603" y="326" font-size="13" fill="#ffd85e" font-weight="700">W02</text>
+<rect x="597" y="522" width="195" height="144" fill="none" stroke="#ffd85e" stroke-width="2" />
+<text x="603" y="518" font-size="13" fill="#ffd85e" font-weight="700">W03</text>
+<rect x="597" y="714" width="195" height="144" fill="none" stroke="#ffd85e" stroke-width="2" />
+<text x="603" y="710" font-size="13" fill="#ffd85e" font-weight="700">W04</text>
+<rect x="168" y="138" width="48" height="144" fill="none" stroke="#70e1ff" stroke-width="2" />
+<text x="171" y="134" font-size="13" fill="#70e1ff" font-weight="700">QE</text>
+<rect x="405" y="138" width="51" height="144" fill="none" stroke="#70e1ff" stroke-width="2" />
+<text x="408" y="134" font-size="13" fill="#70e1ff" font-weight="700">QD</text>
+<rect x="24" y="474" width="192" height="144" fill="none" stroke="#70e1ff" stroke-width="2" />
+<text x="27" y="470" font-size="13" fill="#70e1ff" font-weight="700">IE</text>
+<rect x="360" y="474" width="192" height="144" fill="none" stroke="#70e1ff" stroke-width="2" />
+<text x="363" y="470" font-size="13" fill="#70e1ff" font-weight="700">ID</text>
+<rect x="24" y="282" width="51" height="144" fill="none" stroke="#9ce5b5" stroke-width="2" />
+<text x="27" y="278" font-size="13" fill="#9ce5b5" font-weight="700">TSE</text>
+<rect x="504" y="282" width="48" height="144" fill="none" stroke="#9ce5b5" stroke-width="2" />
+<text x="507" y="278" font-size="13" fill="#9ce5b5" font-weight="700">TSD</text>
+<rect x="24" y="714" width="51" height="144" fill="none" stroke="#9ce5b5" stroke-width="2" />
+<text x="27" y="710" font-size="13" fill="#9ce5b5" font-weight="700">TIE</text>
+<rect x="504" y="714" width="48" height="144" fill="none" stroke="#9ce5b5" stroke-width="2" />
+<text x="507" y="710" font-size="13" fill="#9ce5b5" font-weight="700">TID</text>
+<rect x="24" y="618" width="48" height="48" fill="none" stroke="#9ce5b5" stroke-width="2" />
+<text x="27" y="614" font-size="13" fill="#9ce5b5" font-weight="700">LE</text>
+<rect x="504" y="618" width="48" height="48" fill="none" stroke="#9ce5b5" stroke-width="2" />
+<text x="507" y="614" font-size="13" fill="#9ce5b5" font-weight="700">LD</text>
+<text x="820" y="112" font-size="22" fill="#ffd85e" font-weight="700">Recortes medidos</text>
+<text x="820" y="143" font-size="16" fill="#d9e1ef" font-weight="400">W01  (191, 16, 65, 48)</text>
+<text x="820" y="169" font-size="16" fill="#d9e1ef" font-weight="400">W02  (191, 80, 65, 48)</text>
+<text x="820" y="195" font-size="16" fill="#d9e1ef" font-weight="400">W03  (191, 144, 65, 48)</text>
+<text x="820" y="221" font-size="16" fill="#d9e1ef" font-weight="400">W04  (191, 208, 65, 48)</text>
+<text x="820" y="247" font-size="16" fill="#d9e1ef" font-weight="400">QE   (48, 16, 16, 48)</text>
+<text x="820" y="273" font-size="16" fill="#d9e1ef" font-weight="400">QD   (127, 16, 17, 48)</text>
+<text x="820" y="299" font-size="16" fill="#d9e1ef" font-weight="400">IE   (0, 128, 64, 48)</text>
+<text x="820" y="325" font-size="16" fill="#d9e1ef" font-weight="400">ID   (112, 128, 64, 48)</text>
+<text x="820" y="351" font-size="16" fill="#d9e1ef" font-weight="400">TSE  (0, 64, 17, 48)</text>
+<text x="820" y="377" font-size="16" fill="#d9e1ef" font-weight="400">TSD  (160, 64, 16, 48)</text>
+<text x="820" y="403" font-size="16" fill="#d9e1ef" font-weight="400">TIE  (0, 208, 17, 48)</text>
+<text x="820" y="429" font-size="16" fill="#d9e1ef" font-weight="400">TID  (160, 208, 16, 48)</text>
+<text x="820" y="455" font-size="16" fill="#d9e1ef" font-weight="400">LE   (0, 176, 16, 16)</text>
+<text x="820" y="481" font-size="16" fill="#d9e1ef" font-weight="400">LD   (160, 176, 16, 16)</text>
+<text x="820" y="535" font-size="22" fill="#ffd85e" font-weight="700">Escala da arte atual</text>
+<text x="820" y="560" font-size="15" fill="#d9e1ef" font-weight="400">Parede e Mox a 4× apenas para inspeção.</text>
+<rect x="820" y="580" width="432" height="210" fill="url(#checker)" />
+<svg x="832" y="590" width="256" height="192" viewBox="192 16 64 48" overflow="hidden"><use href="#atlas" /></svg>
+<g transform="translate(1152 718) scale(4)"><use href="#mox" /></g>
+<path d="M820 782H1252" stroke="#9ce5b5" stroke-dasharray="5 4" />
+<rect x="1148" y="710" width="72" height="72" fill="none" stroke="#70e1ff" stroke-dasharray="4 3" />
+<text x="820" y="816" font-size="15" fill="#d9e1ef" font-weight="400">Corpo: 64 × 48 px; altura visível de 45 px.</text>
+<text x="820" y="841" font-size="15" fill="#d9e1ef" font-weight="400">Mox mostrado: 15 px visíveis / quadro de 16 px.</text>
+<text x="820" y="866" font-size="15" fill="#d9e1ef" font-weight="400">Contorno azul: referência de 18 × 18 px.</text>
+<text x="24" y="906" font-size="22" fill="#ffd85e" font-weight="700">Regras de montagem</text>
+<text x="24" y="936" font-size="15" fill="#d9e1ef" font-weight="400">W01–W04: corpo em x=192, com 64 px úteis. Borda em x=191, usada somente nas quebras expostas.</text>
+<text x="24" y="961" font-size="15" fill="#d9e1ef" font-weight="400">QE = últimos 16 px de IE; QD = primeiros 17 px de ID. Acabamentos sobrepostos, sem aumentar o trecho.</text>
+<text x="24" y="986" font-size="15" fill="#d9e1ef" font-weight="400">QD ultrapassa a célula 1 px à esquerda; TSE e TIE ultrapassam 1 px à direita. Não perder essas margens ao recortar.</text>
+<text x="24" y="1011" font-size="15" fill="#d9e1ef" font-weight="400">Quinas ocupam a célula da extremidade: não acrescentam outra célula ao comprimento. Faces têm três faixas de 16 px.</text>
+<text x="24" y="1036" font-size="15" fill="#d9e1ef" font-weight="400">Quatro corpos unidos: 64 + 64 + 64 + 64 = 256 px. Sem sobreposição e sem borda nas emendas.</text>
+<text x="24" y="1061" font-size="15" fill="#d9e1ef" font-weight="400">Meta de Mox: 16–18 px de altura visível. O tamanho de colisão e os encaixes com portas ainda não foram definidos.</text>
+</g></svg>

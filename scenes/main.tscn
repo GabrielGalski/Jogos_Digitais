@@ -1,27 +1,8 @@
-[gd_scene load_steps=7 format=3]
+[gd_scene format=3 uid="uid://twmvexpaipda"]
 
-[ext_resource type="PackedScene" path="res://scenes/arena.tscn" id="1_arena"]
-[ext_resource type="PackedScene" path="res://scenes/player.tscn" id="2_player"]
-[ext_resource type="Script" path="res://scripts/main.gd" id="3_main"]
-[ext_resource type="PackedScene" path="res://scenes/booster_viewer.tscn" id="4_booster_viewer"]
-[ext_resource type="Script" path="res://scripts/minotaur_spawner.gd" id="5_minotaur_spawner"]
-[ext_resource type="Script" path="res://scripts/pickups/booster_drop_preview.gd" id="6_booster_drop"]
+[ext_resource type="PackedScene" path="res://scenes/tutorial_arena.tscn" id="1_arena"]
 
-[node name="Main" type="Node2D"]
-script = ExtResource("3_main")
+[node name="Main" type="Node2D" unique_id=36190445]
 
-[node name="Arena" parent="." instance=ExtResource("1_arena")]
-
-[node name="Player" parent="." instance=ExtResource("2_player")]
-
-[node name="Enemies" type="Node2D" parent="."]
-z_index = 1
-script = ExtResource("5_minotaur_spawner")
-
-[node name="BoosterDropPreview" type="Node2D" parent="."]
-script = ExtResource("6_booster_drop")
-
-[node name="BoosterViewerLayer" type="CanvasLayer" parent="."]
-layer = 10
-
-[node name="BoosterViewer" parent="BoosterViewerLayer" instance=ExtResource("4_booster_viewer")]
+[node name="TutorialArena" parent="." unique_id=2069989885 instance=ExtResource("1_arena")]
+position = Vector2(130, -420)

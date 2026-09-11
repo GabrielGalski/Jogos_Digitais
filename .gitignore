@@ -1,3 +1,29 @@
+# Godot: caches e dados locais
 .godot/
 .godot-user/
 
+# MVP, arquivos antigos e materiais de apresentação
+old/
+/pitch/
+/renders/
+/render/
+
+# Exportações e arquivos temporários
+/build/
+/builds/
+/dist/
+/exports/
+/tmp/
+/temp/
+*.tmp
+*.bak
+*.log
+* - Copia.*
+
+# Arquivos do sistema e configurações locais
+.DS_Store
+Thumbs.db
+desktop.ini
+.env
+.env.*
+!.env.example

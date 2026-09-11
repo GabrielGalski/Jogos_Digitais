@@ -1,21 +1,15 @@
-[gd_scene load_steps=8 format=3]
+[gd_scene load_steps=5 format=3]
 
 [ext_resource type="Script" path="res://scripts/player.gd" id="1_player"]
 [ext_resource type="SpriteFrames" path="res://resources/player_frames.tres" id="2_frames"]
-[ext_resource type="Texture2D" path="res://assets/weapons/booster/booster_shooter.png" id="3_weapon"]
-[ext_resource type="Shader" path="res://shaders/white_damage_flash.gdshader" id="4_damage_shader"]
-[ext_resource type="Script" path="res://scripts/visual/simple_mob_shadow.gd" id="5_shadow"]
+[ext_resource type="Script" path="res://scripts/visual/simple_mob_shadow.gd" id="3_shadow"]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_player"]
 radius = 4.0
 height = 10.0
 
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_damage"]
-resource_local_to_scene = true
-shader = ExtResource("4_damage_shader")
-
 [node name="Player" type="CharacterBody2D"]
-z_index = 1
+z_index = 2
 texture_filter = 1
 script = ExtResource("1_player")
 
@@ -23,19 +17,8 @@ script = ExtResource("1_player")
 position = Vector2(0, 3)
 shape = SubResource("CapsuleShape2D_player")
 
-[node name="WeaponPivot" type="Node2D" parent="."]
-z_index = 2
-
-[node name="Weapon" type="Sprite2D" parent="WeaponPivot"]
-texture_filter = 2
-position = Vector2(-3.85, -2.2)
-scale = Vector2(0.55, 0.55)
-texture = ExtResource("3_weapon")
-centered = false
-
 [node name="Body" type="AnimatedSprite2D" parent="."]
-z_index = 1
-material = SubResource("ShaderMaterial_damage")
+z_index = 0
 texture_filter = 1
 scale = Vector2(1.05, 1.05)
 sprite_frames = ExtResource("2_frames")
@@ -46,10 +29,17 @@ autoplay = "idle"
 show_behind_parent = true
 z_index = -1
 position = Vector2(0, 7)
-script = ExtResource("5_shadow")
+script = ExtResource("3_shadow")
 radius = 4.0
 
 [node name="Camera2D" type="Camera2D" parent="."]
-position = Vector2(0, -5)
+position = Vector2(0, 4)
+zoom = Vector2(1.2, 1.2)
+limit_left = -320
+limit_top = -320
+limit_right = 320
+limit_bottom = 320
 position_smoothing_enabled = true
 position_smoothing_speed = 5.0
+process_callback = 0
+enabled = true

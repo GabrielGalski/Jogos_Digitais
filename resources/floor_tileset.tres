@@ -1,8 +1,9 @@
 [gd_resource type="TileSet" format=3]
 
 [ext_resource type="Texture2D" path="res://assets/tiles/floor/floor_tileset.png" id="1_is8l4"]
+[ext_resource type="Texture2D" path="res://assets/tiles/floor/path_color.png" id="2_eq74r"]
 
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_eq74r"]
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_y37lj"]
 texture = ExtResource("1_is8l4")
 0:0/0 = 0
 1:0/0 = 0
@@ -17,5 +18,10 @@ texture = ExtResource("1_is8l4")
 2:2/0 = 0
 3:2/0 = 0
 
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_pn77s"]
+texture = ExtResource("2_eq74r")
+0:0/0 = 0
+
 [resource]
-sources/0 = SubResource("TileSetAtlasSource_eq74r")
+sources/0 = SubResource("TileSetAtlasSource_y37lj")
+sources/1 = SubResource("TileSetAtlasSource_pn77s")
