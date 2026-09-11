@@ -1,18 +1,23 @@
-# Godot: caches e dados locais
-.godot/
-.godot-user/
+# Godot: arquivos gerados localmente
+/.godot/
+/.godot-user/
+/.import/
 
-# MVP, arquivos antigos e materiais de apresentação
-old/
+# Materiais fora do projeto executável
+/old/
 /pitch/
-/renders/
 /render/
+/renders/
+/docs/
+/tests/
 
-# Exportações e arquivos temporários
+# Builds e exportações
 /build/
 /builds/
 /dist/
 /exports/
+
+# Temporários e cópias redundantes
 /tmp/
 /temp/
 *.tmp
@@ -20,7 +25,9 @@ old/
 *.log
 * - Copia.*
 
-# Arquivos do sistema e configurações locais
+# Configurações locais e arquivos do sistema
+/.idea/
+/.vscode/
 .DS_Store
 Thumbs.db
 desktop.ini

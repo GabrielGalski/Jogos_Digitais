@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bgx07svpmvmmg"
-path="res://.godot/imported/tutorial_arena_visualizacao.png-790fe9a307999f9d6da1d4419d24513a.ctex"
+uid="uid://b4k2kqg5yfel2"
+path="res://.godot/imported/clouds_near.png-a519e9684df1ae0179db9031c97a27b8.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://docs/tutorial_arena_visualizacao.png"
-dest_files=["res://.godot/imported/tutorial_arena_visualizacao.png-790fe9a307999f9d6da1d4419d24513a.ctex"]
+source_file="res://assets/tiles/clouds/clouds_near.png"
+dest_files=["res://.godot/imported/clouds_near.png-a519e9684df1ae0179db9031c97a27b8.ctex"]
 
 [params]
 

@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cltqouxrvd5xq"
-path="res://.godot/imported/tileset_paredes_atlas.svg-928c07cc287cd4a9ba34885628825127.ctex"
+uid="uid://y7tania8gjho"
+path="res://.godot/imported/wall_tileset_old.png-bd091bf11919613cb33c097f13d7f1c9.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://docs/tileset_paredes_atlas.svg"
-dest_files=["res://.godot/imported/tileset_paredes_atlas.svg-928c07cc287cd4a9ba34885628825127.ctex"]
+source_file="res://assets/tiles/wall/old/wall_tileset_old.png"
+dest_files=["res://.godot/imported/wall_tileset_old.png-bd091bf11919613cb33c097f13d7f1c9.ctex"]
 
 [params]
 
@@ -38,6 +38,3 @@ process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
 detect_3d/compress_to=1
-svg/scale=1.0
-editor/scale_with_editor_scale=false
-editor/convert_colors_with_editor_theme=false

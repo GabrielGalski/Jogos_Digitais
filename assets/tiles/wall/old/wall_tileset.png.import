@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://douyoeux4otpe"
-path="res://.godot/imported/tileset_paredes_encaixes.png-7187bdf2152b9b632f8768ee21a9f4ae.ctex"
+uid="uid://bnhry5y468gst"
+path="res://.godot/imported/wall_tileset.png-b781f30cf5366026265882f03cf7799b.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://docs/tileset_paredes_encaixes.png"
-dest_files=["res://.godot/imported/tileset_paredes_encaixes.png-7187bdf2152b9b632f8768ee21a9f4ae.ctex"]
+source_file="res://assets/tiles/wall/old/wall_tileset.png"
+dest_files=["res://.godot/imported/wall_tileset.png-b781f30cf5366026265882f03cf7799b.ctex"]
 
 [params]
 

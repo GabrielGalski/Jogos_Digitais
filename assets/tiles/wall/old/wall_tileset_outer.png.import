@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dhkkxdl0twvlp"
-path="res://.godot/imported/tutorial_arena_correntes.png-dce255243aac8ef9a7d1168275afaa2e.ctex"
+uid="uid://nlujhg1vjsv0"
+path="res://.godot/imported/wall_tileset_outer.png-8f197f5c797ceb322c81a7943e2ccff1.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://docs/tutorial_arena_correntes.png"
-dest_files=["res://.godot/imported/tutorial_arena_correntes.png-dce255243aac8ef9a7d1168275afaa2e.ctex"]
+source_file="res://assets/tiles/wall/old/wall_tileset_outer.png"
+dest_files=["res://.godot/imported/wall_tileset_outer.png-8f197f5c797ceb322c81a7943e2ccff1.ctex"]
 
 [params]
 

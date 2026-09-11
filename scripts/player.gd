@@ -3,9 +3,9 @@ class_name Player
 
 @export var movement_speed := 82.0
 const CAMERA_ARENA_MARGIN := 32.0
-@export var arena_bounds := Rect2(-320.0, -384.0, 640.0, 704.0)
+@export var arena_bounds := Rect2(-336.0, -320.0, 672.0, 640.0)
 # Local bounds account for the capsule's downward offset.
-@export var movement_bounds := Rect2(-316.0, -382.0, 632.0, 694.0)
+@export var movement_bounds := Rect2(-332.0, -318.0, 664.0, 630.0)
 var intro_locked := false
 
 @onready var body: AnimatedSprite2D = $Body
