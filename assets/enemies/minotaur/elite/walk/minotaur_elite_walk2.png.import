@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://iunlpb7fmb28"
-path="res://.godot/imported/elite_minotaur_walk6.png-7557096f22c335ae545d0fabf89642fe.ctex"
+uid="uid://dt7wq2jftykgc"
+path="res://.godot/imported/minotaur_elite_walk2.png-227988a0ba6850fa6484ed309e1af4ce.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/enemies/minotaur/elite/elite_minotaur_walk6.png"
-dest_files=["res://.godot/imported/elite_minotaur_walk6.png-7557096f22c335ae545d0fabf89642fe.ctex"]
+source_file="res://assets/enemies/minotaur/elite/walk/minotaur_elite_walk2.png"
+dest_files=["res://.godot/imported/minotaur_elite_walk2.png-227988a0ba6850fa6484ed309e1af4ce.ctex"]
 
 [params]
 

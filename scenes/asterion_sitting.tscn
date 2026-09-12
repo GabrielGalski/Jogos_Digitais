@@ -1,0 +1,20 @@
+[gd_scene format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/minotaur_throne.tscn" id="1_throne"]
+[ext_resource type="SpriteFrames" path="res://resources/asterion_sitting_frames.tres" id="2_frames"]
+
+[node name="AsterionSitting" instance=ExtResource("1_throne")]
+
+[node name="Back" parent="." index="0"]
+visible = false
+
+[node name="Seat" parent="." index="1"]
+visible = false
+
+[node name="Asterion" type="AnimatedSprite2D" parent="." index="3"]
+texture_filter = 1
+position = Vector2(-1.56, -31.2)
+scale = Vector2(0.78, 0.78)
+sprite_frames = ExtResource("2_frames")
+animation = &"sitting"
+autoplay = "sitting"

@@ -10,7 +10,7 @@
 [ext_resource type="Texture2D" path="res://assets/tiles/inferior/inferior.png" id="9_lmcha"]
 [ext_resource type="PackedScene" path="res://scenes/hanging_chain.tscn" id="9_s1q6n"]
 [ext_resource type="TileSet" path="res://resources/floor_tileset.tres" id="11_hxo4e"]
-[ext_resource type="PackedScene" path="res://scenes/minotaur_throne.tscn" id="12_ly4nq"]
+[ext_resource type="PackedScene" path="res://scenes/asterion_sitting.tscn" id="12_ly4nq"]
 [ext_resource type="PackedScene" path="res://scenes/player.tscn" id="17_1idpy"]
 [ext_resource type="Script" path="res://scripts/player.gd" id="18_c2qos"]
 
