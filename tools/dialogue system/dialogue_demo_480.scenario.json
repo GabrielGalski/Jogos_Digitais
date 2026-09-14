@@ -1,0 +1,15 @@
+{
+  "scene_path": "res://tools/dialogue system/dialogue_demo.tscn",
+  "viewport_size": {"width": 480, "height": 270},
+  "settle_frames": 3,
+  "steps": [
+    {"type": "assert", "assertion": "property", "node_path": "DialogueBox", "property": "_line_index", "expected": 0},
+    {"type": "assert", "assertion": "property", "node_path": "DialogueBox/Interface/SafeArea/Layout/DialogueRow/DialogueColumn/NameOuter/NameBlack/NameInner/NameMargin/Name", "property": "text", "expected": "ASTERION"},
+    {"type": "ui_report", "label": "dialogue-480", "fail_on": ["zero_size", "offscreen", "overlap"]},
+    {"type": "screenshot", "path": "C:/Users/gabri/AppData/Local/Temp/monster_booster_dialogue_480.png"}
+  ],
+  "assertions": [
+    {"assertion": "visible", "node_path": "DialogueBox/Interface", "expected": true},
+    {"assertion": "visible", "node_path": "DialogueBox/Interface/SafeArea/Layout/DialogueRow/DialogueColumn/BodyOuter", "expected": true}
+  ]
+}

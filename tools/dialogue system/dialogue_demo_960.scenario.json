@@ -1,0 +1,13 @@
+{
+  "scene_path": "res://tools/dialogue system/dialogue_demo.tscn",
+  "viewport_size": {"width": 960, "height": 540},
+  "settle_frames": 3,
+  "steps": [
+    {"type": "ui_report", "label": "dialogue-960", "fail_on": ["zero_size", "offscreen", "overlap"]},
+    {"type": "screenshot", "path": "C:/Users/gabri/AppData/Local/Temp/monster_booster_dialogue_960.png"}
+  ],
+  "assertions": [
+    {"assertion": "visible", "node_path": "DialogueBox/Interface", "expected": true},
+    {"assertion": "property", "node_path": "DialogueBox/Interface/SafeArea/Layout/DialogueRow/DialogueColumn/NameOuter/NameBlack/NameInner/NameMargin/Name", "property": "text", "expected": "ASTERION"}
+  ]
+}

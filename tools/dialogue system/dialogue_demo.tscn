@@ -1,0 +1,73 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://tools/dialogue system/dialogue_demo.gd" id="1_demo"]
+[ext_resource type="PackedScene" path="res://tools/dialogue system/dialogue_box.tscn" id="2_dialogue"]
+[ext_resource type="FontFile" path="res://assets/font/Fixedsys Excelsior 3.01.ttf" id="3_font"]
+
+[sub_resource type="Theme" id="Theme_demo"]
+default_font = ExtResource("3_font")
+default_font_size = 14
+
+[node name="DialogueDemo" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = SubResource("Theme_demo")
+script = ExtResource("1_demo")
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.145098, 0.0745098, 0.101961, 1)
+
+[node name="DemoMargin" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 14
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 14
+
+[node name="Info" type="VBoxContainer" parent="DemoMargin"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 4
+
+[node name="Title" type="Label" parent="DemoMargin/Info"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.960784, 0.85098, 0.462745, 1)
+theme_override_colors/font_outline_color = Color(0.0352941, 0.027451, 0.0431373, 1)
+theme_override_constants/outline_size = 2
+theme_override_font_sizes/font_size = 18
+text = "MONSTER BOOSTER"
+
+[node name="Status" type="Label" parent="DemoMargin/Info"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.964706, 0.929412, 0.956863, 1)
+theme_override_colors/font_outline_color = Color(0.0352941, 0.027451, 0.0431373, 1)
+theme_override_constants/outline_size = 2
+theme_override_font_sizes/font_size = 12
+text = "DEMONSTRACAO DO SISTEMA"
+
+[node name="Instructions" type="Label" parent="DemoMargin/Info"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.756863, 0.670588, 0.737255, 1)
+theme_override_colors/font_outline_color = Color(0.0352941, 0.027451, 0.0431373, 1)
+theme_override_constants/outline_size = 1
+theme_override_font_sizes/font_size = 11
+text = "E: completar / avancar     W/S ou setas: escolher"
+
+[node name="DialogueBox" parent="." instance=ExtResource("2_dialogue")]

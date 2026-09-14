@@ -1,15 +1,23 @@
 [gd_scene format=3]
 
 [ext_resource type="PackedScene" path="res://scenes/minotaur_throne.tscn" id="1_throne"]
-[ext_resource type="SpriteFrames" path="res://resources/asterion_sitting_frames.tres" id="2_frames"]
+[ext_resource type="SpriteFrames" path="res://resources/asterion_sitting_body_frames.tres" id="2_frames"]
+[ext_resource type="Script" path="res://scripts/asterion_skybreaker.gd" id="3_controller"]
+[ext_resource type="Script" path="res://scripts/visual/skybreaker_impact.gd" id="4_impact"]
+[ext_resource type="Script" path="res://scripts/visual/simple_mob_shadow.gd" id="5_shadow"]
+[ext_resource type="PackedScene" path="res://scenes/asterion_field_skybreaker.tscn" id="6_field_skybreaker"]
+[ext_resource type="Script" path="res://scripts/ai/elites/asterion_ai.gd" id="7_ai"]
+[ext_resource type="Script" path="res://scripts/ai/integration/enemy_ai_world_sensor_2d.gd" id="8_sensor"]
+
+[sub_resource type="CircleShape2D" id="Circle_body"]
+radius = 12.0
 
 [node name="AsterionSitting" instance=ExtResource("1_throne")]
+script = ExtResource("3_controller")
 
 [node name="Back" parent="." index="0"]
-visible = false
 
 [node name="Seat" parent="." index="1"]
-visible = false
 
 [node name="Asterion" type="AnimatedSprite2D" parent="." index="3"]
 texture_filter = 1
@@ -18,3 +26,45 @@ scale = Vector2(0.78, 0.78)
 sprite_frames = ExtResource("2_frames")
 animation = &"sitting"
 autoplay = "sitting"
+
+[node name="LaunchOrigin" type="Marker2D" parent="." index="4"]
+position = Vector2(-1.56, -8.58)
+
+[node name="Actor" type="CharacterBody2D" parent="." index="5"]
+visible = false
+top_level = true
+z_index = 2
+z_as_relative = false
+collision_layer = 1
+collision_mask = 1
+
+[node name="Visual" type="Sprite2D" parent="Actor"]
+texture_filter = 1
+scale = Vector2(0.78, 0.78)
+centered = false
+
+[node name="FieldSkybreakerVisual" parent="Actor" instance=ExtResource("6_field_skybreaker")]
+
+[node name="BodyCollision" type="CollisionShape2D" parent="Actor"]
+shape = SubResource("Circle_body")
+disabled = true
+
+[node name="GroundShadow" type="Node2D" parent="Actor"]
+visible = false
+show_behind_parent = true
+z_index = -1
+scale = Vector2(1, 0.38)
+script = ExtResource("5_shadow")
+radius = 11.0
+
+[node name="AI" type="Node" parent="." index="6"]
+script = ExtResource("7_ai")
+
+[node name="AIWorldSensor" type="Node" parent="." index="7"]
+script = ExtResource("8_sensor")
+
+[node name="ImpactEffect" type="Node2D" parent="." index="8"]
+top_level = true
+z_index = 1
+z_as_relative = false
+script = ExtResource("4_impact")

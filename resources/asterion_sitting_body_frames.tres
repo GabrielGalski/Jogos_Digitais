@@ -1,0 +1,26 @@
+[gd_resource type="SpriteFrames" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/enemies/minotaur/elite/sitting/asterion_sitting_body_01.png" id="1"]
+[ext_resource type="Texture2D" path="res://assets/enemies/minotaur/elite/sitting/asterion_sitting_body_02.png" id="2"]
+[ext_resource type="Texture2D" path="res://assets/enemies/minotaur/elite/sitting/asterion_sitting_body_03.png" id="3"]
+
+[ext_resource type="Texture2D" path="res://assets/enemies/minotaur/elite/animation/propulsion/standing.png" id="4"]
+[ext_resource type="Texture2D" path="res://assets/enemies/minotaur/elite/animation/propulsion/propulsion.png" id="5"]
+
+[resource]
+animations = [{
+"frames": [
+{"duration": 0.5, "texture": ExtResource("1")},
+{"duration": 1.0, "texture": ExtResource("2")},
+{"duration": 0.5, "texture": ExtResource("3")}
+],
+"loop": true,
+"name": &"sitting",
+"speed": 1.0
+}, {
+"frames": [{"duration": 1.0, "texture": ExtResource("4")}],
+"loop": false, "name": &"standing", "speed": 1.0
+}, {
+"frames": [{"duration": 1.0, "texture": ExtResource("5")}],
+"loop": false, "name": &"propulsion", "speed": 1.0
+}]
