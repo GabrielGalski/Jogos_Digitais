@@ -9,6 +9,10 @@
 [ext_resource type="Script" path="res://scripts/ai/elites/asterion_ai.gd" id="7_ai"]
 [ext_resource type="Script" path="res://scripts/ai/integration/enemy_ai_world_sensor_2d.gd" id="8_sensor"]
 
+[ext_resource type="PackedScene" path="res://tools/dialogue system/dialogue_box.tscn" id="9_dialogue"]
+
+[ext_resource type="PackedScene" path="res://scenes/tutorial_encounter.tscn" id="10_encounter"]
+
 [sub_resource type="CircleShape2D" id="Circle_body"]
 radius = 12.0
 
@@ -68,3 +72,7 @@ top_level = true
 z_index = 1
 z_as_relative = false
 script = ExtResource("4_impact")
+
+[node name="IntroDialogue" parent="." instance=ExtResource("9_dialogue")]
+
+[node name="TutorialEncounter" parent="." instance=ExtResource("10_encounter")]

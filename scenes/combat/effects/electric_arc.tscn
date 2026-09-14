@@ -1,0 +1,36 @@
+[gd_scene load_steps=12 format=3]
+
+[ext_resource type="Script" path="res://scripts/combat/effects/electric_arc.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://assets/effects/lightning/arc/lightning_arc_left_01.png" id="2_left1"]
+[ext_resource type="Texture2D" path="res://assets/effects/lightning/arc/lightning_arc_left_02.png" id="3_left2"]
+[ext_resource type="Texture2D" path="res://assets/effects/lightning/arc/lightning_arc_left_03.png" id="4_left3"]
+[ext_resource type="Texture2D" path="res://assets/effects/lightning/arc/lightning_arc_left_04.png" id="5_left4"]
+[ext_resource type="Texture2D" path="res://assets/effects/lightning/arc/lightning_arc_left_05.png" id="6_left5"]
+[ext_resource type="Texture2D" path="res://assets/effects/lightning/arc/lightning_arc_right_01.png" id="7_right1"]
+[ext_resource type="Texture2D" path="res://assets/effects/lightning/arc/lightning_arc_right_02.png" id="8_right2"]
+[ext_resource type="Texture2D" path="res://assets/effects/lightning/arc/lightning_arc_right_03.png" id="9_right3"]
+[ext_resource type="Texture2D" path="res://assets/effects/lightning/arc/lightning_arc_right_04.png" id="10_right4"]
+[ext_resource type="Texture2D" path="res://assets/effects/lightning/arc/lightning_arc_right_05.png" id="11_right5"]
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_arc"]
+animations = [{
+"frames": [{"duration": 1.0, "texture": ExtResource("2_left1")}, {"duration": 1.0, "texture": ExtResource("3_left2")}, {"duration": 1.0, "texture": ExtResource("4_left3")}, {"duration": 1.0, "texture": ExtResource("5_left4")}, {"duration": 1.0, "texture": ExtResource("6_left5")}],
+"loop": false,
+"name": &"left",
+"speed": 16.0
+}, {
+"frames": [{"duration": 1.0, "texture": ExtResource("7_right1")}, {"duration": 1.0, "texture": ExtResource("8_right2")}, {"duration": 1.0, "texture": ExtResource("9_right3")}, {"duration": 1.0, "texture": ExtResource("10_right4")}, {"duration": 1.0, "texture": ExtResource("11_right5")}],
+"loop": false,
+"name": &"right",
+"speed": 16.0
+}]
+
+[node name="ElectricArc" type="Node2D"]
+z_index = 5
+script = ExtResource("1_script")
+
+[node name="Sprite" type="AnimatedSprite2D" parent="."]
+texture_filter = 1
+sprite_frames = SubResource("SpriteFrames_arc")
+animation = &"left"
+

@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="DialogueSequence" format=3]
+
+[ext_resource type="Script" path="res://tools/dialogue system/dialogue_sequence.gd" id="1_sequence"]
+[ext_resource type="Script" path="res://tools/dialogue system/dialogue_line.gd" id="2_line"]
+[ext_resource type="Script" path="res://tools/dialogue system/dialogue_speaker.gd" id="3_speaker"]
+
+[sub_resource type="Resource" id="Speaker_asterion"]
+script = ExtResource("3_speaker")
+display_name = "ASTERION"
+name_color = Color(0.960784, 0.85098, 0.462745, 1)
+
+[sub_resource type="Resource" id="Roar"]
+script = ExtResource("2_line")
+speaker = SubResource("Speaker_asterion")
+text = "[shake rate=24 level=7]GRRRAAAAH![/shake]"
+characters_per_second = 38.0
+next_line_index = -2
+
+[resource]
+script = ExtResource("1_sequence")
+sequence_id = &"asterion_roar"
+lines = Array[ExtResource("2_line")]([SubResource("Roar")])

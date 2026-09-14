@@ -6,7 +6,7 @@ extends MinionAI
 @export var influence_source: StringName = &""
 @export var empowered_attack_id: StringName = &"walk_attack"
 @export var normal_speed_multiplier: float = 1.0
-@export var empowered_speed_multiplier: float = 1.35
+@export var empowered_speed_multiplier: float = 1.85
 
 
 func _ready() -> void:

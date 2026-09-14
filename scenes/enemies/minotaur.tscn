@@ -1,0 +1,62 @@
+[gd_scene load_steps=14 format=3]
+
+[ext_resource type="Script" path="res://scripts/enemies/minotaur.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://assets/enemies/minotaur/walk/minotaur_walk_01.png" id="2_walk1"]
+[ext_resource type="Texture2D" path="res://assets/enemies/minotaur/walk/minotaur_walk_02.png" id="3_walk2"]
+[ext_resource type="Texture2D" path="res://assets/enemies/minotaur/walk/minotaur_walk_03.png" id="4_walk3"]
+[ext_resource type="Texture2D" path="res://assets/enemies/minotaur/walk/minotaur_walk_04.png" id="5_walk4"]
+[ext_resource type="Texture2D" path="res://assets/enemies/minotaur/attack/minotaur_attack_01.png" id="6_attack1"]
+[ext_resource type="Texture2D" path="res://assets/enemies/minotaur/attack/minotaur_attack_02.png" id="7_attack2"]
+[ext_resource type="Texture2D" path="res://assets/enemies/minotaur/attack/minotaur_attack_03.png" id="8_attack3"]
+[ext_resource type="Texture2D" path="res://assets/enemies/minotaur/attack/minotaur_attack_04.png" id="9_attack4"]
+[ext_resource type="Texture2D" path="res://assets/enemies/minotaur/attack/minotaur_attack_05.png" id="10_attack5"]
+[ext_resource type="Texture2D" path="res://assets/enemies/minotaur/attack/minotaur_attack_06.png" id="11_attack6"]
+[ext_resource type="Script" path="res://scripts/visual/simple_mob_shadow.gd" id="12_shadow"]
+
+[ext_resource type="Script" path="res://scripts/ai/minions/minotaur_ai.gd" id="13_ai"]
+[ext_resource type="Script" path="res://scripts/ai/integration/enemy_ai_world_sensor_2d.gd" id="14_sensor"]
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_minotaur"]
+animations = [{
+"frames": [{"duration": 1.0, "texture": ExtResource("6_attack1")}, {"duration": 1.0, "texture": ExtResource("7_attack2")}, {"duration": 1.0, "texture": ExtResource("8_attack3")}, {"duration": 1.0, "texture": ExtResource("9_attack4")}, {"duration": 1.0, "texture": ExtResource("10_attack5")}, {"duration": 1.0, "texture": ExtResource("11_attack6")}],
+"loop": false,
+"name": &"attack",
+"speed": 10.0
+}, {
+"frames": [{"duration": 1.0, "texture": ExtResource("2_walk1")}, {"duration": 1.0, "texture": ExtResource("3_walk2")}, {"duration": 1.0, "texture": ExtResource("4_walk3")}, {"duration": 1.0, "texture": ExtResource("5_walk4")}],
+"loop": true,
+"name": &"walk",
+"speed": 6.0
+}]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_minotaur"]
+radius = 11.0
+
+[node name="Minotaur" type="CharacterBody2D"]
+z_index = 2
+z_as_relative = false
+collision_layer = 4
+collision_mask = 5
+script = ExtResource("1_script")
+
+[node name="Sprite" type="AnimatedSprite2D" parent="."]
+texture_filter = 1
+sprite_frames = SubResource("SpriteFrames_minotaur")
+animation = &"walk"
+autoplay = "walk"
+
+[node name="GroundShadow" type="Node2D" parent="."]
+show_behind_parent = true
+z_index = -1
+position = Vector2(0, 9)
+script = ExtResource("12_shadow")
+radius = 5.5
+
+[node name="BodyCollision" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_minotaur")
+
+[node name="AI" type="Node" parent="."]
+script = ExtResource("13_ai")
+
+[node name="WorldSensor" type="Node" parent="."]
+script = ExtResource("14_sensor")

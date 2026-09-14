@@ -1,45 +1,48 @@
-[gd_scene load_steps=5 format=3]
+[gd_scene format=3]
 
 [ext_resource type="Script" path="res://scripts/player.gd" id="1_player"]
 [ext_resource type="SpriteFrames" path="res://resources/player_frames.tres" id="2_frames"]
 [ext_resource type="Script" path="res://scripts/visual/simple_mob_shadow.gd" id="3_shadow"]
+[ext_resource type="PackedScene" path="res://scenes/combat/booster_shooter.tscn" id="4_qlg0r"]
+[ext_resource type="Script" path="res://scripts/combat/booster_shooter.gd" id="5_tuyoq"]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_player"]
 radius = 4.0
 height = 10.0
 
-[node name="Player" type="CharacterBody2D"]
+[node name="Player" type="CharacterBody2D" unique_id=1384979021]
 z_index = 2
 texture_filter = 1
 script = ExtResource("1_player")
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1603195880]
 position = Vector2(0, 3)
 shape = SubResource("CapsuleShape2D_player")
 
-[node name="Body" type="AnimatedSprite2D" parent="."]
-z_index = 0
+[node name="Body" type="AnimatedSprite2D" parent="." unique_id=1799496208]
 texture_filter = 1
 scale = Vector2(1.05, 1.05)
 sprite_frames = ExtResource("2_frames")
 animation = &"idle"
 autoplay = "idle"
 
-[node name="GroundShadow" type="Node2D" parent="."]
+[node name="GroundShadow" type="Node2D" parent="." unique_id=867207707]
 show_behind_parent = true
 z_index = -1
 position = Vector2(0, 7)
 script = ExtResource("3_shadow")
-radius = 4.0
 
-[node name="Camera2D" type="Camera2D" parent="."]
+[node name="Camera2D" type="Camera2D" parent="." unique_id=705688774]
 position = Vector2(0, 4)
 zoom = Vector2(1.2, 1.2)
+process_callback = 0
 limit_left = -320
 limit_top = -320
 limit_right = 320
 limit_bottom = 320
 position_smoothing_enabled = true
-position_smoothing_speed = 5.0
-process_callback = 0
-enabled = true
+
+[node name="BoosterShooter" type="Node2D" parent="." unique_id=544156429 instance=ExtResource("4_qlg0r")]
+visible = false
+texture_filter = 1
+script = ExtResource("5_tuyoq")

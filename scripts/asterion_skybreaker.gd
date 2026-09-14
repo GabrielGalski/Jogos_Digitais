@@ -11,6 +11,8 @@ signal melee_started
 signal melee_damage_requested(position: Vector2, radius: float, damage: float)
 signal skybreaker_finished
 
+@export_category("Combat balance")
+@export var max_resistance: float = 90.0
 enum State {
 	SITTING,
 	PLAYER_APPROACH,
@@ -28,6 +30,10 @@ enum State {
 	MELEE_PREPARE,
 	MELEE_ATTACK,
 	MELEE_RECOVERY,
+	INTRO_DIALOGUE,
+	WEAPON_REVEAL,
+	HORDE,
+	WAIT_RETURN,
 }
 
 const STANDING = preload("res://assets/enemies/minotaur/elite/animation/propulsion/standing.png")
@@ -88,6 +94,8 @@ const ATTACK_FOOT_X := [37.0, 40.0, 24.0, 24.0, 24.0]
 const GROUND_FOOT_Y := 48.0
 const ACTOR_DRAW_LAYER := 2
 
+@export var intro_dialogue: DialogueSequence = preload("res://resources/dialogue/asterion_intro.tres")
+
 @export var intro_destination := Vector2(0, -192)
 @export var intro_pause_duration := 2.0
 @export var intro_walk_speed := 82.0
@@ -124,6 +132,8 @@ var _sense_left: float = 0.0
 var _observation: EnemyAIObservation
 var _decision: EnemyAIDecision
 
+@onready var tutorial_encounter: Node = $TutorialEncounter
+@onready var dialogue_box: DialogueBox = $IntroDialogue
 @onready var arena: Node2D = get_parent()
 @onready var actor: CharacterBody2D = $Actor
 @onready var visual: Sprite2D = $Actor/Visual
@@ -138,6 +148,8 @@ var _decision: EnemyAIDecision
 
 
 func _ready() -> void:
+	dialogue_box.dialogue_finished.connect(_on_intro_dialogue_finished)
+	tutorial_encounter.setup(self, arena, player, dialogue_box)
 	ai_world_sensor.configure(arena, Rect2(arena.to_global(player.arena_bounds.position), player.arena_bounds.size * arena.global_scale))
 	actor.add_to_group(&"enemy_ai_actor")
 	actor.set_meta(&"enemy_ai_is_elite", true)
@@ -179,7 +191,7 @@ func _physics_process(delta: float) -> void:
 		State.PLAYER_APPROACH:
 			_update_player_approach(delta)
 		State.THRONE_PAUSE:
-			_tick_timed_state(delta, intro_pause_duration, _start_from_throne)
+			_tick_timed_state(delta, intro_pause_duration, _begin_intro_dialogue)
 		State.THRONE_STANDING:
 			_tick_timed_state(delta, THRONE_STANDING_DURATION, _finish_throne_standing)
 		State.THRONE_PROPULSION:
@@ -228,6 +240,20 @@ func _update_player_approach(delta: float) -> void:
 		_enter(State.THRONE_PAUSE)
 		return
 	player.global_position = player.global_position.move_toward(destination, intro_walk_speed * delta)
+
+
+func _begin_intro_dialogue() -> void:
+	# Keep the seated idle and the existing player lock until the first takeoff.
+	_enter(State.INTRO_DIALOGUE)
+	player.velocity = Vector2.ZERO
+	player.body.play(&"idle")
+	tutorial_encounter.begin_dialogue()
+
+
+func _on_intro_dialogue_finished(sequence_id: StringName) -> void:
+	if state != State.INTRO_DIALOGUE:
+		return
+	tutorial_encounter.on_dialogue_finished(sequence_id)
 
 
 func _start_from_throne() -> void:
@@ -619,3 +645,19 @@ func _restore_camera() -> void:
 func _exit_tree() -> void:
 	if state != State.SITTING:
 		_restore_camera()
+
+
+func enter_weapon_reveal() -> void:
+	_enter(State.WEAPON_REVEAL)
+
+
+func enter_intro_dialogue_state() -> void:
+	_enter(State.INTRO_DIALOGUE)
+
+
+func enter_horde_phase() -> void:
+	_enter(State.HORDE)
+
+
+func enter_return_phase() -> void:
+	_enter(State.WAIT_RETURN)

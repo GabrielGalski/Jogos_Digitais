@@ -1,0 +1,64 @@
+[gd_resource type="Resource" script_class="DialogueSequence" format=3]
+
+[ext_resource type="Script" path="res://tools/dialogue system/dialogue_sequence.gd" id="1_sequence"]
+[ext_resource type="Script" path="res://tools/dialogue system/dialogue_line.gd" id="2_line"]
+[ext_resource type="Script" path="res://tools/dialogue system/dialogue_speaker.gd" id="3_speaker"]
+
+[sub_resource type="Resource" id="Speaker_asterion"]
+script = ExtResource("3_speaker")
+display_name = "ASTERION"
+name_color = Color(0.960784, 0.85098, 0.462745, 1)
+
+[sub_resource type="Resource" id="Speaker_nox"]
+script = ExtResource("3_speaker")
+display_name = "NOX"
+name_color = Color(0.960784, 0.85098, 0.462745, 1)
+
+[sub_resource type="Resource" id="Line_01"]
+script = ExtResource("2_line")
+speaker = SubResource("Speaker_asterion")
+text = "Ei. Essa escada termina nos meus domínios. Você se perdeu ou tem algum problema?"
+
+[sub_resource type="Resource" id="Line_02"]
+script = ExtResource("2_line")
+speaker = SubResource("Speaker_nox")
+text = "[wave amp=12 freq=4]⌁◌⋏◊∿ ∿⊙⋮⌁ ○ ◌ ◍ ◎ ∿⊙⧜ ⧝ ⋮⌁[/wave]"
+characters_per_second = 50.0
+
+[sub_resource type="Resource" id="Line_03"]
+script = ExtResource("2_line")
+speaker = SubResource("Speaker_asterion")
+text = "Nox? Isso tudo era o seu nome?"
+
+[sub_resource type="Resource" id="Line_04"]
+script = ExtResource("2_line")
+speaker = SubResource("Speaker_asterion")
+text = "Muito bem, Nox. O que uma criaturinha como você quer com o [wave amp=8 freq=3]GRANDE Asterion[/wave]?"
+
+[sub_resource type="Resource" id="Line_05"]
+script = ExtResource("2_line")
+speaker = SubResource("Speaker_nox")
+text = "[wave amp=12 freq=4]∿⟐⋏[/wave]"
+characters_per_second = 50.0
+
+[sub_resource type="Resource" id="Line_06"]
+script = ExtResource("2_line")
+speaker = SubResource("Speaker_asterion")
+text = "Me derrotar, levar minhas cartas e montar a maior coleção de [color=#f5d976]Monster Booster[/color]?!"
+
+[sub_resource type="Resource" id="Line_07"]
+script = ExtResource("2_line")
+speaker = SubResource("Speaker_asterion")
+text = "[shake rate=15 level=3]HA![/shake] Gostei da ordem. Principalmente da parte impossível, logo no começo."
+
+[sub_resource type="Resource" id="Line_08"]
+script = ExtResource("2_line")
+speaker = SubResource("Speaker_nox")
+text = "[wave amp=12 freq=4]◌[/wave]"
+characters_per_second = 50.0
+next_line_index = -2
+
+[resource]
+script = ExtResource("1_sequence")
+sequence_id = &"asterion_first_encounter"
+lines = Array[ExtResource("2_line")]([SubResource("Line_01"), SubResource("Line_02"), SubResource("Line_03"), SubResource("Line_04"), SubResource("Line_05"), SubResource("Line_06"), SubResource("Line_07"), SubResource("Line_08")])
