@@ -17,6 +17,7 @@ var camera_impulse := 0.0
 var feedback_time := 0.0
 var feedback_offset: Vector2 = Vector2.ZERO
 var camera_feedback_enabled: bool = true
+var active_explosion_visuals: Array[Node2D] = []
 
 
 func _process(delta: float) -> void:
@@ -97,7 +98,7 @@ func trigger_explosion(
 	_spawn_explosion_visual(center, radius)
 	camera_impulse = maxf(camera_impulse, clampf(radius / 24.0, 0.4, 1.2))
 	var hit_ids: Dictionary = {}
-	for enemy_node in get_tree().get_nodes_in_group(&"minotaurs"):
+	for enemy_node in get_tree().get_nodes_in_group(&"enemy_bodies"):
 		if not _is_valid_enemy(enemy_node):
 			continue
 		var enemy := enemy_node as Node2D
@@ -153,7 +154,7 @@ func _run_electric_chain(
 func _find_nearest_enemy(origin: Vector2, visited: Dictionary) -> Node2D:
 	var nearest: Node2D
 	var nearest_distance_squared := CHAIN_RANGE * CHAIN_RANGE
-	for enemy_node in get_tree().get_nodes_in_group(&"minotaurs"):
+	for enemy_node in get_tree().get_nodes_in_group(&"enemy_bodies"):
 		if not _is_valid_enemy(enemy_node):
 			continue
 		var enemy := enemy_node as Node2D
@@ -187,6 +188,18 @@ func _spawn_arc_visual(
 
 
 func _spawn_explosion_visual(center: Vector2, radius: float) -> void:
+	var retained: Array[Node2D] = []
+	for existing: Node2D in active_explosion_visuals:
+		if not is_instance_valid(existing) or existing.is_queued_for_deletion():
+			continue
+		# Rapid shots can land before the previous five-frame flash finishes.
+		# Keep one readable burst per overlapping impact area without changing damage.
+		if existing.global_position.distance_to(center) <= radius * 0.8:
+			existing.queue_free()
+			continue
+		retained.append(existing)
+	active_explosion_visuals = retained
 	var explosion := ELECTRIC_EXPLOSION_SCENE.instantiate() as Node2D
 	add_child(explosion)
 	explosion.call(&"setup", center, radius)
+	active_explosion_visuals.append(explosion)

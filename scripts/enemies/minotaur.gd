@@ -4,8 +4,8 @@ extends CharacterBody2D
 signal died(enemy: Minotaur)
 signal damaged(amount: float, remaining_health: float)
 const MELEE: PackedScene = preload("res://scenes/enemies/attacks/minotaur_melee_attack.tscn")
-@export var movement_speed: float = 38.0
-@export var max_resistance: float = 6.0
+@export var movement_speed: float = 47.5
+@export var max_resistance: float = 18.0
 @export var attack_range: float = 44.0
 @export var attack_windup: float = 0.38
 @export var attack_interval: float = 2.0
@@ -14,7 +14,8 @@ const MELEE: PackedScene = preload("res://scenes/enemies/attacks/minotaur_melee_
 @export var empowered_attack_duration: float = 0.38
 @export var empowered_knockback: float = 140.0
 var target: Player
-var resistance: float = 6.0
+var resistance: float = 18.0
+var throne: Node2D
 var dying: bool = false
 var last_hit_direction: Vector2 = Vector2.ZERO
 var hit_velocity: Vector2 = Vector2.ZERO
@@ -23,6 +24,7 @@ var spawn_grace: float = 0.5
 var attack_time: float = -1.0
 var attack_emitted: bool = false
 var empowered: bool = false
+var ram_cooldown: float = 0.0
 var sense_left: float = 0.0
 var observation: EnemyAIObservation
 var damage_tween: Tween
@@ -42,6 +44,15 @@ func _ready() -> void:
 	hit_material.shader = preload("res://shaders/white_damage_flash.gdshader")
 	sprite.material = hit_material
 	sprite.play(&"walk")
+	sensor.target_offset = Vector2.ZERO
+	var frames: SpriteFrames = sprite.sprite_frames.duplicate() as SpriteFrames
+	frames.add_animation(&"walk_attack")
+	frames.set_animation_speed(&"walk_attack", 10.0)
+	frames.set_animation_loop(&"walk_attack", true)
+	for index: int in range(1, 5):
+		var texture: Texture2D = load("res://assets/enemies/minotaur/walk_attack_effect/minotaur_walkattack_%02d.png" % index) as Texture2D
+		frames.add_frame(&"walk_attack", texture)
+	sprite.sprite_frames = frames
 	brain.minion_profile.attack_range = attack_range - sensor.attack_slot_radius
 	brain.minion_profile.attack_cooldown = attack_interval
 	brain.minion_profile.personal_space = 5.0
@@ -53,6 +64,7 @@ func _ready() -> void:
 
 func setup(player: Player, chamber: Node2D, bounds: Rect2) -> void:
 	target = player
+	throne = chamber.get_node_or_null("MinotaurChair") as Node2D
 	sensor.configure(chamber, bounds)
 
 func set_empowered(enabled: bool) -> void:
@@ -65,6 +77,7 @@ func set_empowered(enabled: bool) -> void:
 		brain.clear_elite_influence()
 		brain.minion_profile.attack_cooldown = attack_interval
 		sprite.speed_scale = 1.0
+	sprite.play(&"walk_attack" if empowered else &"walk")
 func is_alive() -> bool:
 	return not dying and resistance > 0.0
 
@@ -77,6 +90,7 @@ func get_separation_radius() -> float:
 func take_damage(amount: float) -> void:
 	if not is_alive() or amount <= 0.0:
 		return
+	amount = ceilf(amount / 3.0) * 3.0
 	resistance = maxf(0.0, resistance - amount)
 	damaged.emit(amount, resistance)
 	if damage_tween and damage_tween.is_valid():
@@ -99,7 +113,7 @@ func receive_impact(direction: Vector2, impulse: float, recovery: float = 0.055)
 	hit_recovery = maxf(hit_recovery, recovery)
 	attack_time = -1.0
 	set_meta(&"enemy_ai_is_attacking", false)
-	sprite.play(&"walk")
+	sprite.play(&"walk_attack" if empowered else &"walk")
 	if impact_tween and impact_tween.is_valid():
 		impact_tween.kill()
 	var compression: float = clampf(impulse / 850.0, 0.045, 0.19)
@@ -126,10 +140,13 @@ func _die() -> void:
 	death.chain().tween_callback(queue_free)
 
 func _physics_process(delta: float) -> void:
+	if is_instance_valid(throne):
+		z_index = 1 if global_position.y + 9.0 < throne.global_position.y else 2
 	if not is_instance_valid(target) or target.intro_locked:
 		velocity = Vector2.ZERO
 		return
 	spawn_grace = maxf(0.0, spawn_grace - delta)
+	ram_cooldown = maxf(0.0, ram_cooldown - delta)
 	if spawn_grace > 0.0:
 		return
 	hit_recovery = maxf(0.0, hit_recovery - delta)
@@ -140,6 +157,13 @@ func _physics_process(delta: float) -> void:
 	if hit_recovery > 0.0:
 		return
 	var to_target: Vector2 = target.global_position - global_position
+	if empowered and ram_cooldown <= 0.0 and to_target.length() <= 24.0 and sensor._has_line_of_sight(self, target, target.global_position):
+		var direction: Vector2 = to_target.normalized()
+		target.receive_contact_damage(6, direction, empowered_knockback)
+		ram_cooldown = 0.48
+		receive_impact(-direction, 115.0, 0.20)
+		brain.reset_decision_timer()
+		return
 	if absf(to_target.x) > 0.05:
 		sprite.flip_h = to_target.x < 0.0
 	if attack_time >= 0.0:
@@ -153,6 +177,10 @@ func _physics_process(delta: float) -> void:
 	var decision: EnemyAIDecision = brain.evaluate(observation, delta)
 	set_meta(&"enemy_ai_intent", decision.intent)
 	if decision.intent == EnemyAIEnums.Intent.PREPARE and to_target.length() <= attack_range and sensor._has_line_of_sight(self, target, target.global_position):
+		if empowered:
+			velocity = sensor.safe_velocity(self, to_target.normalized() * movement_speed * brain.speed_multiplier(), delta)
+			move_and_slide()
+			return
 		velocity = Vector2.ZERO if not empowered else sensor.safe_velocity(self, to_target.normalized() * movement_speed * brain.speed_multiplier(), delta)
 		if empowered:
 			move_and_slide()
@@ -163,8 +191,9 @@ func _physics_process(delta: float) -> void:
 		return
 	velocity = Vector2.ZERO if decision.lock_movement else sensor.safe_velocity(self, decision.movement_direction * movement_speed * brain.speed_multiplier(), delta)
 	move_and_slide()
-	if sprite.animation != &"walk":
-		sprite.play(&"walk")
+	var movement_animation: StringName = &"walk_attack" if empowered else &"walk"
+	if sprite.animation != movement_animation:
+		sprite.play(movement_animation)
 
 func _update_attack(delta: float) -> void:
 	attack_time += delta

@@ -10,9 +10,14 @@ signal area_damage_requested(position: Vector2, radius: float, damage: float)
 signal melee_started
 signal melee_damage_requested(position: Vector2, radius: float, damage: float)
 signal skybreaker_finished
+signal health_changed(current: float, maximum: float)
+signal defeated
+signal defeat_animation_finished
 
 @export_category("Combat balance")
-@export var max_resistance: float = 90.0
+@export var max_resistance: float = 270.0
+var health: float = 270.0
+var damage_flash: Tween
 enum State {
 	SITTING,
 	PLAYER_APPROACH,
@@ -34,7 +39,16 @@ enum State {
 	WEAPON_REVEAL,
 	HORDE,
 	WAIT_RETURN,
+	DEFEATED,
 }
+
+const DEFEATED_FRAMES: Array[Texture2D] = [
+	preload("res://assets/enemies/minotaur/elite/defeated/defeated1.png"),
+	preload("res://assets/enemies/minotaur/elite/defeated/defeated2.png"),
+	preload("res://assets/enemies/minotaur/elite/defeated/defeated3.png"),
+	preload("res://assets/enemies/minotaur/elite/defeated/defeated4.png"),
+	preload("res://assets/enemies/minotaur/elite/defeated/defeated5.png"),
+]
 
 const STANDING = preload("res://assets/enemies/minotaur/elite/animation/propulsion/standing.png")
 const PROPULSION = preload("res://assets/enemies/minotaur/elite/animation/propulsion/propulsion.png")
@@ -75,8 +89,8 @@ const THRONE_STANDING_DURATION := 0.50
 const THRONE_PROPULSION_DURATION := 0.18
 const PREPARE_FRAME_DURATION := 0.12
 const LAUNCH_DURATION := 0.45
-const OFFSCREEN_DURATION := 2.0
-const TARGET_LOCK_TIME := 1.25
+const OFFSCREEN_DURATION := 2.25
+const TARGET_LOCK_TIME := 2.05
 const DESCENT_DURATION := 0.65
 const HIT_1_DURATION := 0.12
 const HIT_2_DURATION := 0.18
@@ -93,6 +107,8 @@ const WALK_FOOT_X := [25.0, 28.0, 28.0, 25.0, 24.0, 23.0, 26.0, 26.0, 25.0]
 const ATTACK_FOOT_X := [37.0, 40.0, 24.0, 24.0, 24.0]
 const GROUND_FOOT_Y := 48.0
 const ACTOR_DRAW_LAYER := 2
+const AIR_SHADOW_START_SCALE := Vector2(1.8, 0.75)
+const AIR_SHADOW_END_SCALE := Vector2(4.0, 1.8)
 
 @export var intro_dialogue: DialogueSequence = preload("res://resources/dialogue/asterion_intro.tres")
 
@@ -103,9 +119,9 @@ const ACTOR_DRAW_LAYER := 2
 @export var chase_speed := 44.0
 @export var melee_range := 32.0
 @export var melee_hit_range := 38.0
-@export var melee_damage := 1.0
+@export var melee_damage := 3.0
 @export var impact_radius := 40.0
-@export var preview_damage := 1.0
+@export var preview_damage := 3.0
 @export var melee_decision_cooldown := 0.75
 @export var skybreaker_decision_cooldown := 3.5
 @export_range(0.0, 1.0) var shake_intensity := 1.0
@@ -115,6 +131,7 @@ var state_time := 0.0
 var elapsed := 0.0
 var impact_position := Vector2.ZERO
 var target_is_locked := false
+var air_chase_velocity: Vector2 = Vector2.ZERO
 var damage_emitted := false
 var melee_damage_emitted := false
 var launch_position := Vector2.ZERO
@@ -148,6 +165,7 @@ var _decision: EnemyAIDecision
 
 
 func _ready() -> void:
+	health = max_resistance
 	dialogue_box.dialogue_finished.connect(_on_intro_dialogue_finished)
 	tutorial_encounter.setup(self, arena, player, dialogue_box)
 	ai_world_sensor.configure(arena, Rect2(arena.to_global(player.arena_bounds.position), player.arena_bounds.size * arena.global_scale))
@@ -183,6 +201,8 @@ func start_skybreaker() -> bool:
 
 
 func _physics_process(delta: float) -> void:
+	if actor.visible:
+		actor.z_index = 1 if actor.global_position.y < global_position.y else ACTOR_DRAW_LAYER
 	_update_shake(delta)
 	match state:
 		State.SITTING:
@@ -218,6 +238,51 @@ func _physics_process(delta: float) -> void:
 			_update_melee_attack(delta)
 		State.MELEE_RECOVERY:
 			_tick_timed_state(delta, MELEE_RECOVERY_DURATION, _finish_melee_recovery)
+		State.DEFEATED:
+			_update_defeated(delta)
+
+func can_receive_damage() -> bool:
+	return health > 0.0 and state in [State.CHASE, State.MELEE_PREPARE, State.MELEE_ATTACK, State.MELEE_RECOVERY, State.SKYBREAKER_PREPARE, State.HIT_1, State.HIT_2, State.RECOVERY]
+
+func take_damage(amount: float) -> void:
+	if not can_receive_damage() or player.dead or amount <= 0.0:
+		return
+	health = maxf(0.0, health - ceilf(amount / 3.0) * 3.0)
+	health_changed.emit(health, max_resistance)
+	if health <= 0.0:
+		_enter_defeated()
+		return
+	if damage_flash and damage_flash.is_valid():
+		damage_flash.kill()
+	visual.modulate = Color(2.0, 1.4, 1.4)
+	damage_flash = create_tween()
+	damage_flash.tween_property(visual, "modulate", Color.WHITE, 0.12)
+
+func _enter_defeated() -> void:
+	_enter(State.DEFEATED)
+	ai.enabled = false
+	actor.velocity = Vector2.ZERO
+	actor.remove_from_group(&"enemy_ai_actor")
+	body_shape.set_deferred("disabled", true)
+	damage_emitted = true
+	melee_damage_emitted = true
+	shake_time = 0.0
+	_restore_camera()
+	_restore_ground_shadow()
+	shadow.hide()
+	if damage_flash and damage_flash.is_valid():
+		damage_flash.kill()
+	visual.modulate = Color.WHITE
+	_set_pose(DEFEATED_FRAMES[0], Vector2(32, 48))
+	defeated.emit()
+
+func _update_defeated(delta: float) -> void:
+	var previous: float = state_time
+	state_time += delta
+	var frame: int = mini(int(state_time / 0.16), DEFEATED_FRAMES.size() - 1)
+	_set_pose(DEFEATED_FRAMES[frame], Vector2(32, 48))
+	if previous < 0.8 and state_time >= 0.8:
+		defeat_animation_finished.emit()
 
 
 func _begin_player_approach() -> void:
@@ -295,14 +360,17 @@ func _update_skybreaker_prepare(delta: float) -> void:
 
 
 func _begin_launch() -> void:
+	air_chase_velocity = Vector2.ZERO
 	ai.notify_special_attack_committed(skybreaker_decision_cooldown)
 	ai.notify_attack_committed(RECOVERY_DURATION)
 	launch_position = actor.global_position
+	impact_position = _safe_landing(player.global_position + Vector2(0, 7))
 	actor.velocity = Vector2.ZERO
 	# Chains hang in front of the arena and must also occlude the airborne boss.
 	actor.z_index = ACTOR_DRAW_LAYER
 	body_shape.set_deferred("disabled", true)
-	shadow.hide()
+	_prepare_air_shadow()
+	_update_air_shadow(0.0)
 	_shake(6.0, 2.5, 0.45)
 	_enter(State.LAUNCHING)
 
@@ -313,6 +381,9 @@ func _update_launch(delta: float) -> void:
 	var t := clampf(state_time / LAUNCH_DURATION, 0.0, 1.0)
 	var end_y := minf(launch_position.y - 180.0, _camera_top() - 80.0)
 	actor.global_position = launch_position.lerp(Vector2(launch_position.x, end_y), 1.0 - pow(1.0 - t, 2.0))
+	if not target_is_locked:
+		_track_air_target(delta)
+	_update_air_shadow(t * 0.15)
 	if state_time >= LAUNCH_DURATION:
 		actor.hide()
 		_set_pose(FLYING, FLYING_FRAME_FOOT)
@@ -326,8 +397,13 @@ func _update_launch(delta: float) -> void:
 func _update_offscreen(delta: float) -> void:
 	state_time += delta
 	elapsed += delta
+	if not target_is_locked:
+		_track_air_target(delta)
+	var tracking_progress: float = clampf(state_time / TARGET_LOCK_TIME, 0.0, 1.0)
+	_update_air_shadow(0.15 + tracking_progress * 0.55)
 	if not target_is_locked and state_time >= TARGET_LOCK_TIME:
-		impact_position = _safe_landing(player.global_position + Vector2(0, 7))
+		impact_position = _safe_landing(impact_position)
+		_update_air_shadow(0.70)
 		target_is_locked = true
 		target_locked.emit(impact_position)
 	if state_time >= OFFSCREEN_DURATION:
@@ -343,9 +419,10 @@ func _update_descent(delta: float) -> void:
 	elapsed += delta
 	var t := clampf(state_time / DESCENT_DURATION, 0.0, 1.0)
 	actor.global_position = descent_position.lerp(impact_position, t * t)
+	_update_air_shadow(0.70 + t * 0.30)
 	if state_time >= DESCENT_DURATION:
 		actor.global_position = impact_position
-		shadow.show()
+		shadow.hide()
 		_set_pose(HIT_1_TEXTURE, HIT_1_FRAME_FOOT)
 		_enter(State.HIT_1)
 
@@ -376,6 +453,7 @@ func _enter_chase() -> void:
 	_sense_left = 0.0
 	actor.z_index = ACTOR_DRAW_LAYER
 	actor.show()
+	_restore_ground_shadow()
 	shadow.show()
 	_set_ground_pose(WALK_FRAMES[0])
 	_enter(State.CHASE)
@@ -584,11 +662,16 @@ func _impact() -> void:
 	if damage_emitted:
 		return
 	damage_emitted = true
+	for enemy: Node in get_tree().get_nodes_in_group(&"minotaurs"):
+		if enemy is Minotaur and enemy.is_alive() and enemy.global_position.distance_to(impact_position) <= impact_radius:
+			enemy.take_damage(preview_damage)
+			if enemy.is_alive():
+				enemy.receive_impact(impact_position.direction_to(enemy.global_position), 100.0, 0.15)
 	impact_started.emit(impact_position)
 	area_damage_requested.emit(impact_position, impact_radius, preview_damage)
 	effect.global_position = impact_position
 	effect.start(impact_radius)
-	_shake(8.0, 1.5, 0.25)
+	_shake(12.0, 4.0, 0.38)
 	var shape := CircleShape2D.new()
 	shape.radius = impact_radius
 	var query := PhysicsShapeQueryParameters2D.new()
@@ -600,6 +683,43 @@ func _impact() -> void:
 		if result.collider == player:
 			player.receive_skybreaker_hit(preview_damage)
 			break
+
+
+func _track_air_target(delta: float) -> void:
+	# Critically damped pursuit: continuous position and velocity through direction changes.
+	# Flight crosses holes; only the committed landing needs a terrain correction.
+	var wanted: Vector2 = player.global_position + Vector2(0, 7)
+	var offset: Vector2 = impact_position - wanted
+	var response: float = 10.0
+	var decay: float = exp(-response * delta)
+	var impulse: Vector2 = (air_chase_velocity + offset * response) * delta
+	impact_position = wanted + (offset + impulse) * decay
+	air_chase_velocity = (air_chase_velocity - impulse * response) * decay
+
+
+func _prepare_air_shadow() -> void:
+	if shadow.get_parent() != self:
+		shadow.reparent(self, true)
+	shadow.show_behind_parent = false
+	shadow.z_index = ACTOR_DRAW_LAYER - 1
+	shadow.show()
+
+
+func _update_air_shadow(progress: float) -> void:
+	var growth: float = clampf(progress, 0.0, 1.0)
+	shadow.global_position = impact_position
+	shadow.scale = AIR_SHADOW_START_SCALE.lerp(AIR_SHADOW_END_SCALE, growth)
+	shadow.modulate.a = lerpf(0.75, 1.0, growth)
+
+
+func _restore_ground_shadow() -> void:
+	if shadow.get_parent() != actor:
+		shadow.reparent(actor, false)
+	shadow.position = Vector2.ZERO
+	shadow.scale = Vector2(1.0, 0.38)
+	shadow.modulate.a = 1.0
+	shadow.show_behind_parent = true
+	shadow.z_index = -1
 
 
 func _enable_body_when_clear() -> void:

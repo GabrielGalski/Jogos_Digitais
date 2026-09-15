@@ -2,15 +2,30 @@ extends CharacterBody2D
 class_name Player
 
 signal damage_received(amount: float)
+signal health_changed(current: float, maximum: float)
+signal defeated
 
 @export_category("Combat balance")
-@export var max_health: float = 20.0
+@export var max_health: float = 60.0
+var health: float = 60.0
+var dead: bool = false
 var hit_flash: Tween
 var contact_invulnerability: float = 0.0
 var knockback_velocity: Vector2 = Vector2.ZERO
+var impact_control_lock: float = 0.0
 
 func receive_skybreaker_hit(amount: float) -> void:
+	if dead or intro_locked or amount <= 0.0:
+		return
+	amount = ceilf(amount / 3.0) * 3.0
+	health = maxf(0.0, health - amount)
+	health_changed.emit(health, max_health)
 	damage_received.emit(amount)
+	if health <= 0.0:
+		dead = true
+		intro_locked = true
+		velocity = Vector2.ZERO
+		defeated.emit()
 	if hit_flash and hit_flash.is_valid():
 		hit_flash.kill()
 	body.modulate = Color(2.8, 1.2, 1.2)
@@ -28,6 +43,7 @@ var intro_locked := false
 
 
 func _ready() -> void:
+	health = max_health
 	# Camera limits use world coordinates; movement bounds use arena coordinates.
 	var arena := get_parent() as Node2D
 	var camera: Camera2D = $Camera2D
@@ -43,10 +59,11 @@ func _ready() -> void:
 
 func _physics_process(_delta: float) -> void:
 	contact_invulnerability = maxf(0.0, contact_invulnerability - _delta)
+	impact_control_lock = maxf(0.0, impact_control_lock - _delta)
 	if intro_locked:
 		velocity = Vector2.ZERO
 		return
-	var input_direction := _get_movement_input()
+	var input_direction: Vector2 = Vector2.ZERO if impact_control_lock > 0.0 else _get_movement_input()
 	knockback_velocity = knockback_velocity.move_toward(Vector2.ZERO, 480.0 * _delta)
 	velocity = input_direction * movement_speed + knockback_velocity
 	move_and_slide()
@@ -80,4 +97,14 @@ func receive_contact_damage(amount: int, direction: Vector2 = Vector2.ZERO, knoc
 	contact_invulnerability = 0.65
 	if knockback > 0.0 and not direction.is_zero_approx():
 		knockback_velocity = direction.normalized() * knockback
+		impact_control_lock = 0.20
 	receive_skybreaker_hit(float(amount))
+
+func heal_full() -> void:
+	if dead:
+		return
+	health = max_health
+	contact_invulnerability = 0.0
+	knockback_velocity = Vector2.ZERO
+	impact_control_lock = 0.0
+	health_changed.emit(health, max_health)

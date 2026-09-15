@@ -196,3 +196,15 @@ func _on_enemy_died(enemy: Minotaur) -> void:
 		opening_targets.erase(enemy.get_instance_id())
 		total_killed += 1
 
+func finish_chamber() -> void:
+	active = false
+	spawning = false
+	opening_pending = false
+	opening_entering = false
+	opening_targets.clear()
+	var survivors: Array[Minotaur] = alive.duplicate()
+	for enemy: Minotaur in survivors:
+		if is_instance_valid(enemy) and enemy.is_alive():
+			enemy.take_damage(enemy.get_current_health())
+	alive.clear()
+

@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://pr3toqgubuwq"
-path="res://.godot/imported/booster_dropped.png-07b6afe8977d6c34678da8d9eb69eb6f.ctex"
+uid="uid://cr3hwr4gsl00v"
+path="res://.godot/imported/defeated5.png-8de2b471b34878c279238d2b1de70670.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/boosters/preview/booster_dropped.png"
-dest_files=["res://.godot/imported/booster_dropped.png-07b6afe8977d6c34678da8d9eb69eb6f.ctex"]
+source_file="res://assets/enemies/minotaur/elite/defeated/defeated5.png"
+dest_files=["res://.godot/imported/defeated5.png-8de2b471b34878c279238d2b1de70670.ctex"]
 
 [params]
 

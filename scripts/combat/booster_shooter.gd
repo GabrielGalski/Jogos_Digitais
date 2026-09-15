@@ -5,7 +5,7 @@ const BULLET: PackedScene = preload("res://scenes/combat/projectiles/rapid_elect
 const WEAPON_SCALE: float = 0.55
 const FORWARD_DISTANCE: float = 10.5
 const RECOIL_DISTANCE: float = 4.5
-@export var fire_interval: float = 0.09
+@export var fire_interval: float = 0.18
 @export var cutscene_pose_turn_speed: float = 7.5
 var equipped: bool = false
 var combat_enabled: bool = false
@@ -87,8 +87,9 @@ func _update_rig(delta: float) -> void:
 	weapon.scale = Vector2(1.0 - pulse * 0.09, 1.0 + pulse * 0.07) * WEAPON_SCALE
 	pivot.position = aim_direction * (FORWARD_DISTANCE - RECOIL_DISTANCE * pulse) + float_offset
 	pivot.z_index = -1 if pulse > 0.12 else 2
-	var weapon_aim: Vector2 = aim_direction if cutscene_pose_active else mouse_world - pivot.global_position
-	pivot.rotation = weapon_aim.angle()
+	# Rotation follows the resolved aim from Nox, never the mouse-to-pivot vector.
+	# Near Nox's center that latter vector points backward and visually flips the weapon.
+	pivot.rotation = aim_direction.angle()
 	pivot.rotation += -0.065 * 0.85 * pulse * (-1.0 if aim_direction.x < 0.0 else 1.0)
 	weapon.flip_v = aim_direction.x < 0.0
 	player.body.flip_h = aim_direction.x < 0.0

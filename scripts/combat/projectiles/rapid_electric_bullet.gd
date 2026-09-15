@@ -2,10 +2,10 @@ extends Area2D
 class_name RapidElectricBullet
 
 @export var movement_speed := 180.0
-@export var direct_damage := 1.0
-@export var chain_damage := 4.0
+@export var direct_damage := 3.0
+@export var chain_damage := 0.0
 @export var explosion_radius := 18.0
-@export var explosion_damage := 1.0
+@export var explosion_damage := 3.0
 @export var maximum_lifetime := 1.4
 
 var direction := Vector2.RIGHT
@@ -47,7 +47,7 @@ func _physics_process(delta: float) -> void:
 
 
 func _on_body_entered(area: Node2D) -> void:
-	if consumed or is_queued_for_deletion() or not area.is_in_group(&"minotaurs"):
+	if consumed or is_queued_for_deletion() or not area.is_in_group(&"enemy_bodies"):
 		return
 	if not area.has_method(&"is_alive") or not bool(area.call(&"is_alive")):
 		return

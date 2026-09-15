@@ -1,7 +1,7 @@
 extends Area2D
 class_name MinotaurMeleeAttack
 
-@export var contact_damage := 2
+@export var contact_damage := 6
 @export var lifetime := 0.45
 
 @onready var sprite: AnimatedSprite2D = $Sprite
