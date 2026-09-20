@@ -1,0 +1,92 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/merchant_corridor.gd" id="1_corridor"]
+[ext_resource type="Texture2D" path="res://assets/merchant/merchant_hall.png" id="2_ayjaq"]
+[ext_resource type="SpriteFrames" path="res://resources/player_frames.tres" id="2_nox_frames"]
+[ext_resource type="PackedScene" path="res://scenes/merchant/merchant.tscn" id="3_la2ho"]
+
+[node name="MerchantCorridor" type="Node2D" unique_id=1860945524]
+script = ExtResource("1_corridor")
+
+[node name="World" type="Node2D" parent="." unique_id=1154867078]
+
+[node name="Entrance" type="Node2D" parent="World" unique_id=301532003]
+
+[node name="DoorPanel" type="Node2D" parent="World/Entrance" unique_id=1803732858]
+
+[node name="MerchantHall" type="Sprite2D" parent="World" unique_id=943522775]
+texture_filter = 1
+position = Vector2(-32, -32)
+texture = ExtResource("2_ayjaq")
+centered = false
+
+[node name="Merchant" type="Area2D" parent="World" unique_id=629883862 groups=["interactable"] instance=ExtResource("3_la2ho")]
+z_index = 5
+position = Vector2(331, 103)
+collision_layer = 0
+metadata/interactions = []
+metadata/interaction_prompt = ""
+
+[node name="StairGuides" type="Node2D" parent="World" unique_id=1357689271]
+z_index = 1
+
+[node name="Riser1Top" type="Line2D" parent="World/StairGuides" unique_id=1365578194]
+points = PackedVector2Array(96, 116, 72, 172)
+width = 2.0
+default_color = Color(0.14509805, 0.07450981, 0.101960786, 1)
+
+[node name="Riser1Bottom" type="Line2D" parent="World/StairGuides" unique_id=1877306538]
+points = PackedVector2Array(96, 128, 72, 184)
+width = 2.0
+default_color = Color(0.14509805, 0.07450981, 0.101960786, 1)
+
+[node name="Riser2Top" type="Line2D" parent="World/StairGuides" unique_id=589605702]
+points = PackedVector2Array(120, 128, 96, 184)
+width = 2.0
+default_color = Color(0.14509805, 0.07450981, 0.101960786, 1)
+
+[node name="Riser2Bottom" type="Line2D" parent="World/StairGuides" unique_id=1365598133]
+points = PackedVector2Array(120, 140, 96, 196)
+width = 2.0
+default_color = Color(0.14509805, 0.07450981, 0.101960786, 1)
+
+[node name="Riser3Top" type="Line2D" parent="World/StairGuides" unique_id=92538345]
+points = PackedVector2Array(144, 140, 120, 196)
+width = 2.0
+default_color = Color(0.14509805, 0.07450981, 0.101960786, 1)
+
+[node name="Riser3Bottom" type="Line2D" parent="World/StairGuides" unique_id=322734186]
+points = PackedVector2Array(144, 152, 120, 208)
+width = 2.0
+default_color = Color(0.14509805, 0.07450981, 0.101960786, 1)
+
+[node name="Nox" type="Node2D" parent="." unique_id=1068723887]
+z_index = 10
+
+[node name="Visual" type="AnimatedSprite2D" parent="Nox" unique_id=1381046164]
+texture_filter = 1
+position = Vector2(0, -21.6)
+scale = Vector2(2.7, 2.7)
+sprite_frames = ExtResource("2_nox_frames")
+animation = &"idle"
+autoplay = "idle"
+
+[node name="RoomCamera" type="Camera2D" parent="." unique_id=887175405]
+position = Vector2(240, 135)
+process_callback = 0
+limit_left = -32
+limit_top = -32
+limit_right = 992
+limit_bottom = 302
+
+[node name="FadeLayer" type="CanvasLayer" parent="." unique_id=1869399691]
+layer = 100
+
+[node name="Fade" type="ColorRect" parent="FadeLayer" unique_id=2045354090]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0, 0, 0, 1)
