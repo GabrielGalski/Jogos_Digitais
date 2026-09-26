@@ -1,19 +1,25 @@
 [gd_scene format=3]
 
-[ext_resource type="Texture2D" path="res://assets/merchant/character/merchant_static2.png" id="1_sxptm"]
+[ext_resource type="Script" path="res://scripts/merchant/merchant.gd" id="1_rluj3"]
+[ext_resource type="SpriteFrames" path="res://resources/merchant_idle_frames.tres" id="1_sxptm"]
+[ext_resource type="Resource" path="res://resources/dialogue/tin_greeting.tres" id="2_5r4yi"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_jpa3s"]
 size = Vector2(96, 48)
 
 [node name="Merchant" type="Area2D" unique_id=629883862 groups=["interactable"]]
 collision_layer = 0
-metadata/interactions = []
-metadata/interaction_prompt = ""
+script = ExtResource("1_rluj3")
+initial_dialogue = ExtResource("2_5r4yi")
+metadata/interactions = ["talk"]
+metadata/interaction_prompt = "E — Conversar com Tin"
 
-[node name="Visual" type="Sprite2D" parent="." unique_id=1471437202]
+[node name="Visual" type="AnimatedSprite2D" parent="." unique_id=404650997]
 texture_filter = 1
 scale = Vector2(0.11, 0.11)
-texture = ExtResource("1_sxptm")
+sprite_frames = ExtResource("1_sxptm")
+animation = &"idle"
+autoplay = "idle"
 
 [node name="InteractionArea" type="CollisionShape2D" parent="." unique_id=179537250]
 position = Vector2(0, 49)

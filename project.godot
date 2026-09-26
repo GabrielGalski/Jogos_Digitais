@@ -23,6 +23,13 @@ window/size/window_width_override=960
 window/size/window_height_override=540
 window/stretch/mode="canvas_items"
 
+[input]
+
+dash={
+"deadzone": 0.5,
+"events": [Object(InputEventKey,"physical_keycode":32)]
+}
+
 [physics]
 
 common/physics_interpolation=true

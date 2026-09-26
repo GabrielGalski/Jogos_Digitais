@@ -4,6 +4,14 @@
 [ext_resource type="Texture2D" path="res://assets/merchant/merchant_hall.png" id="2_ayjaq"]
 [ext_resource type="SpriteFrames" path="res://resources/player_frames.tres" id="2_nox_frames"]
 [ext_resource type="PackedScene" path="res://scenes/merchant/merchant.tscn" id="3_la2ho"]
+[ext_resource type="Script" path="res://scripts/merchant/merchant.gd" id="4_iv1vt"]
+[ext_resource type="Resource" path="res://resources/dialogue/tin_greeting.tres" id="5_3nwu2"]
+[ext_resource type="PackedScene" path="res://tools/dialogue system/dialogue_box.tscn" id="7_pt7on"]
+[ext_resource type="Script" path="res://tools/dialogue system/dialogue_box.gd" id="8_tnlk1"]
+[ext_resource type="FontFile" path="res://assets/font/Fixedsys Excelsior 3.01.ttf" id="9_sytn0"]
+[ext_resource type="Script" path="res://scripts/merchant/merchant_shooter.gd" id="10_3nwu2"]
+[ext_resource type="Script" path="res://scripts/merchant/entrance_cutscene.gd" id="11_tnlk1"]
+[ext_resource type="Texture2D" path="res://assets/merchant/hall_entrance.png" id="12_sytn0"]
 
 [node name="MerchantCorridor" type="Node2D" unique_id=1860945524]
 script = ExtResource("1_corridor")
@@ -24,41 +32,10 @@ centered = false
 z_index = 5
 position = Vector2(331, 103)
 collision_layer = 0
+script = ExtResource("4_iv1vt")
+initial_dialogue = ExtResource("5_3nwu2")
 metadata/interactions = []
 metadata/interaction_prompt = ""
-
-[node name="StairGuides" type="Node2D" parent="World" unique_id=1357689271]
-z_index = 1
-
-[node name="Riser1Top" type="Line2D" parent="World/StairGuides" unique_id=1365578194]
-points = PackedVector2Array(96, 116, 72, 172)
-width = 2.0
-default_color = Color(0.14509805, 0.07450981, 0.101960786, 1)
-
-[node name="Riser1Bottom" type="Line2D" parent="World/StairGuides" unique_id=1877306538]
-points = PackedVector2Array(96, 128, 72, 184)
-width = 2.0
-default_color = Color(0.14509805, 0.07450981, 0.101960786, 1)
-
-[node name="Riser2Top" type="Line2D" parent="World/StairGuides" unique_id=589605702]
-points = PackedVector2Array(120, 128, 96, 184)
-width = 2.0
-default_color = Color(0.14509805, 0.07450981, 0.101960786, 1)
-
-[node name="Riser2Bottom" type="Line2D" parent="World/StairGuides" unique_id=1365598133]
-points = PackedVector2Array(120, 140, 96, 196)
-width = 2.0
-default_color = Color(0.14509805, 0.07450981, 0.101960786, 1)
-
-[node name="Riser3Top" type="Line2D" parent="World/StairGuides" unique_id=92538345]
-points = PackedVector2Array(144, 140, 120, 196)
-width = 2.0
-default_color = Color(0.14509805, 0.07450981, 0.101960786, 1)
-
-[node name="Riser3Bottom" type="Line2D" parent="World/StairGuides" unique_id=322734186]
-points = PackedVector2Array(144, 152, 120, 208)
-width = 2.0
-default_color = Color(0.14509805, 0.07450981, 0.101960786, 1)
 
 [node name="Nox" type="Node2D" parent="." unique_id=1068723887]
 z_index = 10
@@ -90,3 +67,58 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 color = Color(0, 0, 0, 1)
+
+[node name="TinDialogue" type="CanvasLayer" parent="." unique_id=1494250164 instance=ExtResource("7_pt7on")]
+layer = 90
+script = ExtResource("8_tnlk1")
+
+[node name="InteractionHUD" type="CanvasLayer" parent="." unique_id=1083787132]
+layer = 80
+
+[node name="PromptAnchor" type="MarginContainer" parent="InteractionHUD" unique_id=944712651]
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_vertical = 0
+mouse_filter = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 0
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 12
+
+[node name="Prompt" type="Label" parent="InteractionHUD/PromptAnchor" unique_id=437298792]
+visible = false
+layout_mode = 2
+theme_override_colors/font_color = Color(0.96, 0.93, 0.96, 1)
+theme_override_colors/font_outline_color = Color(0.14, 0.07, 0.1, 1)
+theme_override_constants/outline_size = 4
+theme_override_fonts/font = ExtResource("9_sytn0")
+theme_override_font_sizes/font_size = 14
+text = "[E] Conversar com Tin"
+horizontal_alignment = 1
+
+[node name="HallShooter" type="Node2D" parent="." unique_id=1164488381]
+z_index = 9
+script = ExtResource("10_3nwu2")
+
+[node name="EntranceCutscene" type="Node2D" parent="." unique_id=461763130]
+script = ExtResource("11_tnlk1")
+
+[node name="HallOverlay" type="Sprite2D" parent="EntranceCutscene" unique_id=767573883]
+z_index = 11
+texture_filter = 1
+position = Vector2(-32, -32)
+texture = ExtResource("12_sytn0")
+centered = false
+region_enabled = true
+region_rect = Rect2(0, 0, 151, 203)
+
+[node name="LeftForeground" type="Sprite2D" parent="EntranceCutscene" unique_id=1566636889]
+z_index = 30
+texture_filter = 1
+position = Vector2(-32, -32)
+texture = ExtResource("12_sytn0")
+centered = false
+region_enabled = true
+region_rect = Rect2(0, 0, 22, 203)

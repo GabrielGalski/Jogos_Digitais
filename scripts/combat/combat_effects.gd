@@ -43,12 +43,14 @@ func _exit_tree() -> void:
 		feedback_offset = Vector2.ZERO
 
 
-func apply_hit(enemy: Node2D, damage: float, direction: Vector2, impulse: float) -> void:
+func apply_hit(enemy: Node2D, damage: float, direction: Vector2, impulse: float, on_kill: Callable = Callable()) -> void:
 	if damage <= 0.0 or not _is_valid_enemy(enemy):
 		return
 	if enemy.has_method(&"receive_impact"):
 		enemy.call(&"receive_impact", direction, impulse)
 	enemy.call(&"take_damage", damage)
+	if (not is_instance_valid(enemy) or not bool(enemy.call(&"is_alive"))) and on_kill.is_valid():
+		on_kill.call()
 
 
 func _ready() -> void:
@@ -93,8 +95,11 @@ func trigger_electric_chain(
 func trigger_explosion(
 	center: Vector2,
 	radius: float,
-	damage: float
+	damage: float,
+	on_kill: Callable = Callable()
 ) -> void:
+	if radius <= 0.0 or damage <= 0.0:
+		return
 	_spawn_explosion_visual(center, radius)
 	camera_impulse = maxf(camera_impulse, clampf(radius / 24.0, 0.4, 1.2))
 	var hit_ids: Dictionary = {}
@@ -111,7 +116,7 @@ func trigger_explosion(
 		if outward.is_zero_approx():
 			outward = enemy.get(&"last_hit_direction")
 		var falloff := 1.0 - 0.45 * clampf(enemy.global_position.distance_to(center) / radius, 0.0, 1.0)
-		apply_hit(enemy, damage, outward, radius * 3.0 * falloff)
+		apply_hit(enemy, damage, outward, radius * 3.0 * falloff, on_kill)
 
 
 func _run_electric_chain(

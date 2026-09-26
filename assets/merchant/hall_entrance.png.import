@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cxfpsctj3pdgi"
-path="res://.godot/imported/merchant_static2.png-126b1e43ad02de20db2e603684bb80b5.ctex"
+uid="uid://ckkh4sdm06icq"
+path="res://.godot/imported/hall_entrance.png-201de19c42544f68436d99857c9367bf.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/merchant/character/merchant_static2.png"
-dest_files=["res://.godot/imported/merchant_static2.png-126b1e43ad02de20db2e603684bb80b5.ctex"]
+source_file="res://assets/merchant/hall_entrance.png"
+dest_files=["res://.godot/imported/hall_entrance.png-201de19c42544f68436d99857c9367bf.ctex"]
 
 [params]
 

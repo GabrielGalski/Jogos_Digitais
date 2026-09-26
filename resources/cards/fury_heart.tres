@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="MutationCard" format=3]
+
+[ext_resource type="Script" path="res://scripts/cards/mutation_card.gd" id="1_pb3gd"]
+
+[resource]
+script = ExtResource("1_pb3gd")
+card_id = &"CARD_MUT_001"
+display_name = "Coração de Fúria"
+description = "Abates pela arma aumentam o movimento em 20% por 3 segundos. Novos abates renovam a duração."

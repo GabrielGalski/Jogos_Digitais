@@ -1,0 +1,30 @@
+[gd_resource type="SpriteFrames" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/merchant/character/merchant_idle1.png" id="1_l7n36"]
+[ext_resource type="Texture2D" path="res://assets/merchant/character/merchant_idle2.png" id="2_qvr17"]
+[ext_resource type="Texture2D" path="res://assets/merchant/character/merchant_idle3.png" id="3_b16r2"]
+[ext_resource type="Texture2D" path="res://assets/merchant/character/merchant_idle4.png" id="4_p45ld"]
+[ext_resource type="Texture2D" path="res://assets/merchant/character/merchant_idle5.png" id="5_oxovv"]
+
+[resource]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("1_l7n36")
+}, {
+"duration": 1.0,
+"texture": ExtResource("2_qvr17")
+}, {
+"duration": 1.0,
+"texture": ExtResource("3_b16r2")
+}, {
+"duration": 1.0,
+"texture": ExtResource("4_p45ld")
+}, {
+"duration": 1.0,
+"texture": ExtResource("5_oxovv")
+}],
+"loop": 1,
+"name": &"idle",
+"speed": 5.0
+}]

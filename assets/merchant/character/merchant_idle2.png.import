@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://ot0juu01xw3v"
-path="res://.godot/imported/merchant_static1.png-88ad0bbd65a325bbd6f1c40f8af28a79.ctex"
+uid="uid://rx7vgmqp53n6"
+path="res://.godot/imported/merchant_idle2.png-c12ed0e877e4063b9608ff17d6bc38dd.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/merchant/character/merchant_static1.png"
-dest_files=["res://.godot/imported/merchant_static1.png-88ad0bbd65a325bbd6f1c40f8af28a79.ctex"]
+source_file="res://assets/merchant/character/merchant_idle2.png"
+dest_files=["res://.godot/imported/merchant_idle2.png-c12ed0e877e4063b9608ff17d6bc38dd.ctex"]
 
 [params]
 

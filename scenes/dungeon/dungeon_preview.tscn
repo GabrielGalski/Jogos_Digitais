@@ -1,0 +1,39 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/dungeon/dungeon_preview.gd" id="1"]
+[ext_resource type="PackedScene" path="res://scenes/dungeon/two_room_layout.tscn" id="2"]
+[ext_resource type="PackedScene" path="res://scenes/player.tscn" id="3"]
+[ext_resource type="Script" path="res://scripts/combat/combat_effects.gd" id="4"]
+[ext_resource type="Script" path="res://scripts/dungeon/room_encounter.gd" id="5"]
+[ext_resource type="PackedScene" path="res://scenes/dungeon/preview_hud.tscn" id="6"]
+
+[node name="DungeonPreview" type="Node2D"]
+texture_filter = 1
+script = ExtResource("1")
+
+[node name="Layout" parent="." instance=ExtResource("2")]
+
+[node name="Room1Encounter" type="Node2D" parent="."]
+script = ExtResource("5")
+bounds = Rect2(0, 0, 320, 192)
+spawn_points = PackedVector2Array(240, 48, 240, 144, 160, 48, 160, 144, 64, 48, 64, 144)
+
+[node name="Room2Encounter" type="Node2D" parent="."]
+script = ExtResource("5")
+bounds = Rect2(288, -416, 480, 320)
+spawn_points = PackedVector2Array(368, -336, 688, -352, 544, -160, 560, -352, 352, -192, 704, -160, 512, -256, 704, -256)
+waves = Array[int]([4, 4])
+elite_placeholder = true
+
+[node name="Projectiles" type="Node2D" parent="."]
+
+[node name="Effects" type="Node2D" parent="."]
+script = ExtResource("4")
+
+[node name="Nox" parent="." instance=ExtResource("3")]
+position = Vector2(-96, 96)
+arena_bounds = Rect2(-144, -448, 1072, 688)
+movement_bounds = Rect2(-140, -432, 1056, 656)
+intro_locked = true
+
+[node name="HUD" parent="." instance=ExtResource("6")]

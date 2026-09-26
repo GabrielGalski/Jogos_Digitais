@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="InfusionCard" format=3]
+
+[ext_resource type="Script" path="res://scripts/cards/infusion_card.gd" id="1_ox1tg"]
+
+[resource]
+script = ExtResource("1_ox1tg")
+card_id = &"CARD_INF_001"
+display_name = "Núcleo de Golem"
+description = "O primeiro impacto em inimigo causa uma explosão de 3 de dano em 18 pixels."

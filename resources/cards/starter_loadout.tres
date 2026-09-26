@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="CardLoadout" format=3]
+
+[ext_resource type="Resource" path="res://resources/cards/golem_core.tres" id="1_o5xhu"]
+[ext_resource type="Resource" path="res://resources/cards/slime_shot.tres" id="2_cndue"]
+[ext_resource type="Script" path="res://scripts/cards/card_loadout.gd" id="3_t5324"]
+
+[resource]
+script = ExtResource("3_t5324")
+manifestation = ExtResource("2_cndue")
+infusion = ExtResource("1_o5xhu")

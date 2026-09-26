@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="DialogueSequence" load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://tools/dialogue system/dialogue_sequence.gd" id="1"]
+[ext_resource type="Script" path="res://tools/dialogue system/dialogue_line.gd" id="2"]
+[ext_resource type="Script" path="res://tools/dialogue system/dialogue_speaker.gd" id="3"]
+
+[sub_resource type="Resource" id="Speaker_tin"]
+script = ExtResource("3")
+display_name = "TIN"
+name_color = Color(0.96, 0.65, 0.8, 1)
+
+[sub_resource type="Resource" id="Greeting"]
+script = ExtResource("2")
+speaker = SubResource("Speaker_tin")
+text = "Oi, Nox. Pode respirar: aqui você está seguro. Sou Tin. Bem-vindo ao meu balcão."
+next_line_index = -2
+
+[resource]
+script = ExtResource("1")
+sequence_id = &"tin_greeting"
+lines = Array[ExtResource("2")]([SubResource("Greeting")])

@@ -1,0 +1,22 @@
+[gd_scene format=3]
+
+[ext_resource type="Texture2D" path="res://assets/merchant/water.png" id="1"]
+[ext_resource type="Shader" path="res://shaders/merchant_water.gdshader" id="2"]
+[ext_resource type="Script" path="res://scripts/merchant_water.gd" id="3"]
+
+[sub_resource type="ShaderMaterial" id="WaterMaterial"]
+resource_local_to_scene = true
+shader = ExtResource("2")
+
+[node name="Water" type="Node2D"]
+z_index = 1
+script = ExtResource("3")
+
+[node name="Surface" type="Sprite2D" parent="."]
+texture_filter = 1
+material = SubResource("WaterMaterial")
+position = Vector2(0, 295)
+texture = ExtResource("1")
+centered = false
+region_enabled = true
+region_rect = Rect2(0, 295, 1024, 39)

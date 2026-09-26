@@ -1,7 +1,14 @@
 extends Node2D
-## The MVP weapon rig, now unlocked by the tutorial reveal.
+## Caster presentation and input; authored cards drive the initial combat loadout.
 signal shot_fired
 const BULLET: PackedScene = preload("res://scenes/combat/projectiles/rapid_electric_bullet.tscn")
+const COMPANION: Script = preload("res://scripts/combat/deck_box_companion.gd")
+@export var use_deck_box: bool = true
+@export var use_card_loadout: bool = true
+@export var initial_loadout: CardLoadout = preload("res://resources/cards/starter_loadout.tres")
+var card_runtime: CardCombatRuntime = CardCombatRuntime.new()
+@export_flags_2d_physics var projectile_obstacle_mask: int = 0
+var companion: Node2D
 const WEAPON_SCALE: float = 0.55
 const FORWARD_DISTANCE: float = 10.5
 const RECOIL_DISTANCE: float = 4.5
@@ -23,9 +30,24 @@ var projectiles: Node2D
 @onready var muzzle: Marker2D = $WeaponPivot/Muzzle
 
 func _ready() -> void:
-	hide()
+	if not equip_cards(initial_loadout):
+		push_error("BoosterShooter received an invalid initial card loadout.")
+	player.defeated.connect(_reset_card_effects)
+	if use_deck_box:
+		equipped = true
+		show()
+		companion = COMPANION.new() as Node2D
+		companion.name = "DeckBox"
+		add_child(companion)
+		companion.call("configure", self)
+		weapon.hide()
+		_update_rig(0.0)
+	else:
+		hide()
 
 func reveal() -> void:
+	if use_deck_box and equipped:
+		return
 	equipped = true
 	show()
 	aim_direction = Vector2.RIGHT
@@ -43,6 +65,8 @@ func set_combat_enabled(enabled: bool) -> void:
 	cooldown = 0.0
 
 func _process(delta: float) -> void:
+	card_runtime.tick(delta)
+	player.card_movement_multiplier = card_runtime.movement_multiplier() if use_card_loadout else 1.0
 	if not equipped:
 		return
 	_update_rig(delta)
@@ -61,16 +85,46 @@ func fire_once() -> Node2D:
 	if not is_instance_valid(effects) or not is_instance_valid(projectiles):
 		return null
 	var bullet: RapidElectricBullet = BULLET.instantiate() as RapidElectricBullet
+	var attack: CardAttack
+	if use_card_loadout:
+		attack = card_runtime.create_attack()
+		if attack == null:
+			bullet.free()
+			return null
+		bullet.card_attack = attack
+		bullet.direct_damage = attack.damage
+		bullet.movement_speed = attack.projectile_speed
+		bullet.maximum_lifetime = attack.projectile_lifetime
+		bullet.explosion_damage = attack.explosion_damage
+		bullet.explosion_radius = attack.explosion_radius
 	projectiles.add_child(bullet)
 	bullet.global_position = muzzle.global_position
 	bullet.setup(aim_direction, effects)
+	bullet.obstacle_mask = projectile_obstacle_mask
+	bullet.collision_mask |= projectile_obstacle_mask
 	bullet.reset_physics_interpolation()
-	cooldown = fire_interval
+	cooldown = attack.fire_interval if attack != null else fire_interval
 	shot_recoil = 0.85
 	shot_fired.emit()
 	return bullet
 
+
+func equip_cards(loadout: CardLoadout) -> bool:
+	if not card_runtime.equip(loadout):
+		return false
+	if is_instance_valid(player):
+		player.card_movement_multiplier = 1.0
+	return true
+
+
+func _reset_card_effects() -> void:
+	card_runtime.reset_effects()
+	player.card_movement_multiplier = 1.0
+
 func _update_rig(delta: float) -> void:
+	if use_deck_box and is_instance_valid(companion):
+		companion.call("update_pose", delta)
+		return
 	var mouse_world: Vector2 = get_viewport().get_canvas_transform().affine_inverse() * get_viewport().get_mouse_position()
 	if cutscene_pose_active:
 		var turn: float = wrapf(Vector2.RIGHT.angle() - aim_direction.angle(), -PI, PI)
@@ -93,5 +147,3 @@ func _update_rig(delta: float) -> void:
 	pivot.rotation += -0.065 * 0.85 * pulse * (-1.0 if aim_direction.x < 0.0 else 1.0)
 	weapon.flip_v = aim_direction.x < 0.0
 	player.body.flip_h = aim_direction.x < 0.0
-
-

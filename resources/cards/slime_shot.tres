@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="ManifestationCard" format=3]
+
+[ext_resource type="Script" path="res://scripts/cards/manifestation_card.gd" id="1_d4eg8"]
+
+[resource]
+script = ExtResource("1_d4eg8")
+card_id = &"CARD_MAN_001"
+display_name = "Gotas de Slime"
+description = "Dispara um projétil de slime pelo caster."

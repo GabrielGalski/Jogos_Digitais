@@ -1,0 +1,75 @@
+[gd_scene format=3]
+
+[ext_resource type="FontFile" path="res://assets/font/determination.ttf" id="1"]
+
+[sub_resource type="Theme" id="Theme"]
+default_font = ExtResource("1")
+default_font_size = 12
+Label/colors/font_color = Color(0.94, 0.88, 0.93, 1)
+Label/colors/font_shadow_color = Color(0.05, 0.02, 0.05, 1)
+Label/constants/shadow_offset_x = 1
+Label/constants/shadow_offset_y = 1
+
+[node name="HUD" type="CanvasLayer"]
+layer = 20
+
+[node name="Frame" type="MarginContainer" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme = SubResource("Theme")
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 8
+
+[node name="Column" type="VBoxContainer" parent="Frame"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 4
+
+[node name="Health" type="Label" parent="Frame/Column"]
+layout_mode = 2
+mouse_filter = 2
+text = "NOX  60 / 60"
+
+[node name="Status" type="Label" parent="Frame/Column"]
+layout_mode = 2
+mouse_filter = 2
+text = "ENTRADA"
+
+[node name="Hint" type="Label" parent="Frame/Column"]
+layout_mode = 2
+size_flags_vertical = 3
+mouse_filter = 2
+vertical_alignment = 2
+autowrap_mode = 3
+text = "WASD: mover  |  Mouse: mirar / atirar  |  Espaço: dash"
+
+[node name="Fade" type="ColorRect" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.05, 0.02, 0.05, 1)
+
+[node name="Ending" type="CenterContainer" parent="."]
+visible = false
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme = SubResource("Theme")
+
+[node name="Text" type="Label" parent="Ending"]
+layout_mode = 2
+mouse_filter = 2
+horizontal_alignment = 1
+text = "TESTE CONCLUÍDO\n\nR: voltar ao mercador"
