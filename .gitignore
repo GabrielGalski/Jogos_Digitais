@@ -8,8 +8,16 @@
 /pitch/
 /render/
 /renders/
-/docs/
-/tests/
+
+# Documentação ativa: somente os três documentos canônicos
+/docs/*
+!/docs/GDD.md
+!/docs/TDD.md
+!/docs/GUIA.md
+
+# Capturas de testes são locais; scripts, cenários e fixtures continuam versionáveis
+/tests/*.png
+/tests/*.png.import
 
 # Builds e exportações
 /build/
@@ -20,10 +28,18 @@
 # Temporários e cópias redundantes
 /tmp/
 /temp/
+/ldtk_backups/
 *.tmp
 *.bak
 *.log
 * - Copia.*
+
+# Python e ferramentas locais (não ignorar fontes, .uid ou presets de importação)
+__pycache__/
+*.py[cod]
+/.venv/
+/.pytest_cache/
+/tools/AtualizarLDtk_unsigned.exe
 
 # Configurações locais e arquivos do sistema
 /.idea/
@@ -31,6 +47,7 @@
 .DS_Store
 Thumbs.db
 desktop.ini
+*.lnk
 .env
 .env.*
 !.env.example

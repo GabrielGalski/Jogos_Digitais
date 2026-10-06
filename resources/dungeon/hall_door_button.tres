@@ -1,0 +1,40 @@
+[gd_resource type="Theme" format=3]
+
+[ext_resource type="FontFile" path="res://assets/font/Fixedsys Excelsior 3.01.ttf" id="1_nvmt1"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_7u2hp"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_qw2wn"]
+draw_center = false
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(1, 0.83137256, 0.9019608, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_0y5h1"]
+bg_color = Color(1, 0.5647059, 0.7490196, 0.09411765)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.93333334, 0.5254902, 0.6901961, 0.627451)
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_cyei0"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_8mr4f"]
+bg_color = Color(1, 0.5647059, 0.7490196, 0.21960784)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(1, 0.83137256, 0.9019608, 1)
+
+[resource]
+default_font = ExtResource("1_nvmt1")
+default_font_size = 12
+Button/styles/disabled = SubResource("StyleBoxEmpty_7u2hp")
+Button/styles/focus = SubResource("StyleBoxFlat_qw2wn")
+Button/styles/hover = SubResource("StyleBoxFlat_0y5h1")
+Button/styles/normal = SubResource("StyleBoxEmpty_cyei0")
+Button/styles/pressed = SubResource("StyleBoxFlat_8mr4f")

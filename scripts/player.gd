@@ -10,6 +10,7 @@ signal dash_started
 @export var dash_speed: float = 330.0
 @export var dash_duration: float = 0.16
 @export var dash_cooldown: float = 0.65
+@export var dash_afterimages_enabled: bool = true
 var dash_remaining: float = 0.0
 var dash_recovery: float = 0.0
 var dash_direction: Vector2 = Vector2.RIGHT
@@ -18,6 +19,7 @@ var dash_camera_strength: float = 0.0
 var dash_camera_offset: Vector2 = Vector2.ZERO
 var dash_visual_time: float = 0.0
 var body_rest_scale: Vector2 = Vector2.ONE
+var respawn_position: Vector2 = Vector2.ZERO
 
 @export_category("Combat balance")
 @export var max_health: float = 60.0
@@ -93,7 +95,7 @@ func _physics_process(_delta: float) -> void:
 		dash_trail_timer -= _delta
 		if dash_trail_timer <= 0.0:
 			_spawn_dash_trail()
-			dash_trail_timer += 0.025
+			dash_trail_timer += 0.05
 		_update_animation(dash_direction)
 		if get_slide_collision_count() > 0:
 			dash_remaining = 0.0
@@ -117,7 +119,8 @@ func try_dash(direction: Vector2 = Vector2.ZERO) -> bool:
 		dash_direction = Vector2.LEFT if body.flip_h else Vector2.RIGHT
 	dash_remaining = dash_duration
 	dash_recovery = dash_cooldown
-	dash_trail_timer = 0.0
+	# The first frame is spawned here; wait before creating the next one.
+	dash_trail_timer = 0.05
 	knockback_velocity = Vector2.ZERO
 	dash_camera_strength = 1.0
 	_spawn_dash_trail()
@@ -143,6 +146,8 @@ func _process(delta: float) -> void:
 
 
 func _spawn_dash_trail() -> void:
+	if not dash_afterimages_enabled:
+		return
 	var trail: Sprite2D = Sprite2D.new()
 	trail.name = "DashAfterimage"
 	trail.add_to_group(&"dash_afterimages")
@@ -151,6 +156,7 @@ func _spawn_dash_trail() -> void:
 	trail.texture_filter = body.texture_filter
 	get_parent().add_child(trail)
 	trail.global_transform = body.global_transform
+	trail.reset_physics_interpolation()
 	trail.z_index = z_index
 	trail.modulate = Color(0.64, 0.35, 0.85, 0.48)
 	var fade_trail: Tween = trail.create_tween()
@@ -160,6 +166,24 @@ func _spawn_dash_trail() -> void:
 
 func set_movement_bounds(bounds: Rect2) -> void:
 	movement_bounds = bounds
+
+
+func set_respawn_position(point: Vector2) -> void:
+	respawn_position = point
+
+
+func fall_from_ldtk_gap() -> void:
+	if dead or is_dashing():
+		return
+	velocity = Vector2.ZERO
+	knockback_velocity = Vector2.ZERO
+	impact_control_lock = 0.0
+	position = respawn_position
+	dash_camera_strength = 0.0
+	reset_physics_interpolation()
+	var camera: Camera2D = get_node_or_null("Camera2D") as Camera2D
+	if camera != null:
+		camera.reset_smoothing()
 
 
 func _get_movement_input() -> Vector2:

@@ -17,6 +17,7 @@ var camera_impulse := 0.0
 var feedback_time := 0.0
 var feedback_offset: Vector2 = Vector2.ZERO
 var camera_feedback_enabled: bool = true
+@export var explosion_visuals_enabled: bool = true
 var active_explosion_visuals: Array[Node2D] = []
 
 
@@ -193,6 +194,8 @@ func _spawn_arc_visual(
 
 
 func _spawn_explosion_visual(center: Vector2, radius: float) -> void:
+	if not explosion_visuals_enabled:
+		return
 	var retained: Array[Node2D] = []
 	for existing: Node2D in active_explosion_visuals:
 		if not is_instance_valid(existing) or existing.is_queued_for_deletion():

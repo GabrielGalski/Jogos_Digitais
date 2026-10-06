@@ -1,0 +1,15 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/camera/camera_view_profile.gd" id="1_profile"]
+
+[node name="CameraViewVertical" type="Node"]
+script = ExtResource("1_profile")
+display_name = "Dungeon vertical"
+elevation_degrees = 70.0
+orthographic_size = 2.25
+wall_height = 0.5
+focus_depth_offset = -0.05
+floor_color = Color(0.31, 0.24, 0.3, 1)
+wall_color = Color(0.39, 0.25, 0.32, 1)
+wall_top_color = Color(0.62, 0.39, 0.46, 1)
+background_color = Color(0.1, 0.055, 0.078, 1)

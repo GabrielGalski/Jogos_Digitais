@@ -1,0 +1,17 @@
+{
+  "scene_path": "scenes/ui/player_life_bar.tscn",
+  "viewport_size": {"width":480,"height":270},
+  "steps": [
+    {"type":"assert","assertion":"property","node_path":".","property":"size","expected":{"__type":"Vector2","x":68,"y":10}},
+    {"type":"assert","assertion":"property","node_path":".","property":"texture_filter","expected":1},
+    {"type":"ui_report","label":"player-full-480","fail_on":["any"]},
+    {"type":"assert","assertion":"property","node_path":".","property":"lit_blocks","expected":6},
+    {"type":"set_property","node_path":".","property":"value","value":50.0},
+    {"type":"assert","assertion":"property","node_path":".","property":"flash_mask","expected":32},
+    {"type":"wait_seconds","seconds":0.4},
+    {"type":"assert","assertion":"property","node_path":".","property":"flash_mask","expected":0},
+    {"type":"set_property","node_path":".","property":"value","value":0.0},
+    {"type":"assert","assertion":"property","node_path":".","property":"lit_blocks","expected":0},
+    {"type":"ui_report","label":"player-empty-480","fail_on":["any"]}
+  ]
+}

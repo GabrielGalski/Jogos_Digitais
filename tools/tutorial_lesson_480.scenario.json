@@ -1,0 +1,13 @@
+{
+  "scene_path": "scenes/tutorial_completion.tscn",
+  "viewport_size": {"width":480,"height":270},
+  "steps": [
+    {"type":"set_property","node_path":"EliteLesson","property":"visible","value":true},
+    {"type":"ui_report","node_path":"EliteLesson","label":"asterion-lesson-480","fail_on":["any"]},
+    {"type":"set_property","node_path":"EliteLesson/Panel/Content/Margin/Text","property":"text","value":"COMANDOS\n\nWASD · Mover\nEspaço · Dash\nMouse · Mirar\nClique esquerdo · Atirar"},
+    {"type":"ui_report","node_path":"EliteLesson","label":"controls-lesson-480","fail_on":["any"]},
+    {"type":"key","physical_keycode":69,"keycode":69,"pressed":true},
+    {"type":"key","physical_keycode":69,"keycode":69,"pressed":false},
+    {"type":"assert","assertion":"visible","node_path":"EliteLesson","expected":false}
+  ]
+}

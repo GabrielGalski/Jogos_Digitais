@@ -22,11 +22,12 @@ const SENTENCE_PAUSE: float = 0.24
 @export var punctuation_pauses_enabled: bool = true
 
 @onready var interface_root: Control = $Interface
+@onready var dialogue_row: HBoxContainer = $Interface/SafeArea/Layout/DialogueRow
 @onready var portrait_column: Control = $Interface/SafeArea/Layout/DialogueRow/PortraitColumn
-@onready var portrait_texture: TextureRect = $Interface/SafeArea/Layout/DialogueRow/PortraitColumn/PortraitOuter/PortraitBlack/PortraitInner/Portrait
+@onready var portrait_texture: TextureRect = $Interface/SafeArea/Layout/DialogueRow/PortraitColumn/PortraitOuter/Portrait
 @onready var dialogue_column: VBoxContainer = $Interface/SafeArea/Layout/DialogueRow/DialogueColumn
-@onready var name_outer: PanelContainer = $Interface/SafeArea/Layout/DialogueRow/DialogueColumn/NameOuter
-@onready var name_label: Label = $Interface/SafeArea/Layout/DialogueRow/DialogueColumn/NameOuter/NameBlack/NameInner/NameMargin/Name
+@onready var name_outer: PanelContainer = $Interface/SafeArea/Layout/DialogueRow/PortraitColumn/NameOuter
+@onready var name_label: Label = $Interface/SafeArea/Layout/DialogueRow/PortraitColumn/NameOuter/NameBlack/NameInner/NameMargin/Name
 @onready var body_text: RichTextLabel = $Interface/SafeArea/Layout/DialogueRow/DialogueColumn/BodyOuter/BodyBlack/BodyInner/BodyMargin/Content/Text
 @onready var choices_container: VBoxContainer = $Interface/SafeArea/Layout/DialogueRow/DialogueColumn/BodyOuter/BodyBlack/BodyInner/BodyMargin/Content/Choices
 @onready var continue_outer: PanelContainer = $Interface/SafeArea/Layout/DialogueRow/DialogueColumn/BodyOuter/BodyBlack/BodyInner/BodyMargin/Content/ContinueRow/ContinueOuter
@@ -46,6 +47,8 @@ var _choice_labels: Array[Label] = []
 
 
 func _ready() -> void:
+	interface_root.resized.connect(_update_dialogue_width)
+	_update_dialogue_width()
 	interface_root.hide()
 	set_process(false)
 
@@ -166,6 +169,7 @@ func _apply_speaker(speaker: DialogueSpeaker) -> void:
 	if speaker == null:
 		name_outer.hide()
 		portrait_column.hide()
+		portrait_texture.texture = null
 		body_text.add_theme_color_override("default_color", DEFAULT_TEXT_COLOR)
 		voice_player.stream = null
 		return
@@ -174,7 +178,7 @@ func _apply_speaker(speaker: DialogueSpeaker) -> void:
 	name_outer.visible = not speaker.display_name.is_empty()
 	body_text.add_theme_color_override("default_color", speaker.text_color if speaker.text_color.a > 0.0 else DEFAULT_TEXT_COLOR)
 	portrait_texture.texture = speaker.portrait
-	portrait_column.visible = speaker.portrait != null
+	portrait_column.visible = not speaker.display_name.is_empty() or speaker.portrait != null
 	dialogue_column.size_flags_stretch_ratio = 1.0
 	voice_player.stream = speaker.voice
 
@@ -216,6 +220,7 @@ func _show_choices() -> void:
 			continue
 		var label: Label = Label.new()
 		label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		label.add_theme_font_size_override("font_size", 12)
 		label.add_theme_constant_override("outline_size", 2)
 		label.add_theme_color_override("font_outline_color", Color.BLACK)
 		choices_container.add_child(label)
@@ -301,3 +306,8 @@ func _is_up_key(event: InputEventKey) -> bool:
 
 func _is_down_key(event: InputEventKey) -> bool:
 	return event.keycode in [KEY_DOWN, KEY_S] or event.physical_keycode in [KEY_DOWN, KEY_S]
+
+
+func _update_dialogue_width() -> void:
+	var available_width: float = maxf(0.0, interface_root.size.x - 24.0)
+	dialogue_row.custom_minimum_size.x = minf(720.0, available_width * 0.78)

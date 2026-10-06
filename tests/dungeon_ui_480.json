@@ -1,0 +1,11 @@
+{
+  "scene_path": "scenes/dungeon/dungeon_preview.tscn",
+  "viewport_size": {"width": 480, "height": 270},
+  "steps": [
+    {"type": "wait_seconds", "seconds": 0.6},
+    {"type": "ui_report", "label": "dungeon-480", "node_path": "HUD", "fail_on": ["any"]},
+    {"type": "set_property", "node_path": "HUD/Frame", "property": "visible", "value": false},
+    {"type": "set_property", "node_path": "HUD/Ending", "property": "visible", "value": true},
+    {"type": "ui_report", "label": "ending-480", "node_path": "HUD", "fail_on": ["any"]}
+  ]
+}

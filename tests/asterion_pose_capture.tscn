@@ -1,0 +1,4 @@
+[gd_scene format=3]
+[ext_resource type="Script" path="res://tests/asterion_pose_capture.gd" id="1"]
+[node name="PoseCapture" type="Node"]
+script = ExtResource("1")

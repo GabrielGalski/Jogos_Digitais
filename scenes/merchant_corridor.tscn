@@ -6,12 +6,18 @@
 [ext_resource type="PackedScene" path="res://scenes/merchant/merchant.tscn" id="3_la2ho"]
 [ext_resource type="Script" path="res://scripts/merchant/merchant.gd" id="4_iv1vt"]
 [ext_resource type="Resource" path="res://resources/dialogue/tin_greeting.tres" id="5_3nwu2"]
+[ext_resource type="PackedScene" path="res://scenes/merchant/hall_details.tscn" id="6_dencs"]
+[ext_resource type="Script" path="res://scripts/merchant/hall_details.gd" id="7_5cbtp"]
 [ext_resource type="PackedScene" path="res://tools/dialogue system/dialogue_box.tscn" id="7_pt7on"]
+[ext_resource type="Theme" path="res://resources/dungeon/hall_door_button.tres" id="8_5cbtp"]
 [ext_resource type="Script" path="res://tools/dialogue system/dialogue_box.gd" id="8_tnlk1"]
 [ext_resource type="FontFile" path="res://assets/font/Fixedsys Excelsior 3.01.ttf" id="9_sytn0"]
 [ext_resource type="Script" path="res://scripts/merchant/merchant_shooter.gd" id="10_3nwu2"]
 [ext_resource type="Script" path="res://scripts/merchant/entrance_cutscene.gd" id="11_tnlk1"]
 [ext_resource type="Texture2D" path="res://assets/merchant/hall_entrance.png" id="12_sytn0"]
+[ext_resource type="PackedScene" path="res://scenes/merchant/booster_viewer.tscn" id="13_sfhf7"]
+[ext_resource type="Script" path="res://scripts/booster_viewer.gd" id="14_3npo5"]
+[ext_resource type="Script" path="res://scripts/visual/merchant_lighting.gd" id="18_2bt18"]
 
 [node name="MerchantCorridor" type="Node2D" unique_id=1860945524]
 script = ExtResource("1_corridor")
@@ -36,6 +42,20 @@ script = ExtResource("4_iv1vt")
 initial_dialogue = ExtResource("5_3nwu2")
 metadata/interactions = []
 metadata/interaction_prompt = ""
+
+[node name="HallDetails" type="Node2D" parent="World" unique_id=1866435512 instance=ExtResource("6_dencs")]
+script = ExtResource("7_5cbtp")
+
+[node name="DungeonDoorButton" type="Button" parent="World" unique_id=870927142]
+z_index = 6
+offset_left = 533.0
+offset_top = 43.0
+offset_right = 592.0
+offset_bottom = 151.0
+tooltip_text = "Entrar na dungeon"
+mouse_default_cursor_shape = 2
+theme = ExtResource("8_5cbtp")
+disabled = true
 
 [node name="Nox" type="Node2D" parent="." unique_id=1068723887]
 z_index = 10
@@ -122,3 +142,24 @@ texture = ExtResource("12_sytn0")
 centered = false
 region_enabled = true
 region_rect = Rect2(0, 0, 22, 203)
+
+[node name="BoosterViewerLayer" type="CanvasLayer" parent="." unique_id=1216208168]
+layer = 110
+
+[node name="BoosterViewer" type="Control" parent="BoosterViewerLayer" unique_id=1394194935 instance=ExtResource("13_sfhf7")]
+process_mode = 3
+visible = false
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("14_3npo5")
+
+[node name="MerchantLighting" type="Node2D" parent="." unique_id=1104854334]
+script = ExtResource("18_2bt18")
+water_origins = PackedVector2Array(70, 268, 275, 268, 480, 268, 685, 268, 890, 268)
+
+[connection signal="pressed" from="World/DungeonDoorButton" to="." method="_on_dungeon_door_pressed"]

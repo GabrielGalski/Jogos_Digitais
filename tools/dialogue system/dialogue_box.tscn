@@ -1,8 +1,7 @@
-[gd_scene load_steps=9 format=3]
+[gd_scene format=3]
 
 [ext_resource type="Script" path="res://tools/dialogue system/dialogue_box.gd" id="1_dialogue"]
 [ext_resource type="FontFile" path="res://assets/font/Fixedsys Excelsior 3.01.ttf" id="2_font"]
-
 
 [sub_resource type="Theme" id="Theme_dialogue"]
 default_font = ExtResource("2_font")
@@ -22,13 +21,6 @@ content_margin_right = 2.0
 content_margin_bottom = 2.0
 bg_color = Color(0.0352941, 0.027451, 0.0431373, 1)
 
-[sub_resource type="StyleBoxFlat" id="Style_purple"]
-content_margin_left = 7.0
-content_margin_top = 5.0
-content_margin_right = 7.0
-content_margin_bottom = 5.0
-bg_color = Color(0.301961, 0.215686, 0.329412, 1)
-
 [sub_resource type="StyleBoxFlat" id="Style_name_purple"]
 content_margin_left = 8.0
 content_margin_top = 2.0
@@ -36,13 +28,53 @@ content_margin_right = 8.0
 content_margin_bottom = 2.0
 bg_color = Color(0.301961, 0.215686, 0.329412, 1)
 
-[sub_resource type="StyleBoxEmpty" id="Style_empty"]
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_g0nto"]
 
-[node name="DialogueBox" type="CanvasLayer"]
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_idguq"]
+content_margin_left = 1.0
+content_margin_top = 1.0
+content_margin_right = 1.0
+content_margin_bottom = 1.0
+bg_color = Color(0, 0, 0, 0)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.964706, 0.929412, 0.956863, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_hergq"]
+content_margin_left = 1.0
+content_margin_top = 1.0
+content_margin_right = 1.0
+content_margin_bottom = 1.0
+bg_color = Color(0.0352941, 0.027451, 0.0431373, 0.42)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_kawct"]
+content_margin_left = 6.0
+content_margin_top = 4.0
+content_margin_right = 6.0
+content_margin_bottom = 4.0
+bg_color = Color(0.301961, 0.215686, 0.329412, 0.62)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_g0nto"]
+content_margin_left = 1.0
+content_margin_top = 1.0
+content_margin_right = 1.0
+content_margin_bottom = 1.0
+bg_color = Color(0.0352941, 0.027451, 0.0431373, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_rwo0i"]
+content_margin_left = 6.0
+content_margin_top = 1.0
+content_margin_right = 6.0
+content_margin_bottom = 1.0
+bg_color = Color(0.301961, 0.215686, 0.329412, 1)
+
+[node name="DialogueBox" type="CanvasLayer" unique_id=480721311]
 layer = 100
 script = ExtResource("1_dialogue")
 
-[node name="Interface" type="Control" parent="."]
+[node name="Interface" type="Control" parent="." unique_id=1071531974]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -52,7 +84,7 @@ grow_vertical = 2
 mouse_filter = 2
 theme = SubResource("Theme_dialogue")
 
-[node name="SafeArea" type="MarginContainer" parent="Interface"]
+[node name="SafeArea" type="MarginContainer" parent="Interface" unique_id=1071221517]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -64,158 +96,141 @@ theme_override_constants/margin_top = 10
 theme_override_constants/margin_right = 12
 theme_override_constants/margin_bottom = 10
 
-[node name="Layout" type="VBoxContainer" parent="Interface/SafeArea"]
+[node name="Layout" type="VBoxContainer" parent="Interface/SafeArea" unique_id=989229928]
 layout_mode = 2
 theme_override_constants/separation = 0
 
-[node name="TopSpacer" type="Control" parent="Interface/SafeArea/Layout"]
+[node name="TopSpacer" type="Control" parent="Interface/SafeArea/Layout" unique_id=132354298]
 layout_mode = 2
 size_flags_vertical = 3
 mouse_filter = 2
 
-[node name="DialogueRow" type="HBoxContainer" parent="Interface/SafeArea/Layout"]
-custom_minimum_size = Vector2(0, 102)
+[node name="DialogueRow" type="HBoxContainer" parent="Interface/SafeArea/Layout" unique_id=1000361276]
+custom_minimum_size = Vector2(0, 88)
 layout_mode = 2
+size_flags_horizontal = 4
 theme_override_constants/separation = 5
 
-[node name="PortraitColumn" type="VBoxContainer" parent="Interface/SafeArea/Layout/DialogueRow"]
+[node name="PortraitColumn" type="VBoxContainer" parent="Interface/SafeArea/Layout/DialogueRow" unique_id=1049377338]
 visible = false
-custom_minimum_size = Vector2(82, 0)
+custom_minimum_size = Vector2(88, 0)
 layout_mode = 2
 size_flags_vertical = 8
+theme_override_constants/separation = 0
 
-[node name="PortraitSpacer" type="Control" parent="Interface/SafeArea/Layout/DialogueRow/PortraitColumn"]
-custom_minimum_size = Vector2(0, 18)
-layout_mode = 2
-mouse_filter = 2
-
-[node name="PortraitOuter" type="PanelContainer" parent="Interface/SafeArea/Layout/DialogueRow/PortraitColumn"]
-custom_minimum_size = Vector2(82, 82)
-layout_mode = 2
-theme_override_styles/panel = SubResource("Style_white")
-
-[node name="PortraitBlack" type="PanelContainer" parent="Interface/SafeArea/Layout/DialogueRow/PortraitColumn/PortraitOuter"]
-layout_mode = 2
-theme_override_styles/panel = SubResource("Style_black")
-
-[node name="PortraitInner" type="PanelContainer" parent="Interface/SafeArea/Layout/DialogueRow/PortraitColumn/PortraitOuter/PortraitBlack"]
-layout_mode = 2
-theme_override_styles/panel = SubResource("Style_purple")
-
-[node name="Portrait" type="TextureRect" parent="Interface/SafeArea/Layout/DialogueRow/PortraitColumn/PortraitOuter/PortraitBlack/PortraitInner"]
-layout_mode = 2
-expand_mode = 1
-stretch_mode = 5
-texture_filter = 0
-
-[node name="DialogueColumn" type="VBoxContainer" parent="Interface/SafeArea/Layout/DialogueRow"]
-layout_mode = 2
-size_flags_horizontal = 3
-theme_override_constants/separation = -1
-
-[node name="NameOuter" type="PanelContainer" parent="Interface/SafeArea/Layout/DialogueRow/DialogueColumn"]
-custom_minimum_size = Vector2(108, 20)
+[node name="NameOuter" type="PanelContainer" parent="Interface/SafeArea/Layout/DialogueRow/PortraitColumn" unique_id=740392606]
+custom_minimum_size = Vector2(88, 18)
 layout_mode = 2
 size_flags_horizontal = 0
 theme_override_styles/panel = SubResource("Style_white")
 
-[node name="NameBlack" type="PanelContainer" parent="Interface/SafeArea/Layout/DialogueRow/DialogueColumn/NameOuter"]
+[node name="NameBlack" type="PanelContainer" parent="Interface/SafeArea/Layout/DialogueRow/PortraitColumn/NameOuter" unique_id=1024007192]
 layout_mode = 2
 theme_override_styles/panel = SubResource("Style_black")
 
-[node name="NameInner" type="PanelContainer" parent="Interface/SafeArea/Layout/DialogueRow/DialogueColumn/NameOuter/NameBlack"]
+[node name="NameInner" type="PanelContainer" parent="Interface/SafeArea/Layout/DialogueRow/PortraitColumn/NameOuter/NameBlack" unique_id=1038588474]
 layout_mode = 2
 theme_override_styles/panel = SubResource("Style_name_purple")
 
-[node name="NameMargin" type="MarginContainer" parent="Interface/SafeArea/Layout/DialogueRow/DialogueColumn/NameOuter/NameBlack/NameInner"]
+[node name="NameMargin" type="MarginContainer" parent="Interface/SafeArea/Layout/DialogueRow/PortraitColumn/NameOuter/NameBlack/NameInner" unique_id=649328623]
 layout_mode = 2
 
-[node name="Name" type="Label" parent="Interface/SafeArea/Layout/DialogueRow/DialogueColumn/NameOuter/NameBlack/NameInner/NameMargin"]
+[node name="Name" type="Label" parent="Interface/SafeArea/Layout/DialogueRow/PortraitColumn/NameOuter/NameBlack/NameInner/NameMargin" unique_id=1575051201]
 layout_mode = 2
 theme_override_colors/font_shadow_color = Color(0, 0, 0, 1)
 theme_override_constants/shadow_offset_x = 1
 theme_override_constants/shadow_offset_y = 1
 theme_override_constants/outline_size = 1
-theme_override_font_sizes/font_size = 13
+theme_override_font_sizes/font_size = 12
 text = "PERSONAGEM"
 horizontal_alignment = 1
 
-[node name="BodyOuter" type="PanelContainer" parent="Interface/SafeArea/Layout/DialogueRow/DialogueColumn"]
-custom_minimum_size = Vector2(0, 84)
+[node name="PortraitOuter" type="PanelContainer" parent="Interface/SafeArea/Layout/DialogueRow/PortraitColumn" unique_id=1098197775]
+custom_minimum_size = Vector2(88, 65)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxEmpty_g0nto")
+
+[node name="Portrait" type="TextureRect" parent="Interface/SafeArea/Layout/DialogueRow/PortraitColumn/PortraitOuter" unique_id=1586281170]
+layout_mode = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="DialogueColumn" type="VBoxContainer" parent="Interface/SafeArea/Layout/DialogueRow" unique_id=79453307]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 0
+
+[node name="BodyOuter" type="PanelContainer" parent="Interface/SafeArea/Layout/DialogueRow/DialogueColumn" unique_id=418426085]
+custom_minimum_size = Vector2(0, 80)
 layout_mode = 2
 size_flags_vertical = 3
-theme_override_styles/panel = SubResource("Style_white")
+theme_override_styles/panel = SubResource("StyleBoxFlat_idguq")
 
-[node name="BodyBlack" type="PanelContainer" parent="Interface/SafeArea/Layout/DialogueRow/DialogueColumn/BodyOuter"]
+[node name="BodyBlack" type="PanelContainer" parent="Interface/SafeArea/Layout/DialogueRow/DialogueColumn/BodyOuter" unique_id=220344494]
 layout_mode = 2
-theme_override_styles/panel = SubResource("Style_black")
+theme_override_styles/panel = SubResource("StyleBoxFlat_hergq")
 
-[node name="BodyInner" type="PanelContainer" parent="Interface/SafeArea/Layout/DialogueRow/DialogueColumn/BodyOuter/BodyBlack"]
+[node name="BodyInner" type="PanelContainer" parent="Interface/SafeArea/Layout/DialogueRow/DialogueColumn/BodyOuter/BodyBlack" unique_id=2093449405]
 layout_mode = 2
-theme_override_styles/panel = SubResource("Style_purple")
+theme_override_styles/panel = SubResource("StyleBoxFlat_kawct")
 
-[node name="BodyMargin" type="MarginContainer" parent="Interface/SafeArea/Layout/DialogueRow/DialogueColumn/BodyOuter/BodyBlack/BodyInner"]
+[node name="BodyMargin" type="MarginContainer" parent="Interface/SafeArea/Layout/DialogueRow/DialogueColumn/BodyOuter/BodyBlack/BodyInner" unique_id=1200447888]
 layout_mode = 2
 theme_override_constants/margin_left = 4
 theme_override_constants/margin_top = 2
 theme_override_constants/margin_right = 4
 theme_override_constants/margin_bottom = 2
 
-[node name="Content" type="VBoxContainer" parent="Interface/SafeArea/Layout/DialogueRow/DialogueColumn/BodyOuter/BodyBlack/BodyInner/BodyMargin"]
+[node name="Content" type="VBoxContainer" parent="Interface/SafeArea/Layout/DialogueRow/DialogueColumn/BodyOuter/BodyBlack/BodyInner/BodyMargin" unique_id=2130429629]
 layout_mode = 2
 theme_override_constants/separation = 2
 
-[node name="Text" type="RichTextLabel" parent="Interface/SafeArea/Layout/DialogueRow/DialogueColumn/BodyOuter/BodyBlack/BodyInner/BodyMargin/Content"]
-custom_minimum_size = Vector2(0, 47)
+[node name="Text" type="RichTextLabel" parent="Interface/SafeArea/Layout/DialogueRow/DialogueColumn/BodyOuter/BodyBlack/BodyInner/BodyMargin/Content" unique_id=2121220853]
+custom_minimum_size = Vector2(0, 42)
 layout_mode = 2
 size_flags_vertical = 3
 mouse_filter = 2
 theme_override_colors/default_color = Color(0.964706, 0.929412, 0.956863, 1)
 theme_override_colors/font_outline_color = Color(0.0352941, 0.027451, 0.0431373, 1)
-theme_override_constants/outline_size = 2
-theme_override_constants/line_separation = 2
+theme_override_constants/line_separation = 1
+theme_override_constants/outline_size = 1
+theme_override_font_sizes/normal_font_size = 12
+theme_override_font_sizes/bold_font_size = 12
 bbcode_enabled = true
-fit_content = false
 scroll_active = false
-autowrap_mode = 3
 
-[node name="Choices" type="VBoxContainer" parent="Interface/SafeArea/Layout/DialogueRow/DialogueColumn/BodyOuter/BodyBlack/BodyInner/BodyMargin/Content"]
+[node name="Choices" type="VBoxContainer" parent="Interface/SafeArea/Layout/DialogueRow/DialogueColumn/BodyOuter/BodyBlack/BodyInner/BodyMargin/Content" unique_id=527929088]
 visible = false
 layout_mode = 2
 theme_override_constants/separation = 0
 
-[node name="ContinueRow" type="HBoxContainer" parent="Interface/SafeArea/Layout/DialogueRow/DialogueColumn/BodyOuter/BodyBlack/BodyInner/BodyMargin/Content"]
-custom_minimum_size = Vector2(0, 16)
+[node name="ContinueRow" type="HBoxContainer" parent="Interface/SafeArea/Layout/DialogueRow/DialogueColumn/BodyOuter/BodyBlack/BodyInner/BodyMargin/Content" unique_id=262559927]
+custom_minimum_size = Vector2(0, 12)
 layout_mode = 2
 theme_override_constants/separation = 0
+alignment = 2
 
-[node name="ContinueOuter" type="PanelContainer" parent="Interface/SafeArea/Layout/DialogueRow/DialogueColumn/BodyOuter/BodyBlack/BodyInner/BodyMargin/Content/ContinueRow"]
-custom_minimum_size = Vector2(18, 16)
+[node name="ContinueOuter" type="PanelContainer" parent="Interface/SafeArea/Layout/DialogueRow/DialogueColumn/BodyOuter/BodyBlack/BodyInner/BodyMargin/Content/ContinueRow" unique_id=1782366618]
+custom_minimum_size = Vector2(12, 10)
 layout_mode = 2
 theme_override_styles/panel = SubResource("Style_white")
 
-[node name="ContinueBlack" type="PanelContainer" parent="Interface/SafeArea/Layout/DialogueRow/DialogueColumn/BodyOuter/BodyBlack/BodyInner/BodyMargin/Content/ContinueRow/ContinueOuter"]
+[node name="ContinueBlack" type="PanelContainer" parent="Interface/SafeArea/Layout/DialogueRow/DialogueColumn/BodyOuter/BodyBlack/BodyInner/BodyMargin/Content/ContinueRow/ContinueOuter" unique_id=1919401480]
 layout_mode = 2
-theme_override_styles/panel = SubResource("Style_black")
+theme_override_styles/panel = SubResource("StyleBoxFlat_g0nto")
 
-[node name="ContinueInner" type="PanelContainer" parent="Interface/SafeArea/Layout/DialogueRow/DialogueColumn/BodyOuter/BodyBlack/BodyInner/BodyMargin/Content/ContinueRow/ContinueOuter/ContinueBlack"]
+[node name="ContinueInner" type="PanelContainer" parent="Interface/SafeArea/Layout/DialogueRow/DialogueColumn/BodyOuter/BodyBlack/BodyInner/BodyMargin/Content/ContinueRow/ContinueOuter/ContinueBlack" unique_id=393587130]
 layout_mode = 2
-theme_override_styles/panel = SubResource("Style_name_purple")
+theme_override_styles/panel = SubResource("StyleBoxFlat_rwo0i")
 
-[node name="Key" type="Label" parent="Interface/SafeArea/Layout/DialogueRow/DialogueColumn/BodyOuter/BodyBlack/BodyInner/BodyMargin/Content/ContinueRow/ContinueOuter/ContinueBlack/ContinueInner"]
+[node name="Key" type="Label" parent="Interface/SafeArea/Layout/DialogueRow/DialogueColumn/BodyOuter/BodyBlack/BodyInner/BodyMargin/Content/ContinueRow/ContinueOuter/ContinueBlack/ContinueInner" unique_id=680953714]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.964706, 0.929412, 0.956863, 1)
 theme_override_colors/font_outline_color = Color(0.0352941, 0.027451, 0.0431373, 1)
 theme_override_constants/outline_size = 1
-theme_override_font_sizes/font_size = 12
+theme_override_font_sizes/font_size = 9
 text = "E"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="ContinueSpacer" type="Control" parent="Interface/SafeArea/Layout/DialogueRow/DialogueColumn/BodyOuter/BodyBlack/BodyInner/BodyMargin/Content/ContinueRow"]
-layout_mode = 2
-size_flags_horizontal = 3
-mouse_filter = 2
-
-[node name="Voice" type="AudioStreamPlayer" parent="."]
-bus = &"Master"
+[node name="Voice" type="AudioStreamPlayer" parent="." unique_id=1559862074]

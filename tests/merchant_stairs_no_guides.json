@@ -1,0 +1,110 @@
+{
+  "scene_path": "scenes/merchant_corridor.tscn",
+  "viewport_size": {
+    "width": 960,
+    "height": 540
+  },
+  "steps": [
+    {
+      "type": "wait_until",
+      "node_path": ".",
+      "property": "state",
+      "expected": 2,
+      "timeout_seconds": 5
+    },
+    {
+      "type": "assert",
+      "assertion": "property",
+      "node_path": ".",
+      "property": "movement_speed",
+      "expected": 112.5
+    },
+    {
+      "type": "wait_until",
+      "node_path": ".",
+      "property": "floor_level",
+      "expected": 3,
+      "timeout_seconds": 5
+    },
+    {
+      "type": "screenshot",
+      "path": "res://renders/merchant_stairs_without_guides.png"
+    },
+    {
+      "type": "key",
+      "physical_keycode": 68,
+      "pressed": true
+    },
+    {
+      "type": "wait_until",
+      "node_path": ".",
+      "property": "floor_level",
+      "expected": 2,
+      "timeout_seconds": 5
+    },
+    {
+      "type": "wait_until",
+      "node_path": ".",
+      "property": "floor_level",
+      "expected": 1,
+      "timeout_seconds": 5
+    },
+    {
+      "type": "wait_until",
+      "node_path": ".",
+      "property": "floor_level",
+      "expected": 0,
+      "timeout_seconds": 5
+    },
+    {
+      "type": "key",
+      "physical_keycode": 68,
+      "pressed": false
+    },
+    {
+      "type": "wait_until",
+      "node_path": ".",
+      "property": "displayed_height",
+      "expected": 0,
+      "timeout_seconds": 5
+    },
+    {
+      "type": "key",
+      "physical_keycode": 65,
+      "pressed": true
+    },
+    {
+      "type": "wait_until",
+      "node_path": ".",
+      "property": "floor_level",
+      "expected": 1,
+      "timeout_seconds": 5
+    },
+    {
+      "type": "wait_until",
+      "node_path": ".",
+      "property": "floor_level",
+      "expected": 2,
+      "timeout_seconds": 5
+    },
+    {
+      "type": "wait_until",
+      "node_path": ".",
+      "property": "floor_level",
+      "expected": 3,
+      "timeout_seconds": 5
+    },
+    {
+      "type": "key",
+      "physical_keycode": 65,
+      "pressed": false
+    },
+    {
+      "type": "wait_until",
+      "node_path": ".",
+      "property": "displayed_height",
+      "expected": 36,
+      "timeout_seconds": 5
+    }
+  ]
+}

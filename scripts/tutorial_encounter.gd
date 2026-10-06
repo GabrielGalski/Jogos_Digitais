@@ -2,7 +2,9 @@ extends Node
 ## Owns the first conversation, weapon reveal, minion encounter and return to throne.
 enum Phase { INTRO, REVEAL, ARMED_DIALOGUE, OPENING, HORDE, RETURN, CHALLENGE, BOSS, VICTORY, FINISHED, LOST }
 const COMPLETION: PackedScene = preload("res://scenes/tutorial_completion.tscn")
-const CONTROLS_HINT := "WASD · Mover    Mouse · Mirar    Clique esquerdo · Atirar"
+const RETICLE: Script = preload("res://scripts/dungeon/manifestation_reticle.gd")
+const TUTORIAL_M01: ManifestationCard = preload("res://resources/cards/preview/M01.tres")
+const CONTROLS_HINT := "WASD · Mover    Espaço · Dash    Mouse · Mirar / Atirar"
 var completion: Node
 @export var weapon_reveal_duration: float = 1.4
 @export var return_distance: float = 52.0
@@ -20,26 +22,50 @@ var elite_horde_started: bool = false
 var reveal_time: float = 0.0
 var return_time: float = 0.0
 var skip_requested: bool = false
+var merchant_skip_requested: bool = false
+var tab_presses: int = 0
+var reticle: Sprite2D
 @onready var horde: Node2D = $Horde
 @onready var effects: CombatEffects = $Effects
 @onready var projectiles: Node2D = $Projectiles
 @onready var hint: Label = $HUD/SafeArea/Hint
 
 func setup(owner_boss: Node2D, arena: Node2D, owner_player: Player, box: DialogueBox) -> void:
+	process_mode = Node.PROCESS_MODE_ALWAYS
+	for child: Node in get_children():
+		child.process_mode = Node.PROCESS_MODE_PAUSABLE
 	boss = owner_boss
 	player = owner_player
 	dialogue = box
 	weapon = player.get_node("BoosterShooter") as Node2D
 	weapon.effects = effects
 	weapon.projectiles = projectiles
+	weapon.set(&"projectile_presentation", arena.get_node_or_null("ProjectileWorldStyle"))
+	weapon.use_m01_projectile = true
+	var starter_loadout: CardLoadout = weapon.initial_loadout.duplicate(true) as CardLoadout
+	starter_loadout.manifestation = TUTORIAL_M01
+	weapon.equip_cards(starter_loadout)
+	var aim_layer: CanvasLayer = CanvasLayer.new()
+	aim_layer.name = "CombatAim"
+	aim_layer.layer = 10
+	aim_layer.process_mode = Node.PROCESS_MODE_PAUSABLE
+	add_child(aim_layer)
+	reticle = Sprite2D.new()
+	reticle.name = "Crosshair"
+	reticle.set_script(RETICLE)
+	aim_layer.add_child(reticle)
+	reticle.position = arena.get_viewport().get_mouse_position().round()
 	horde.setup(player, arena)
 	horde.horde_cleared.connect(_on_horde_cleared)
 	horde.opening_arrived.connect(_on_opening_arrived)
 	effects.camera_feedback_enabled = false
+	# M01 uses its own slime impact and shared light, not the legacy blue burst.
+	effects.explosion_visuals_enabled = false
 	boss.skybreaker_started.connect(_on_boss_jump)
 	boss.impact_started.connect(_on_boss_impact)
 	hint.hide()
 	completion = COMPLETION.instantiate()
+	completion.process_mode = Node.PROCESS_MODE_PAUSABLE
 	add_child(completion)
 	completion.setup(self)
 	completion.lesson_dismissed.connect(_on_lesson_dismissed)
@@ -76,6 +102,15 @@ func on_dialogue_finished(sequence_id: StringName) -> void:
 
 func _process(delta: float) -> void:
 	if player == null:
+		return
+	if is_instance_valid(reticle):
+		weapon.set(&"aim_screen_override", reticle.position)
+	if merchant_skip_requested:
+		merchant_skip_requested = false
+		skip_requested = false
+		completion.call(&"skip_to_merchant")
+		return
+	if get_tree().paused:
 		return
 	if skip_requested and boss.arena.entrance_complete:
 		skip_requested = false
@@ -133,9 +168,15 @@ func _on_boss_jump() -> void:
 
 func _input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and not event.echo and event.physical_keycode == KEY_TAB:
-		if phase < Phase.BOSS:
-			skip_requested = true
-			get_viewport().set_input_as_handled()
+		if phase == Phase.FINISHED or phase == Phase.LOST:
+			return
+		tab_presses += 1
+		if tab_presses == 1:
+			if phase < Phase.BOSS:
+				skip_requested = true
+		else:
+			merchant_skip_requested = true
+		get_viewport().set_input_as_handled()
 
 func skip_to_boss() -> void:
 	if phase >= Phase.BOSS:

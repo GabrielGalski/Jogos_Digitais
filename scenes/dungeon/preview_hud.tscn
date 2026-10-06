@@ -1,6 +1,8 @@
 [gd_scene format=3]
 
 [ext_resource type="FontFile" path="res://assets/font/determination.ttf" id="1"]
+[ext_resource type="PackedScene" path="res://scenes/ui/player_life_bar.tscn" id="2_1g45v"]
+[ext_resource type="Script" path="res://scripts/ui/player_life_bar.gd" id="3_oiutp"]
 
 [sub_resource type="Theme" id="Theme"]
 default_font = ExtResource("1")
@@ -10,10 +12,10 @@ Label/colors/font_shadow_color = Color(0.05, 0.02, 0.05, 1)
 Label/constants/shadow_offset_x = 1
 Label/constants/shadow_offset_y = 1
 
-[node name="HUD" type="CanvasLayer"]
+[node name="HUD" type="CanvasLayer" unique_id=911119815]
 layer = 20
 
-[node name="Frame" type="MarginContainer" parent="."]
+[node name="Frame" type="MarginContainer" parent="." unique_id=998217687]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -26,30 +28,101 @@ theme_override_constants/margin_top = 8
 theme_override_constants/margin_right = 12
 theme_override_constants/margin_bottom = 8
 
-[node name="Column" type="VBoxContainer" parent="Frame"]
+[node name="Column" type="VBoxContainer" parent="Frame" unique_id=1610897982]
 layout_mode = 2
 mouse_filter = 2
 theme_override_constants/separation = 4
 
-[node name="Health" type="Label" parent="Frame/Column"]
+[node name="Health" type="Range" parent="Frame/Column" unique_id=255625230 instance=ExtResource("2_1g45v")]
+unique_name_in_owner = false
+process_mode = 0
+process_priority = 0
+process_physics_priority = 0
+process_thread_group = 0
+physics_interpolation_mode = 2
+auto_translate_mode = 0
+editor_description = ""
+visible = true
+modulate = Color(1, 1, 1, 1)
+self_modulate = Color(1, 1, 1, 1)
+show_behind_parent = false
+top_level = false
+clip_children = 0
+oversampling_with_scale = 0
+light_mask = 1
+visibility_layer = 1
+z_index = 0
+z_as_relative = true
+y_sort_enabled = false
+texture_filter = 1
+texture_repeat = 0
+material = null
+use_parent_material = false
+custom_minimum_size = Vector2(68, 10)
+custom_maximum_size = Vector2(-1, -1)
+propagate_maximum_size = false
+clip_contents = false
 layout_mode = 2
+size_flags_horizontal = 0
+size_flags_vertical = 1
+size_flags_stretch_ratio = 1.0
+offset_transform_enabled = false
+offset_transform_position = Vector2(0, 0)
+offset_transform_position_ratio = Vector2(0, 0)
+offset_transform_scale = Vector2(1, 1)
+offset_transform_rotation = 0.0
+offset_transform_pivot = Vector2(0, 0)
+offset_transform_pivot_ratio = Vector2(0.5, 0.5)
+offset_transform_visual_only = true
+localize_numeral_system = true
+layout_direction = 0
+translation_context = &""
+tooltip_text = ""
+tooltip_auto_translate_mode = 0
+focus_neighbor_left = NodePath("")
+focus_neighbor_top = NodePath("")
+focus_neighbor_right = NodePath("")
+focus_neighbor_bottom = NodePath("")
+focus_next = NodePath("")
+focus_previous = NodePath("")
+focus_mode = 0
+focus_behavior_recursive = 0
 mouse_filter = 2
-text = "NOX  60 / 60"
+mouse_behavior_recursive = 0
+mouse_force_pass_scroll_events = true
+mouse_default_cursor_shape = 0
+accessibility_name = ""
+accessibility_description = ""
+accessibility_live = 0
+accessibility_controls_nodes = Array[NodePath]([])
+accessibility_described_by_nodes = Array[NodePath]([])
+accessibility_labeled_by_nodes = Array[NodePath]([])
+accessibility_flow_to_nodes = Array[NodePath]([])
+theme = null
+theme_type_variation = &""
+min_value = 0.0
+max_value = 60.0
+step = 0.0
+page = 0.0
+value = 60.0
+exp_edit = false
+rounded = false
+allow_greater = false
+allow_lesser = false
+script = ExtResource("3_oiutp")
 
-[node name="Status" type="Label" parent="Frame/Column"]
+[node name="Status" type="Label" parent="Frame/Column" unique_id=867355633]
 layout_mode = 2
-mouse_filter = 2
 text = "ENTRADA"
 
-[node name="Hint" type="Label" parent="Frame/Column"]
+[node name="Hint" type="Label" parent="Frame/Column" unique_id=1259693511]
 layout_mode = 2
 size_flags_vertical = 3
-mouse_filter = 2
+text = "WASD: mover  |  Mouse: mirar / atirar  |  Shift: dash"
 vertical_alignment = 2
 autowrap_mode = 3
-text = "WASD: mover  |  Mouse: mirar / atirar  |  Espaço: dash"
 
-[node name="Fade" type="ColorRect" parent="."]
+[node name="Fade" type="ColorRect" parent="." unique_id=838957264]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -58,7 +131,7 @@ grow_vertical = 2
 mouse_filter = 2
 color = Color(0.05, 0.02, 0.05, 1)
 
-[node name="Ending" type="CenterContainer" parent="."]
+[node name="Ending" type="CenterContainer" parent="." unique_id=1079201852]
 visible = false
 anchors_preset = 15
 anchor_right = 1.0
@@ -68,8 +141,9 @@ grow_vertical = 2
 mouse_filter = 2
 theme = SubResource("Theme")
 
-[node name="Text" type="Label" parent="Ending"]
+[node name="Text" type="Label" parent="Ending" unique_id=1204952410]
 layout_mode = 2
-mouse_filter = 2
+text = "TESTE CONCLUÍDO
+
+R: voltar ao mercador"
 horizontal_alignment = 1
-text = "TESTE CONCLUÍDO\n\nR: voltar ao mercador"

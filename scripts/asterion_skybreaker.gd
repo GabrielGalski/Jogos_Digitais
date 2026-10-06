@@ -180,7 +180,7 @@ func _ready() -> void:
 
 
 func _unhandled_key_input(event: InputEvent) -> void:
-	if event is InputEventKey and event.pressed and not event.echo and (event.physical_keycode == KEY_SPACE or event.keycode == KEY_SPACE):
+	if event is InputEventKey and event.pressed and not event.echo and (event.physical_keycode == KEY_F8 or event.keycode == KEY_F8):
 		if start_skybreaker():
 			get_viewport().set_input_as_handled()
 

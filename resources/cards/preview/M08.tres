@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="ManifestationCard" format=3]
+
+[ext_resource type="Script" path="res://scripts/cards/manifestation_card.gd" id="1_54nip"]
+
+[resource]
+script = ExtResource("1_54nip")
+damage = 4.0
+fire_interval = 0.1
+projectile_speed = 340.0
+projectile_lifetime = 0.38
+impact_impulse = 60.0
+card_id = &"M08"
+display_name = "Lança-chamas"

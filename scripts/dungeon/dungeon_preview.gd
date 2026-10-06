@@ -14,6 +14,7 @@ var chosen_exit: int = 0
 @onready var hint: Label = $HUD/Frame/Column/Hint
 @onready var fade: ColorRect = $HUD/Fade
 @onready var gun: Node2D = $Nox/BoosterShooter
+@onready var health_bar: Range = $HUD/Frame/Column/Health
 
 func _ready() -> void:
 	gun.set("effects", $Effects)
@@ -90,7 +91,7 @@ func _room_two_cleared() -> void:
 	_update_status()
 
 func _update_status() -> void:
-	hint.text = "WASD: mover  |  Mouse: mirar / atirar  |  Espaço: dash"
+	hint.text = "WASD: mover  |  Mouse: mirar / atirar  |  Shift: dash"
 	match stage:
 		Stage.ARRIVING, Stage.ENTRANCE:
 			status.text = "ENTRADA  —  avance para a primeira sala"
@@ -111,7 +112,8 @@ func _update_status() -> void:
 			hint.text = "Escolha a passagem inferior ou a passagem à direita."
 
 func _health_changed(current: float, maximum: float) -> void:
-	$HUD/Frame/Column/Health.text = "NOX  %d / %d" % [roundi(current), roundi(maximum)]
+	health_bar.max_value = maximum
+	health_bar.value = current
 
 func _finish(exit_number: int) -> void:
 	if stage == Stage.FINISHED:

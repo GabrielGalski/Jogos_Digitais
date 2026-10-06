@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="ManifestationCard" format=3]
+
+[ext_resource type="Script" path="res://scripts/cards/manifestation_card.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+card_id = &"M06"
+display_name = "Cauda de Mantícora"
+damage = 3.0
+fire_interval = 0.28
+projectile_speed = 210.0
+projectile_lifetime = 1.25
+impact_impulse = 25.0
+

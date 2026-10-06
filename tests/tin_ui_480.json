@@ -1,0 +1,97 @@
+{
+  "scene_path": "scenes/merchant_corridor.tscn",
+  "viewport_size": {
+    "width": 480,
+    "height": 270
+  },
+  "steps": [
+    {
+      "type": "wait_until",
+      "node_path": ".",
+      "property": "state",
+      "expected": 2,
+      "timeout_seconds": 5
+    },
+    {
+      "type": "set_property",
+      "node_path": ".",
+      "property": "ground_position",
+      "value": {
+        "__type": "Vector2",
+        "x": 338,
+        "y": 16
+      }
+    },
+    {
+      "type": "wait_seconds",
+      "seconds": 0.5
+    },
+    {
+      "type": "assert",
+      "assertion": "visible",
+      "node_path": "InteractionHUD/PromptAnchor/Prompt",
+      "expected": true
+    },
+    {
+      "type": "ui_report",
+      "node_path": "InteractionHUD",
+      "label": "prompt",
+      "fail_on": [
+        "any"
+      ]
+    },
+    {
+      "type": "screenshot",
+      "path": "res://renders/tin_prompt_480.png"
+    },
+    {
+      "type": "key",
+      "physical_keycode": 69,
+      "pressed": true
+    },
+    {
+      "type": "key",
+      "physical_keycode": 69,
+      "pressed": false
+    },
+    {
+      "type": "wait_until",
+      "node_path": ".",
+      "property": "state",
+      "expected": 4
+    },
+    {
+      "type": "wait_seconds",
+      "seconds": 4
+    },
+    {
+      "type": "ui_report",
+      "node_path": "TinDialogue",
+      "label": "dialogue",
+      "path": "res://renders/tin_ui_480.json",
+      "fail_on": [
+        "any"
+      ]
+    },
+    {
+      "type": "screenshot",
+      "path": "res://renders/tin_dialogue_480.png"
+    },
+    {
+      "type": "key",
+      "physical_keycode": 69,
+      "pressed": true
+    },
+    {
+      "type": "key",
+      "physical_keycode": 69,
+      "pressed": false
+    },
+    {
+      "type": "wait_until",
+      "node_path": ".",
+      "property": "state",
+      "expected": 2
+    }
+  ]
+}

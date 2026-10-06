@@ -20,6 +20,8 @@ var dying: bool = false
 var last_hit_direction: Vector2 = Vector2.ZERO
 var hit_velocity: Vector2 = Vector2.ZERO
 var hit_recovery: float = 0.0
+var training_dummy: bool = false
+var training_home_position: Vector2 = Vector2.ZERO
 var spawn_grace: float = 0.5
 var attack_time: float = -1.0
 var attack_emitted: bool = false
@@ -90,7 +92,6 @@ func get_separation_radius() -> float:
 func take_damage(amount: float) -> void:
 	if not is_alive() or amount <= 0.0:
 		return
-	amount = ceilf(amount / 3.0) * 3.0
 	resistance = maxf(0.0, resistance - amount)
 	damaged.emit(amount, resistance)
 	if damage_tween and damage_tween.is_valid():
@@ -140,6 +141,12 @@ func _die() -> void:
 	death.chain().tween_callback(queue_free)
 
 func _physics_process(delta: float) -> void:
+	if training_dummy:
+		# The infinite-health preview target reacts to impact without starting its AI.
+		velocity = hit_velocity + (training_home_position - global_position) * 2.5
+		move_and_slide()
+		hit_velocity *= exp(-10.0 * delta)
+		return
 	if is_instance_valid(throne):
 		z_index = 1 if global_position.y + 9.0 < throne.global_position.y else 2
 	if not is_instance_valid(target) or target.intro_locked:

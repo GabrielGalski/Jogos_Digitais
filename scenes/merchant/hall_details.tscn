@@ -1,0 +1,62 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/merchant/hall_details.gd" id="1_b560q"]
+[ext_resource type="Texture2D" path="res://assets/merchant/crates.png" id="2_pbwhg"]
+[ext_resource type="Shader" path="res://shaders/merchant_door_light.gdshader" id="3_rn50t"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_3fpre"]
+shader = ExtResource("3_rn50t")
+shader_parameter/light_color = null
+shader_parameter/door_width = null
+shader_parameter/reach = null
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_g7whc"]
+size = Vector3(104, 40, 24)
+
+[node name="HallDetails" type="Node2D" unique_id=1866435512]
+script = ExtResource("1_b560q")
+
+[node name="Crates" type="Sprite2D" parent="." unique_id=1550350079]
+z_index = 8
+texture_filter = 1
+position = Vector2(595, 71)
+texture = ExtResource("2_pbwhg")
+centered = false
+region_enabled = true
+region_rect = Rect2(627, 103, 103, 101)
+
+[node name="DoorLight" type="Node2D" parent="." unique_id=1118510585]
+z_index = 1
+position = Vector2(534, 150)
+
+[node name="Threshold" type="Polygon2D" parent="DoorLight" unique_id=588993763]
+color = Color(0.3647059, 0.1764706, 0.2627451, 1)
+polygon = PackedVector2Array(0, 0, 57, 0, 57, 1, 0, 1)
+
+[node name="Spill" type="Polygon2D" parent="DoorLight" unique_id=1782941007]
+material = SubResource("ShaderMaterial_3fpre")
+polygon = PackedVector2Array(-32, -4, 75, -4, 75, 38, -32, 38)
+
+[node name="CratesCollider3D" type="StaticBody3D" parent="." unique_id=2010922545]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 650, 0, 12)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="CratesCollider3D" unique_id=823176581]
+shape = SubResource("BoxShape3D_g7whc")
+
+[node name="CratesLeftEdge" type="Sprite2D" parent="." unique_id=183870533]
+z_index = 11
+texture_filter = 1
+position = Vector2(598, 119)
+texture = ExtResource("2_pbwhg")
+centered = false
+region_enabled = true
+region_rect = Rect2(630, 151, 14, 41)
+
+[node name="CratesRightEdge" type="Sprite2D" parent="." unique_id=496893081]
+z_index = 11
+texture_filter = 1
+position = Vector2(684, 119)
+texture = ExtResource("2_pbwhg")
+centered = false
+region_enabled = true
+region_rect = Rect2(716, 151, 14, 41)

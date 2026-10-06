@@ -1,0 +1,16 @@
+{
+  "scene_path": "scenes/ui/player_life_bar.tscn",
+  "viewport_size": {"width":960,"height":540},
+  "steps": [
+    {"type":"assert","assertion":"property","node_path":".","property":"size","expected":{"__type":"Vector2","x":68,"y":10}},
+    {"type":"assert","assertion":"property","node_path":".","property":"texture_filter","expected":1},
+    {"type":"ui_report","label":"player-full-960","fail_on":["any"]},
+    {"type":"set_property","node_path":".","property":"value","value":18.0},
+    {"type":"assert","assertion":"property","node_path":".","property":"lit_blocks","expected":2},
+    {"type":"assert","assertion":"property","node_path":".","property":"flash_mask","expected":60},
+    {"type":"wait_seconds","seconds":0.4},
+    {"type":"assert","assertion":"property","node_path":".","property":"flash_mask","expected":0},
+    {"type":"set_property","node_path":".","property":"value","value":60.0},
+    {"type":"ui_report","label":"player-healed-960","fail_on":["any"]}
+  ]
+}

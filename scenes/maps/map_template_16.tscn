@@ -1,0 +1,46 @@
+[gd_scene format=3]
+
+[ext_resource type="TileSet" path="res://resources/map_tileset_16.tres" id="1_mk3t3"]
+
+[node name="MapTemplate16" type="Node2D" unique_id=670965221]
+texture_filter = 1
+
+[node name="PlatformUnderside" type="TileMapLayer" parent="." unique_id=1700418954]
+z_index = -12
+texture_filter = 1
+tile_set = ExtResource("1_mk3t3")
+
+[node name="Floor" type="TileMapLayer" parent="." unique_id=547050084]
+z_index = -10
+texture_filter = 1
+tile_set = ExtResource("1_mk3t3")
+
+[node name="WallsBack" type="TileMapLayer" parent="." unique_id=759849534]
+z_index = -8
+texture_filter = 1
+tile_set = ExtResource("1_mk3t3")
+
+[node name="WallsSides" type="TileMapLayer" parent="." unique_id=1475833912]
+z_index = -7
+texture_filter = 1
+tile_set = ExtResource("1_mk3t3")
+
+[node name="ObjectsBack" type="TileMapLayer" parent="." unique_id=1588162348]
+z_index = -6
+texture_filter = 1
+tile_set = ExtResource("1_mk3t3")
+
+[node name="WallsFront" type="TileMapLayer" parent="." unique_id=354436638]
+z_index = 4
+texture_filter = 1
+tile_set = ExtResource("1_mk3t3")
+
+[node name="Doors" type="TileMapLayer" parent="." unique_id=771846499]
+z_index = 5
+texture_filter = 1
+tile_set = ExtResource("1_mk3t3")
+
+[node name="ObjectsFront" type="TileMapLayer" parent="." unique_id=1513233472]
+z_index = 6
+texture_filter = 1
+tile_set = ExtResource("1_mk3t3")

@@ -4,8 +4,9 @@ signal lesson_dismissed(lesson_id: StringName)
 
 const ELITE_LESSON_DELAY: float = 0.5
 const REWARD_TOAST: PackedScene = preload("res://scenes/visual/booster_reward_toast.tscn")
+const MERCHANT_HALL: String = "res://scenes/merchant_corridor.tscn"
 const ELITE_LESSON_COPY := "ASTERION É UM ELITE\n\nElites fortalecem os inimigos da câmara.\nDerrote o Elite para encerrar o combate."
-const CONTROLS_LESSON_COPY := "COMANDOS\n\nWASD · Mover\nMouse · Mirar\nClique esquerdo · Atirar"
+const CONTROLS_LESSON_COPY := "COMANDOS\n\nWASD · Mover\nEspaço · Dash\nMouse · Mirar\nClique esquerdo · Atirar"
 const TUTORIAL_REWARDS: Array[String] = [
 	"Monster Booster vol. 1",
 	"Monster Booster vol. 2",
@@ -21,11 +22,9 @@ var rewards_granted: bool = false
 var rewards: Dictionary = {}
 var completed: bool = false
 var active_lesson: StringName = &""
-@onready var nox_bar: ProgressBar = $Nox/HP
-@onready var nox_label: Label = $Nox/Name
+@onready var nox_bar: Range = $Nox/HP
 @onready var boss_panel: Control = $Boss
-@onready var boss_bar: ProgressBar = $Boss/HP
-@onready var boss_label: Label = $Boss/Name
+@onready var boss_bar: Range = $Boss/HP
 @onready var end_screen: ColorRect = $Ending
 @onready var end_text: Label = $Ending/Text
 @onready var elite_modal: Control = $EliteLesson
@@ -52,7 +51,7 @@ func setup(owner_encounter: Node) -> void:
 
 func _process(_delta: float) -> void:
 	if encounter != null:
-		boss_panel.visible = encounter.phase == encounter.Phase.BOSS
+		boss_panel.visible = encounter.phase == encounter.Phase.BOSS or (encounter.phase == encounter.Phase.VICTORY and not rewards_granted)
 
 func _explain_elite(_point: Vector2) -> void:
 	if encounter.phase == encounter.Phase.BOSS and not has_meta(&"elite_explained"):
@@ -88,12 +87,10 @@ func _dismiss_elite_lesson() -> void:
 func _nox_health(current: float, maximum: float) -> void:
 	nox_bar.max_value = maximum
 	nox_bar.value = current
-	nox_label.text = "NOX   %d / %d" % [current, maximum]
 
 func _boss_health(current: float, maximum: float) -> void:
 	boss_bar.max_value = maximum
 	boss_bar.value = current
-	boss_label.text = "ASTERION"
 
 func _stop_combat() -> void:
 	if elite_modal.visible:
@@ -186,16 +183,26 @@ func _on_player_defeated() -> void:
 	get_tree().reload_current_scene()
 
 func _on_exit() -> void:
+	if completed:
+		return
 	completed = true
 	encounter.phase = encounter.Phase.FINISHED
+	_stop_combat()
+	encounter.dialogue.close_dialogue()
+	boss.set_physics_process(false)
+	player.intro_locked = true
+	player.velocity = Vector2.ZERO
 	encounter.hint.hide()
 	stair_direction.call(&"clear")
-	end_text.text = "Tutorial concluído\nR · Recomeçar"
+	end_text.text = ""
 	end_screen.modulate.a = 0.0
 	end_screen.show()
-	create_tween().tween_property(end_screen, "modulate:a", 1.0, 0.6)
+	var departure: Tween = create_tween()
+	departure.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	departure.tween_property(end_screen, "modulate:a", 1.0, 0.6)
+	await departure.finished
+	get_tree().change_scene_to_file(MERCHANT_HALL)
 
-func _input(event: InputEvent) -> void:
-	if completed and event is InputEventKey and event.pressed and not event.echo and event.physical_keycode == KEY_R:
-		get_viewport().set_input_as_handled()
-		get_tree().reload_current_scene()
+
+func skip_to_merchant() -> void:
+	_on_exit()

@@ -1,0 +1,215 @@
+{
+  "scene_path": "scenes/dungeon/merchant_platform.tscn",
+  "viewport_size": {
+    "width": 480,
+    "height": 270
+  },
+  "settle_frames": 45,
+  "steps": [
+    {
+      "type": "mouse_motion",
+      "position": {
+        "x": 335,
+        "y": 101
+      }
+    },
+    {
+      "type": "mouse_button",
+      "button_index": 1,
+      "position": {
+        "x": 335,
+        "y": 101
+      },
+      "pressed": true
+    },
+    {
+      "type": "wait_seconds",
+      "seconds": 0.4
+    },
+    {
+      "type": "screenshot",
+      "path": "res://renders/manifestation_M01.png"
+    },
+    {
+      "type": "mouse_button",
+      "button_index": 1,
+      "position": {
+        "x": 335,
+        "y": 101
+      },
+      "pressed": false
+    },
+    {
+      "type": "wait_seconds",
+      "seconds": 1.6
+    },
+    {
+      "type": "key",
+      "physical_keycode": 32,
+      "keycode": 32,
+      "pressed": true
+    },
+    {
+      "type": "key",
+      "physical_keycode": 32,
+      "keycode": 32,
+      "pressed": false
+    },
+    {
+      "type": "mouse_button",
+      "button_index": 1,
+      "position": {
+        "x": 335,
+        "y": 101
+      },
+      "pressed": true
+    },
+    {
+      "type": "wait_seconds",
+      "seconds": 0.4
+    },
+    {
+      "type": "screenshot",
+      "path": "res://renders/manifestation_M02.png"
+    },
+    {
+      "type": "mouse_button",
+      "button_index": 1,
+      "position": {
+        "x": 335,
+        "y": 101
+      },
+      "pressed": false
+    },
+    {
+      "type": "wait_seconds",
+      "seconds": 1.6
+    },
+    {
+      "type": "key",
+      "physical_keycode": 32,
+      "keycode": 32,
+      "pressed": true
+    },
+    {
+      "type": "key",
+      "physical_keycode": 32,
+      "keycode": 32,
+      "pressed": false
+    },
+    {
+      "type": "mouse_button",
+      "button_index": 1,
+      "position": {
+        "x": 335,
+        "y": 101
+      },
+      "pressed": true
+    },
+    {
+      "type": "wait_seconds",
+      "seconds": 0.4
+    },
+    {
+      "type": "screenshot",
+      "path": "res://renders/manifestation_M04.png"
+    },
+    {
+      "type": "mouse_button",
+      "button_index": 1,
+      "position": {
+        "x": 335,
+        "y": 101
+      },
+      "pressed": false
+    },
+    {
+      "type": "wait_seconds",
+      "seconds": 1.6
+    },
+    {
+      "type": "key",
+      "physical_keycode": 32,
+      "keycode": 32,
+      "pressed": true
+    },
+    {
+      "type": "key",
+      "physical_keycode": 32,
+      "keycode": 32,
+      "pressed": false
+    },
+    {
+      "type": "mouse_button",
+      "button_index": 1,
+      "position": {
+        "x": 335,
+        "y": 101
+      },
+      "pressed": true
+    },
+    {
+      "type": "wait_seconds",
+      "seconds": 0.85
+    },
+    {
+      "type": "screenshot",
+      "path": "res://renders/manifestation_M05.png"
+    },
+    {
+      "type": "mouse_button",
+      "button_index": 1,
+      "position": {
+        "x": 335,
+        "y": 101
+      },
+      "pressed": false
+    },
+    {
+      "type": "wait_seconds",
+      "seconds": 1.6
+    },
+    {
+      "type": "key",
+      "physical_keycode": 32,
+      "keycode": 32,
+      "pressed": true
+    },
+    {
+      "type": "key",
+      "physical_keycode": 32,
+      "keycode": 32,
+      "pressed": false
+    },
+    {
+      "type": "mouse_button",
+      "button_index": 1,
+      "position": {
+        "x": 335,
+        "y": 101
+      },
+      "pressed": true
+    },
+    {
+      "type": "wait_seconds",
+      "seconds": 0.65
+    },
+    {
+      "type": "screenshot",
+      "path": "res://renders/manifestation_M06.png"
+    },
+    {
+      "type": "mouse_button",
+      "button_index": 1,
+      "position": {
+        "x": 335,
+        "y": 101
+      },
+      "pressed": false
+    },
+    {
+      "type": "wait_seconds",
+      "seconds": 1.6
+    }
+  ]
+}

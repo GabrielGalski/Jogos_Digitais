@@ -3,9 +3,10 @@ extends Node2D
 const FLOOR_GEOMETRY: Script = preload("res://scripts/merchant_floor_geometry.gd")
 const AWNING_SCENE: PackedScene = preload("res://scenes/merchant/toldo.tscn")
 const WATER_SCENE: PackedScene = preload("res://scenes/merchant/water.tscn")
-const DUNGEON_SCENE: String = "res://scenes/dungeon/dungeon_preview.tscn"
+const DUNGEON_SCENE: String = "res://scenes/dungeon/ldtk_arena.tscn"
+const MERCHANT_PLATFORM_SCENE: String = "res://scenes/dungeon/merchant_platform.tscn"
 
-enum CorridorState { FADE_IN, ENTERING, PLAYING, RESTARTING, TALKING }
+enum CorridorState { FADE_IN, ENTERING, PLAYING, RESTARTING, TALKING, VIEWING_BOOSTERS }
 
 const NOX_START: Vector2 = Vector2(-14.0, 28.0)
 const NOX_STOP: Vector2 = Vector2(72.0, 28.0)
@@ -21,6 +22,7 @@ const CLOSED_ENTRANCE_X: float = 20.0
 @export var camera_movement_lift: float = 8.0
 @export var mouse_top_lift: float = 12.0
 @export_range(0.05, 0.5) var mouse_top_zone: float = 0.3
+@export_range(0, 99) var starting_boosters: int = 3
 
 # X is distance along the corridor; Y is depth on the floor, not screen Y.
 var ground_position: Vector2 = NOX_START
@@ -31,6 +33,8 @@ var state: CorridorState = CorridorState.FADE_IN
 var restart_started: bool = false
 var movement_direction: Vector2 = Vector2.ZERO
 var mouse_look_up: float = 0.0
+var booster_count: int = 0
+var _open_boosters_after_dialogue: bool = false
 
 @onready var nox: Node2D = $Nox
 @onready var nox_visual: AnimatedSprite2D = $Nox/Visual
@@ -39,13 +43,20 @@ var mouse_look_up: float = 0.0
 @onready var entrance_door: Node2D = $World/Entrance/DoorPanel
 @onready var fade: ColorRect = $FadeLayer/Fade
 @onready var room_camera: Camera2D = $RoomCamera
+@onready var dungeon_door_button: Button = $World/DungeonDoorButton
 @onready var merchant: MerchantInteractable = $World/Merchant
+@onready var hall_details: Node2D = $World/HallDetails
 @onready var dialogue: DialogueBox = $TinDialogue
+@onready var booster_viewer: BoosterViewer = $BoosterViewerLayer/BoosterViewer
 @onready var interaction_prompt: Label = $InteractionHUD/PromptAnchor/Prompt
 
 
 func _ready() -> void:
+	booster_count = starting_boosters
 	dialogue.dialogue_finished.connect(_on_tin_dialogue_finished)
+	dialogue.dialogue_event_requested.connect(_on_tin_dialogue_event_requested)
+	booster_viewer.booster_opened.connect(_on_booster_opened)
+	booster_viewer.viewer_closed.connect(_on_booster_viewer_closed)
 	_configure_presentation()
 	get_viewport().size_changed.connect(_fit_hall_camera)
 	_reset_nox()
@@ -58,6 +69,7 @@ func _ready() -> void:
 
 
 func _physics_process(delta: float) -> void:
+	dungeon_door_button.disabled = state != CorridorState.PLAYING
 	match state:
 		CorridorState.ENTERING:
 			_update_entrance(delta)
@@ -84,11 +96,53 @@ func _unhandled_input(event: InputEvent) -> void:
 	movement_direction = Vector2.ZERO
 	nox_visual.play(&"idle")
 	interaction_prompt.hide()
-	dialogue.start_dialogue(merchant.initial_dialogue)
+	dialogue.start_dialogue(_build_tin_dialogue())
+
+
+func _build_tin_dialogue() -> DialogueSequence:
+	var sequence: DialogueSequence = DialogueSequence.new()
+	sequence.sequence_id = merchant.initial_dialogue.sequence_id
+	sequence.start_line_index = merchant.initial_dialogue.start_line_index
+	for source_line: DialogueLine in merchant.initial_dialogue.lines:
+		if source_line != null:
+			var copied_line: DialogueLine = source_line.duplicate(true) as DialogueLine
+			sequence.lines.append(copied_line)
+	if booster_count > 0 and not sequence.lines.is_empty():
+		var last_line: DialogueLine = sequence.lines[sequence.lines.size() - 1]
+		var open_choice: DialogueChoice = DialogueChoice.new()
+		open_choice.text = "Abrir boosters + %d!" % booster_count
+		open_choice.event_name = &"open_boosters"
+		open_choice.next_line_index = DialogueChoice.END_DIALOGUE
+		var leave_choice: DialogueChoice = DialogueChoice.new()
+		leave_choice.text = "Voltar"
+		leave_choice.next_line_index = DialogueChoice.END_DIALOGUE
+		last_line.choices = [open_choice, leave_choice]
+	return sequence
+
+
+func _on_tin_dialogue_event_requested(event_name: StringName, _payload: Dictionary) -> void:
+	if event_name == &"open_boosters":
+		_open_boosters_after_dialogue = true
 
 
 func _on_tin_dialogue_finished(_sequence_id: StringName) -> void:
-	if state == CorridorState.TALKING:
+	if state != CorridorState.TALKING:
+		return
+	if _open_boosters_after_dialogue and booster_count > 0:
+		_open_boosters_after_dialogue = false
+		state = CorridorState.VIEWING_BOOSTERS
+		booster_viewer.open_with_count(booster_count)
+	else:
+		_open_boosters_after_dialogue = false
+		state = CorridorState.PLAYING
+
+
+func _on_booster_opened(remaining: int) -> void:
+	booster_count = remaining
+
+
+func _on_booster_viewer_closed() -> void:
+	if state == CorridorState.VIEWING_BOOSTERS:
 		state = CorridorState.PLAYING
 
 
@@ -131,6 +185,14 @@ func _configure_presentation() -> void:
 
 
 func _input(event: InputEvent) -> void:
+	if event is InputEventKey:
+		var key: InputEventKey = event as InputEventKey
+		if key.pressed and not key.echo and (key.physical_keycode == KEY_TAB or key.keycode == KEY_TAB):
+			if not restart_started:
+				restart_started = true
+				get_viewport().set_input_as_handled()
+				_restart_corridor.call_deferred()
+			return
 	if event is InputEventMouseMotion:
 		var motion: InputEventMouseMotion = event as InputEventMouseMotion
 		var viewport_size: Vector2 = get_viewport_rect().size
@@ -195,6 +257,7 @@ func _move_on_floor(direction: Vector2, delta: float) -> void:
 	ground_position.x += direction.x * movement_speed * delta + (next_depth - ground_position.y) * FLOOR_GEOMETRY.DEPTH_SKEW
 	ground_position.y = next_depth
 	ground_position.x = maxf(ground_position.x, CLOSED_ENTRANCE_X + ground_position.y * FLOOR_GEOMETRY.DEPTH_SKEW)
+	ground_position = hall_details.constrain_floor_motion(old_ground, ground_position)
 	_set_facing(direction.x)
 	movement_direction = Vector2.ZERO if ground_position.is_equal_approx(old_ground) else direction
 	nox_visual.play(&"idle" if ground_position.is_equal_approx(old_ground) else &"run")
@@ -219,6 +282,18 @@ func _restart_corridor() -> void:
 	nox_visual.play(&"idle")
 	await _fade_to(1.0, 0.5)
 	get_tree().change_scene_to_file(DUNGEON_SCENE)
+
+
+func _on_dungeon_door_pressed() -> void:
+	if state != CorridorState.PLAYING or restart_started:
+		return
+	restart_started = true
+	state = CorridorState.RESTARTING
+	dungeon_door_button.disabled = true
+	movement_direction = Vector2.ZERO
+	nox_visual.play(&"idle")
+	await _fade_to(1.0, 0.45)
+	get_tree().change_scene_to_file(MERCHANT_PLATFORM_SCENE)
 
 
 func _fade_to(alpha: float, duration: float) -> void:

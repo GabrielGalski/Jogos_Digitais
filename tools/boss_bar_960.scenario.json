@@ -1,0 +1,16 @@
+{
+  "scene_path": "scenes/ui/asterion_boss_bar.tscn",
+  "viewport_size": {"width":960,"height":540},
+  "steps": [
+    {"type":"set_property","node_path":".","property":"visible","value":true},
+    {"type":"assert","assertion":"property","node_path":"HP","property":"size","expected":{"__type":"Vector2","x":260,"y":29}},
+    {"type":"assert","assertion":"property","node_path":"Name","property":"text","expected":"Asterion"},
+    {"type":"assert","assertion":"property","node_path":"Name","property":"horizontal_alignment","expected":1},
+    {"type":"assert","assertion":"property","node_path":"Name","property":"offset_right","expected":0.0},
+    {"type":"ui_report","label":"boss-full-960","fail_on":["any"]},
+    {"type":"set_property","node_path":"HP","property":"value","value":90.0},
+    {"type":"wait_seconds","seconds":1.0},
+    {"type":"assert","assertion":"property","node_path":"HP","property":"damage_ratio","expected":0.3333333,"operator":"approx","tolerance":0.001},
+    {"type":"ui_report","label":"boss-damaged-960","fail_on":["any"]}
+  ]
+}

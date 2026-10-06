@@ -8,7 +8,7 @@
     {"type": "key", "keycode": 69, "physical_keycode": 69, "pressed": true},
     {"type": "key", "keycode": 69, "physical_keycode": 69, "pressed": false},
     {"type": "assert", "assertion": "property", "node_path": "DialogueBox", "property": "_line_index", "expected": 1},
-    {"type": "assert", "assertion": "property", "node_path": "DialogueBox/Interface/SafeArea/Layout/DialogueRow/DialogueColumn/NameOuter/NameBlack/NameInner/NameMargin/Name", "property": "text", "expected": "NOX"},
+    {"type": "assert", "assertion": "property", "node_path": "DialogueBox/Interface/SafeArea/Layout/DialogueRow/PortraitColumn/NameOuter/NameBlack/NameInner/NameMargin/Name", "property": "text", "expected": "NOX"},
     {"type": "key", "keycode": 69, "physical_keycode": 69, "pressed": true},
     {"type": "key", "keycode": 69, "physical_keycode": 69, "pressed": false},
     {"type": "key", "keycode": 69, "physical_keycode": 69, "pressed": true},

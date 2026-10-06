@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="ManifestationCard" format=3]
+
+[ext_resource type="Script" path="res://scripts/cards/manifestation_card.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+card_id = &"M04"
+display_name = "Olho de Beholder"
+damage = 1.0
+fire_interval = 0.12
+projectile_speed = 240.0
+projectile_lifetime = 1
+impact_impulse = 0.0
+

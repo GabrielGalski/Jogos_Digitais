@@ -1,0 +1,20 @@
+{
+  "scene_path": "res://scenes/merchant_corridor.tscn",
+  "viewport_size": {"width": 480, "height": 270},
+  "settle_frames": 3,
+  "steps": [
+    {"type": "wait_until", "node_path": ".", "property": "state", "expected": 2, "timeout_seconds": 15},
+    {"type": "set_property", "node_path": ".", "property": "booster_count", "value": 0},
+    {"type": "set_property", "node_path": ".", "property": "ground_position", "value": {"__type": "Vector2", "x": 345, "y": 0}},
+    {"type": "wait_until", "node_path": "InteractionHUD/PromptAnchor/Prompt", "property": "visible", "expected": true, "timeout_seconds": 2},
+    {"type": "key", "keycode": 69, "physical_keycode": 69, "pressed": true},
+    {"type": "key", "keycode": 69, "physical_keycode": 69, "pressed": false},
+    {"type": "key", "keycode": 69, "physical_keycode": 69, "pressed": true},
+    {"type": "key", "keycode": 69, "physical_keycode": 69, "pressed": false},
+    {"type": "assert", "assertion": "visible", "node_path": "TinDialogue/Interface/SafeArea/Layout/DialogueRow/DialogueColumn/BodyOuter/BodyBlack/BodyInner/BodyMargin/Content/Choices", "expected": false},
+    {"type": "assert", "assertion": "visible", "node_path": "BoosterViewerLayer/BoosterViewer", "expected": false},
+    {"type": "key", "keycode": 69, "physical_keycode": 69, "pressed": true},
+    {"type": "key", "keycode": 69, "physical_keycode": 69, "pressed": false},
+    {"type": "assert", "assertion": "property", "node_path": ".", "property": "state", "expected": 2}
+  ]
+}

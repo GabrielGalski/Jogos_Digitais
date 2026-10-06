@@ -4,12 +4,16 @@
   "settle_frames": 3,
   "steps": [
     {"type": "assert", "assertion": "property", "node_path": "DialogueBox", "property": "_line_index", "expected": 0},
-    {"type": "assert", "assertion": "property", "node_path": "DialogueBox/Interface/SafeArea/Layout/DialogueRow/DialogueColumn/NameOuter/NameBlack/NameInner/NameMargin/Name", "property": "text", "expected": "ASTERION"},
+    {"type": "assert", "assertion": "property", "node_path": "DialogueBox/Interface/SafeArea/Layout/DialogueRow/PortraitColumn/NameOuter/NameBlack/NameInner/NameMargin/Name", "property": "text", "expected": "ASTERION"},
+    {"type": "key", "keycode": 69, "physical_keycode": 69, "pressed": true},
+    {"type": "key", "keycode": 69, "physical_keycode": 69, "pressed": false},
+    {"type": "assert", "assertion": "visible", "node_path": "DialogueBox/Interface/SafeArea/Layout/DialogueRow/DialogueColumn/BodyOuter/BodyBlack/BodyInner/BodyMargin/Content/ContinueRow/ContinueOuter", "expected": true},
     {"type": "ui_report", "label": "dialogue-480", "fail_on": ["zero_size", "offscreen", "overlap"]},
     {"type": "screenshot", "path": "C:/Users/gabri/AppData/Local/Temp/monster_booster_dialogue_480.png"}
   ],
   "assertions": [
     {"assertion": "visible", "node_path": "DialogueBox/Interface", "expected": true},
+    {"assertion": "visible", "node_path": "DialogueBox/Interface/SafeArea/Layout/DialogueRow/PortraitColumn", "expected": true},
     {"assertion": "visible", "node_path": "DialogueBox/Interface/SafeArea/Layout/DialogueRow/DialogueColumn/BodyOuter", "expected": true}
   ]
 }

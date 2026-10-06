@@ -1,0 +1,154 @@
+{
+  "scene_path": "scenes/dungeon/merchant_platform.tscn",
+  "viewport_size": {
+    "width": 480,
+    "height": 270
+  },
+  "settle_frames": 45,
+  "steps": [
+    {
+      "type": "key",
+      "physical_keycode": 32,
+      "keycode": 32,
+      "pressed": true
+    },
+    {
+      "type": "key",
+      "physical_keycode": 32,
+      "keycode": 32,
+      "pressed": false
+    },
+    {
+      "type": "key",
+      "physical_keycode": 32,
+      "keycode": 32,
+      "pressed": true
+    },
+    {
+      "type": "key",
+      "physical_keycode": 32,
+      "keycode": 32,
+      "pressed": false
+    },
+    {
+      "type": "key",
+      "physical_keycode": 32,
+      "keycode": 32,
+      "pressed": true
+    },
+    {
+      "type": "key",
+      "physical_keycode": 32,
+      "keycode": 32,
+      "pressed": false
+    },
+    {
+      "type": "key",
+      "physical_keycode": 32,
+      "keycode": 32,
+      "pressed": true
+    },
+    {
+      "type": "key",
+      "physical_keycode": 32,
+      "keycode": 32,
+      "pressed": false
+    },
+    {
+      "type": "key",
+      "physical_keycode": 32,
+      "keycode": 32,
+      "pressed": true
+    },
+    {
+      "type": "key",
+      "physical_keycode": 32,
+      "keycode": 32,
+      "pressed": false
+    },
+    {
+      "type": "mouse_motion",
+      "position": {
+        "x": 335,
+        "y": 101
+      }
+    },
+    {
+      "type": "mouse_button",
+      "button_index": 1,
+      "position": {
+        "x": 335,
+        "y": 101
+      },
+      "pressed": true
+    },
+    {
+      "type": "wait_seconds",
+      "seconds": 1
+    },
+    {
+      "type": "assert",
+      "assertion": "property",
+      "node_path": "ManifestationController/BansheeChannel",
+      "property": "active",
+      "expected": true
+    },
+    {
+      "type": "ui_report",
+      "node_path": "CombatUI",
+      "fail_on": [
+        "any"
+      ]
+    },
+    {
+      "type": "screenshot",
+      "path": "res://renders/banshee_heat_480.png"
+    },
+    {
+      "type": "wait_seconds",
+      "seconds": 3.1
+    },
+    {
+      "type": "assert",
+      "assertion": "property",
+      "node_path": "ManifestationController/BansheeChannel",
+      "property": "overheated",
+      "expected": true
+    },
+    {
+      "type": "assert",
+      "assertion": "property",
+      "node_path": "ManifestationController/BansheeChannel",
+      "property": "active",
+      "expected": false
+    },
+    {
+      "type": "screenshot",
+      "path": "res://renders/banshee_overheated.png"
+    },
+    {
+      "type": "wait_seconds",
+      "seconds": 1.3
+    },
+    {
+      "type": "mouse_button",
+      "button_index": 1,
+      "position": {
+        "x": 335,
+        "y": 101
+      },
+      "pressed": false
+    },
+    {
+      "type": "wait_seconds",
+      "seconds": 0.1
+    },
+    {
+      "type": "assert",
+      "assertion": "property",
+      "node_path": "ManifestationController/BansheeChannel",
+      "property": "state_text",
+      "expected": "RESFRIANDO"
+    }
+  ]
+}

@@ -1,0 +1,122 @@
+{
+  "scene_path": "scenes/dungeon/merchant_platform.tscn",
+  "viewport_size": {
+    "width": 480,
+    "height": 270
+  },
+  "settle_frames": 45,
+  "steps": [
+    {
+      "type": "key",
+      "physical_keycode": 32,
+      "keycode": 32,
+      "pressed": true
+    },
+    {
+      "type": "key",
+      "physical_keycode": 32,
+      "keycode": 32,
+      "pressed": false
+    },
+    {
+      "type": "key",
+      "physical_keycode": 32,
+      "keycode": 32,
+      "pressed": true
+    },
+    {
+      "type": "key",
+      "physical_keycode": 32,
+      "keycode": 32,
+      "pressed": false
+    },
+    {
+      "type": "key",
+      "physical_keycode": 32,
+      "keycode": 32,
+      "pressed": true
+    },
+    {
+      "type": "key",
+      "physical_keycode": 32,
+      "keycode": 32,
+      "pressed": false
+    },
+    {
+      "type": "key",
+      "physical_keycode": 32,
+      "keycode": 32,
+      "pressed": true
+    },
+    {
+      "type": "key",
+      "physical_keycode": 32,
+      "keycode": 32,
+      "pressed": false
+    },
+    {
+      "type": "key",
+      "physical_keycode": 32,
+      "keycode": 32,
+      "pressed": true
+    },
+    {
+      "type": "key",
+      "physical_keycode": 32,
+      "keycode": 32,
+      "pressed": false
+    },
+    {
+      "type": "assert",
+      "assertion": "property",
+      "node_path": "ManifestationController",
+      "property": "selected_index",
+      "expected": 5
+    },
+    {
+      "type": "mouse_motion",
+      "position": {
+        "x": 335,
+        "y": 101
+      }
+    },
+    {
+      "type": "mouse_button",
+      "position": {
+        "x": 335,
+        "y": 101
+      },
+      "button_index": 1,
+      "pressed": true
+    },
+    {
+      "type": "wait_seconds",
+      "seconds": 0.22
+    },
+    {
+      "type": "screenshot",
+      "path": "res://renders/manifestation_M03.png"
+    },
+    {
+      "type": "mouse_button",
+      "position": {
+        "x": 335,
+        "y": 101
+      },
+      "button_index": 1,
+      "pressed": false
+    },
+    {
+      "type": "wait_seconds",
+      "seconds": 0.2
+    },
+    {
+      "type": "assert",
+      "assertion": "property",
+      "node_path": "ManifestationController",
+      "property": "total_damage",
+      "operator": "greater_than",
+      "expected": 0
+    }
+  ]
+}

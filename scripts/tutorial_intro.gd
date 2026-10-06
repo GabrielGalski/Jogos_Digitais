@@ -6,6 +6,7 @@ signal entrance_finished
 @onready var player: CharacterBody2D = $Mox
 @onready var stair: Sprite2D = $EntranceStair
 @onready var camera: Camera2D = $Mox/Camera2D
+@export var combat_camera_zoom: float = 0.95
 var entrance_complete := false
 var exit_available: bool = false
 var exiting: bool = false
@@ -15,6 +16,8 @@ signal tutorial_exited
 
 
 func _ready() -> void:
+	# Match the combat-room framing without altering the tutorial map or its camera choreography.
+	camera.zoom = Vector2.ONE * combat_camera_zoom
 	stair_home = stair.position
 	stair_scale = stair.scale
 	var destination := player.position

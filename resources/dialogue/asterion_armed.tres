@@ -1,17 +1,13 @@
-[gd_resource type="Resource" script_class="DialogueSequence" format=3]
+[gd_resource type="Resource" script_class="DialogueSequence" format=3 uid="uid://c0cfds8tvwqx5"]
 
-[ext_resource type="Script" path="res://tools/dialogue system/dialogue_sequence.gd" id="1_sequence"]
-[ext_resource type="Script" path="res://tools/dialogue system/dialogue_line.gd" id="2_line"]
-[ext_resource type="Script" path="res://tools/dialogue system/dialogue_speaker.gd" id="3_speaker"]
+[ext_resource type="Script" uid="uid://s54egej4p8fa" path="res://tools/dialogue system/dialogue_sequence.gd" id="1_sequence"]
+[ext_resource type="Script" uid="uid://bsk2a4g3nivos" path="res://tools/dialogue system/dialogue_choice.gd" id="2_hjem6"]
+[ext_resource type="Script" uid="uid://cc0ek2u8se00e" path="res://tools/dialogue system/dialogue_line.gd" id="2_line"]
+[ext_resource type="Script" uid="uid://bvbptvsb0tkrv" path="res://tools/dialogue system/dialogue_speaker.gd" id="3_speaker"]
 
 [sub_resource type="Resource" id="Speaker_asterion"]
 script = ExtResource("3_speaker")
 display_name = "ASTERION"
-name_color = Color(0.960784, 0.85098, 0.462745, 1)
-
-[sub_resource type="Resource" id="Speaker_nox"]
-script = ExtResource("3_speaker")
-display_name = "NOX"
 name_color = Color(0.960784, 0.85098, 0.462745, 1)
 
 [sub_resource type="Resource" id="Threat"]

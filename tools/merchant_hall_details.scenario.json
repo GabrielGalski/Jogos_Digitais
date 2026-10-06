@@ -1,0 +1,196 @@
+{
+  "scene_path": "res://scenes/merchant_corridor.tscn",
+  "viewport_size": {
+    "width": 960,
+    "height": 540
+  },
+  "settle_frames": 3,
+  "steps": [
+    {
+      "type": "wait_until",
+      "node_path": ".",
+      "property": "state",
+      "expected": 2,
+      "timeout_seconds": 15
+    },
+    {
+      "type": "set_property",
+      "node_path": ".",
+      "property": "ground_position",
+      "value": {
+        "__type": "Vector2",
+        "x": 665.428571,
+        "y": 36
+      }
+    },
+    {
+      "type": "key",
+      "keycode": 87,
+      "physical_keycode": 87,
+      "pressed": true
+    },
+    {
+      "type": "wait_seconds",
+      "seconds": 0.6
+    },
+    {
+      "type": "key",
+      "keycode": 87,
+      "physical_keycode": 87,
+      "pressed": false
+    },
+    {
+      "type": "assert",
+      "assertion": "property",
+      "node_path": "Nox",
+      "property": "position:y",
+      "operator": "approx",
+      "expected": 176,
+      "tolerance": 0.01
+    },
+    {
+      "type": "wait_seconds",
+      "seconds": 0.5
+    },
+    {
+      "type": "screenshot",
+      "path": "C:/Users/gabri/AppData/Local/Temp/merchant_crates_front.png"
+    },
+    {
+      "type": "set_property",
+      "node_path": "World/HallDetails/CratesCollider3D/CollisionShape3D",
+      "property": "shape:size",
+      "value": {"__type": "Vector3", "x": 104, "y": 40, "z": 36}
+    },
+    {
+      "type": "assert",
+      "assertion": "property",
+      "node_path": "Nox",
+      "property": "position:y",
+      "operator": "approx",
+      "expected": 182,
+      "tolerance": 0.01
+    },
+    {
+      "type": "set_property",
+      "node_path": "World/HallDetails/CratesCollider3D/CollisionShape3D",
+      "property": "shape:size",
+      "value": {"__type": "Vector3", "x": 104, "y": 40, "z": 24}
+    },
+    {
+      "type": "set_property",
+      "node_path": ".",
+      "property": "ground_position",
+      "value": {
+        "__type": "Vector2",
+        "x": 580,
+        "y": 4
+      }
+    },
+    {
+      "type": "key",
+      "keycode": 68,
+      "physical_keycode": 68,
+      "pressed": true
+    },
+    {
+      "type": "wait_seconds",
+      "seconds": 0.6
+    },
+    {
+      "type": "key",
+      "keycode": 68,
+      "physical_keycode": 68,
+      "pressed": false
+    },
+    {
+      "type": "assert",
+      "assertion": "property",
+      "node_path": "Nox",
+      "property": "position:x",
+      "operator": "approx",
+      "expected": 598,
+      "tolerance": 0.01
+    },
+    {
+      "type": "key",
+      "keycode": 83,
+      "physical_keycode": 83,
+      "pressed": true
+    },
+    {
+      "type": "wait_seconds",
+      "seconds": 0.4
+    },
+    {
+      "type": "key",
+      "keycode": 83,
+      "physical_keycode": 83,
+      "pressed": false
+    },
+    {
+      "type": "key",
+      "keycode": 68,
+      "physical_keycode": 68,
+      "pressed": true
+    },
+    {
+      "type": "wait_seconds",
+      "seconds": 1.2
+    },
+    {
+      "type": "key",
+      "keycode": 68,
+      "physical_keycode": 68,
+      "pressed": false
+    },
+    {
+      "type": "assert",
+      "assertion": "property",
+      "node_path": "Nox",
+      "property": "position:x",
+      "operator": "greater_than",
+      "expected": 702
+    },
+    {
+      "type": "set_property",
+      "node_path": ".",
+      "property": "ground_position",
+      "value": {
+        "__type": "Vector2",
+        "x": 850,
+        "y": 36
+      }
+    },
+    {
+      "type": "wait_seconds",
+      "seconds": 1
+    },
+    {
+      "type": "screenshot",
+      "path": "C:/Users/gabri/AppData/Local/Temp/merchant_hall_lighting.png"
+    },
+    {
+      "type": "set_property",
+      "node_path": ".",
+      "property": "ground_position",
+      "value": {"__type": "Vector2", "x": 608.2857, "y": 24}
+    },
+    {"type": "wait_seconds", "seconds": 0.4},
+    {
+      "type": "screenshot",
+      "path": "C:/Users/gabri/AppData/Local/Temp/merchant_crates_left_edge.png"
+    },
+    {
+      "type": "set_property",
+      "node_path": ".",
+      "property": "ground_position",
+      "value": {"__type": "Vector2", "x": 712.2857, "y": 24}
+    },
+    {"type": "wait_seconds", "seconds": 0.4},
+    {
+      "type": "screenshot",
+      "path": "C:/Users/gabri/AppData/Local/Temp/merchant_crates_right_edge.png"
+    }
+  ]
+}

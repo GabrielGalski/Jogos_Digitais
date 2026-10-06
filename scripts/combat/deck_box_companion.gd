@@ -14,6 +14,7 @@ var shadow: Polygon2D
 var flight_position: Vector2
 var hover_time: float = 0.0
 var shoulder: float = 1.0
+var vertical_side: float = -1.0
 var crossing_time: float = 0.0
 var initialized: bool = false
 
@@ -47,24 +48,29 @@ func configure(weapon_host: Node2D) -> void:
 
 func update_pose(delta: float) -> void:
 	hover_time += delta
-	var mouse: Vector2 = host.get_viewport().get_canvas_transform().affine_inverse() * host.get_viewport().get_mouse_position()
+	var mouse: Vector2 = host.call(&"get_aim_world_position")
 	var locked: bool = bool(host.get("cutscene_pose_active")) or player.intro_locked
 	var aim: Vector2 = Vector2.RIGHT if locked else (mouse - player.global_position).normalized()
 	if aim.is_zero_approx():
 		aim = Vector2.RIGHT * shoulder
 	var attacking: bool = not locked and bool(host.get("combat_enabled")) and Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT)
 	var desired_side: float = shoulder
-	if attacking and absf(aim.x) > 0.3:
+	# Aim selects one of four positions even when the player is not firing.
+	if not locked and absf(aim.x) > 0.22:
 		desired_side = signf(aim.x)
 	elif absf(player.velocity.x) > 4.0:
 		desired_side = -signf(player.velocity.x)
+	if locked:
+		vertical_side = -1.0
+	elif absf(aim.y) > 0.22:
+		vertical_side = signf(aim.y)
 	if desired_side != shoulder:
 		shoulder = desired_side
 		crossing_time = 0.35
 	crossing_time = maxf(crossing_time - delta, 0.0)
-	var offset: Vector2 = Vector2(shoulder * (21.0 if attacking else 16.0), -10.0)
+	var offset: Vector2 = Vector2(shoulder * (21.0 if attacking else 16.0), vertical_side * 10.0)
 	if attacking:
-		offset.y += aim.y * 7.0
+		offset.y += aim.y * 4.0
 	if crossing_time > 0.0:
 		offset.y -= 9.0
 	var desired: Vector2 = player.global_position + offset

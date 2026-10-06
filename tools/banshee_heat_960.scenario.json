@@ -1,0 +1,128 @@
+{
+  "scene_path": "scenes/dungeon/merchant_platform.tscn",
+  "viewport_size": {
+    "width": 960,
+    "height": 540
+  },
+  "settle_frames": 45,
+  "steps": [
+    {
+      "type": "key",
+      "physical_keycode": 32,
+      "keycode": 32,
+      "pressed": true
+    },
+    {
+      "type": "key",
+      "physical_keycode": 32,
+      "keycode": 32,
+      "pressed": false
+    },
+    {
+      "type": "key",
+      "physical_keycode": 32,
+      "keycode": 32,
+      "pressed": true
+    },
+    {
+      "type": "key",
+      "physical_keycode": 32,
+      "keycode": 32,
+      "pressed": false
+    },
+    {
+      "type": "key",
+      "physical_keycode": 32,
+      "keycode": 32,
+      "pressed": true
+    },
+    {
+      "type": "key",
+      "physical_keycode": 32,
+      "keycode": 32,
+      "pressed": false
+    },
+    {
+      "type": "key",
+      "physical_keycode": 32,
+      "keycode": 32,
+      "pressed": true
+    },
+    {
+      "type": "key",
+      "physical_keycode": 32,
+      "keycode": 32,
+      "pressed": false
+    },
+    {
+      "type": "key",
+      "physical_keycode": 32,
+      "keycode": 32,
+      "pressed": true
+    },
+    {
+      "type": "key",
+      "physical_keycode": 32,
+      "keycode": 32,
+      "pressed": false
+    },
+    {
+      "type": "mouse_motion",
+      "position": {
+        "x": 575,
+        "y": 236
+      }
+    },
+    {
+      "type": "mouse_button",
+      "button_index": 1,
+      "position": {
+        "x": 575,
+        "y": 236
+      },
+      "pressed": true
+    },
+    {
+      "type": "wait_seconds",
+      "seconds": 1
+    },
+    {
+      "type": "assert",
+      "assertion": "property",
+      "node_path": "ManifestationController/BansheeChannel",
+      "property": "active",
+      "expected": true
+    },
+    {
+      "type": "ui_report",
+      "node_path": "CombatUI",
+      "fail_on": [
+        "any"
+      ]
+    },
+    {
+      "type": "screenshot",
+      "path": "res://renders/banshee_heat_960.png"
+    },
+    {
+      "type": "mouse_button",
+      "button_index": 1,
+      "position": {
+        "x": 575,
+        "y": 236
+      },
+      "pressed": false
+    },
+    {
+      "type": "wait_seconds",
+      "seconds": 0.1
+    },
+    {
+      "type": "assert",
+      "assertion": "property",
+      "node_path": "ManifestationController/BansheeChannel",
+      "property": "state_text",
+      "expected": "RESFRIANDO"
+    }
+  ]
+}

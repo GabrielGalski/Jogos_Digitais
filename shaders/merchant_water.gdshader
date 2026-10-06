@@ -10,6 +10,11 @@ uniform float current_speed : hint_range(0.0, 30.0) = 6.0;
 uniform float distant_speed_ratio : hint_range(0.1, 0.9) = 0.45;
 uniform float pixel_size : hint_range(0.5, 3.0) = 1.0;
 uniform float ripple_strength : hint_range(0.0, 2.0) = 1.0;
+uniform float night_level : hint_range(0.0, 1.0) = 1.0;
+uniform float neon_reflections : hint_range(0.0, 1.0) = 0.0;
+uniform vec2 neon_source_x = vec2(369.0, 594.5);
+uniform vec4 facade_reflection_color : source_color = vec4(1.0, 0.333, 0.624, 1.0);
+uniform vec4 door_reflection_color : source_color = vec4(0.812, 0.388, 0.537, 1.0);
 
 varying vec2 water_position;
 
@@ -60,5 +65,12 @@ void fragment() {
 	// Exact original shoreline and extent; no vertex displacement.
 	float shore = step(p.y, pixel_size) * step(0.48, broad);
 	color = mix(color, light_color.rgb, shore);
+	// Local broken crests echo the two sources; no solid reflection columns.
+	float facade = exp(-pow((p.x - neon_source_x.x + bend * 2.0) / 76.0, 2.0));
+	float door = exp(-pow((p.x - neon_source_x.y + bend * 2.0) / 52.0, 2.0));
+	float neon_wave = reflection * (0.55 + small * 0.45) * (1.0 - depth * 0.35);
+	color *= night_level;
+	color = mix(color, facade_reflection_color.rgb, facade * neon_wave * neon_reflections);
+	color = mix(color, door_reflection_color.rgb, door * neon_wave * neon_reflections);
 	COLOR = vec4(color, 1.0);
 }

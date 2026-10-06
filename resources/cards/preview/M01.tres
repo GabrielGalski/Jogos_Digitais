@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="ManifestationCard" format=3]
+
+[ext_resource type="Script" path="res://scripts/cards/manifestation_card.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+card_id = &"M01"
+display_name = "Gotas de Slime"
+damage = 3.0
+fire_interval = 0.18
+projectile_speed = 180.0
+projectile_lifetime = 5.0
+impact_impulse = 45.0
