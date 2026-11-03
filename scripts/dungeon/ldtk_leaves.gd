@@ -1,11 +1,12 @@
 extends Node2D
-## Non-physical foreground canopy, without projected light or halo.
+## Legacy non-physical foreground leaves, without projected light or halo.
 
 const FOREGROUND_Z: int = 1000
 
 
 static func is_leaves_source(definition: Dictionary) -> bool:
-	return str(definition.get("relPath", "")).replace("\\", "/").ends_with("/leaves.png")
+	var path: String = str(definition.get("relPath", "")).replace("\\", "/")
+	return path.ends_with("/leaves.png")
 
 
 func build(layers: Array, definitions: Dictionary, texture_source: RefCounted) -> void:

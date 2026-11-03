@@ -73,6 +73,10 @@ func _hit_player() -> void:
 	if not get_world_2d().direct_space_state.intersect_ray(query).is_empty():
 		return
 	consumed = true
+	if target.try_parry_enemy_attack(attacker, target.global_position):
+		set_physics_process(false)
+		queue_free()
+		return
 	if target.has_method(&"receive_contact_damage"):
 		target.receive_contact_damage(contact_damage, attack_direction, knockback_force)
 	set_physics_process(false)
@@ -85,4 +89,15 @@ func _expire() -> void:
 	consumed = true
 	set_physics_process(false)
 	queue_free()
+
+
+func parry(reflector: Player) -> bool:
+	if consumed or reflector != target or not is_instance_valid(attacker):
+		return false
+	if not reflector.try_parry_enemy_attack(attacker, reflector.global_position):
+		return false
+	consumed = true
+	set_physics_process(false)
+	queue_free()
+	return true
 

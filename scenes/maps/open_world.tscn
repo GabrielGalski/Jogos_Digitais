@@ -1,0 +1,13 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/dungeon/ldtk_arena.tscn" id="arena"]
+[ext_resource type="Resource" path="res://resources/visual/water/open_world_river.tres" id="river"]
+
+[node name="OpenWorld" instance=ExtResource("arena")]
+level_name = "Room_2"
+arrival_warp_id = "room_2_center"
+automatic_water = false
+water_profile = ExtResource("river")
+shore_foam_enabled = true
+river_contour_enabled = true
+river_edge_softness_px = 1.0

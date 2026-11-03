@@ -6,12 +6,13 @@ signal opening_arrived
 signal enemy_spawned(enemy: Minotaur)
 const MINOTAUR: PackedScene = preload("res://scenes/enemies/minotaur.tscn")
 @export var spawn_duration: float = 35.0
-@export var spawn_interval: float = 0.45
-@export var maximum_alive: int = 32
+@export var spawn_interval: float = 1.2
+@export var maximum_alive: int = 8
+@export var opening_count: int = 4
 @export var opening_spacing: float = 29.0
 @export var opening_entrance_speed: float = 100.0
-@export var elite_spawn_interval: float = 0.75
-@export var elite_maximum_alive: int = 12
+@export var elite_spawn_interval: float = 1.5
+@export var elite_maximum_alive: int = 4
 var active: bool = false
 var spawning: bool = false
 var elite_phase: bool = false
@@ -110,10 +111,10 @@ func _spawn_opening() -> void:
 		var x: float = opening_rect.position.x + 14.0 + float(row) * opening_spacing * 0.5
 		var destination_y: float = opening_rect.end.y - 14.0 - float(row) * 30.0
 		var spawn_y: float = bounds.end.y - 28.0 - float(row) * 28.0
-		while x < opening_rect.end.x - 14.0 and alive.size() < maximum_alive:
+		while x < opening_rect.end.x - 14.0 and alive.size() < mini(opening_count, maximum_alive):
 			var destination: Vector2 = Vector2(x, destination_y)
 			var spawn_point: Vector2 = Vector2(x, spawn_y)
-			if can_spawn_at(destination) and can_spawn_at(spawn_point):
+			if can_spawn_at(destination, 32.0) and can_spawn_at(spawn_point):
 				var enemy: Minotaur = _spawn(spawn_point)
 				opening_targets[enemy.get_instance_id()] = destination
 			x += opening_spacing
@@ -163,8 +164,8 @@ func _spawn_offscreen(empowered: bool = false) -> void:
 			return
 	# No safe offscreen space: postpone this reinforcement, never spawn on Nox.
 
-func can_spawn_at(point: Vector2) -> bool:
-	if not bounds.grow(-16.0).has_point(point) or point.distance_to(target.global_position) < 86.0:
+func can_spawn_at(point: Vector2, minimum_player_distance: float = 86.0) -> bool:
+	if not bounds.grow(-16.0).has_point(point) or point.distance_to(target.global_position) < minimum_player_distance:
 		return false
 	for enemy: Minotaur in alive:
 		if is_instance_valid(enemy) and enemy.global_position.distance_to(point) < 27.0:

@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="WaterProfile" format=3]
+
+[ext_resource type="Script" path="res://scripts/visual/water_profile.gd" id="profile"]
+
+[resource]
+script = ExtResource("profile")
+preset_id = &"Lake"
+deep_color = Color(0.090196, 0.239216, 0.290196, 1)
+mid_color = Color(0.145098, 0.372549, 0.407843, 1)
+highlight_color = Color(0.443137, 0.666667, 0.6, 1)

@@ -4,10 +4,9 @@
 
 [resource]
 script = ExtResource("1")
-card_id = &"M01"
-display_name = "Gotas de Slime"
-damage = 3.0
-fire_interval = 0.18
-projectile_speed = 180.0
+fire_interval = 0.2782608695652174
+projectile_speed = 360.0
 projectile_lifetime = 5.0
 impact_impulse = 45.0
+card_id = &"M01"
+display_name = "Gotas de Slime"

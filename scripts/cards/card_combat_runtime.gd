@@ -30,6 +30,7 @@ func create_attack() -> CardAttack:
 		return null
 	var card: ManifestationCard = _loadout.manifestation
 	var attack: CardAttack = CardAttack.new()
+	attack.manifestation_id = card.card_id
 	attack.damage = card.damage
 	attack.fire_interval = card.fire_interval
 	attack.projectile_speed = card.projectile_speed
@@ -40,6 +41,14 @@ func create_attack() -> CardAttack:
 		attack.explosion_damage = _loadout.infusion.explosion_damage
 		attack.explosion_radius = _loadout.infusion.explosion_radius
 	return attack
+
+
+func manifestation_id() -> StringName:
+	return _loadout.manifestation.card_id if _loadout != null and _loadout.manifestation != null else &""
+
+
+func copy_loadout() -> CardLoadout:
+	return _loadout.duplicate(true) as CardLoadout if _loadout != null else null
 
 func _on_weapon_kill(generation: int) -> void:
 	# A projectile from an earlier loadout cannot activate the newly equipped mutation.

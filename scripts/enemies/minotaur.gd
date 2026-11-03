@@ -4,8 +4,9 @@ extends CharacterBody2D
 signal died(enemy: Minotaur)
 signal damaged(amount: float, remaining_health: float)
 const MELEE: PackedScene = preload("res://scenes/enemies/attacks/minotaur_melee_attack.tscn")
+const FINISHING_RAY: Script = preload("res://scripts/combat/effects/enemy_finishing_ray.gd")
 @export var movement_speed: float = 47.5
-@export var max_resistance: float = 18.0
+@export var max_resistance: float = 12.0
 @export var attack_range: float = 44.0
 @export var attack_windup: float = 0.38
 @export var attack_interval: float = 2.0
@@ -13,8 +14,12 @@ const MELEE: PackedScene = preload("res://scenes/enemies/attacks/minotaur_melee_
 @export var empowered_attack_interval: float = 0.55
 @export var empowered_attack_duration: float = 0.38
 @export var empowered_knockback: float = 140.0
+@export_category("Projectile contact")
+@export var projectile_hurt_radius: float = 15.0
+@export var projectile_hurt_height: float = 34.0
+@export var projectile_hurt_offset: Vector2 = Vector2(0, -1)
 var target: Player
-var resistance: float = 18.0
+var resistance: float = 12.0
 var throne: Node2D
 var dying: bool = false
 var last_hit_direction: Vector2 = Vector2.ZERO
@@ -89,6 +94,10 @@ func get_current_health() -> float:
 func get_separation_radius() -> float:
 	return 13.0
 
+
+func get_projectile_hurt_capsule() -> Dictionary:
+	return {"center": projectile_hurt_offset, "radius": projectile_hurt_radius, "height": projectile_hurt_height}
+
 func take_damage(amount: float) -> void:
 	if not is_alive() or amount <= 0.0:
 		return
@@ -126,6 +135,9 @@ func receive_impact(direction: Vector2, impulse: float, recovery: float = 0.055)
 
 func _die() -> void:
 	dying = true
+	if damage_tween and damage_tween.is_valid():
+		damage_tween.kill()
+	FINISHING_RAY.play(self, sprite)
 	velocity = Vector2.ZERO
 	set_physics_process(false)
 	set_meta(&"enemy_ai_is_attacking", false)
@@ -137,7 +149,8 @@ func _die() -> void:
 	var death: Tween = create_tween().set_parallel(true)
 	death.tween_property(sprite, "position", last_hit_direction * 9.0, 0.11).set_ease(Tween.EASE_OUT)
 	death.tween_property(self, "scale", scale * 0.72, 0.11)
-	death.tween_property(self, "modulate:a", 0.0, 0.11)
+	# Let the white pose and the violet sweep peak together; keep the 0.11s death total.
+	death.tween_property(self, "modulate:a", 0.0, 0.075).set_delay(0.035)
 	death.chain().tween_callback(queue_free)
 
 func _physics_process(delta: float) -> void:
@@ -166,7 +179,8 @@ func _physics_process(delta: float) -> void:
 	var to_target: Vector2 = target.global_position - global_position
 	if empowered and ram_cooldown <= 0.0 and to_target.length() <= 24.0 and sensor._has_line_of_sight(self, target, target.global_position):
 		var direction: Vector2 = to_target.normalized()
-		target.receive_contact_damage(6, direction, empowered_knockback)
+		if not target.try_parry_enemy_attack(self, target.global_position):
+			target.receive_contact_damage(6, direction, empowered_knockback)
 		ram_cooldown = 0.48
 		receive_impact(-direction, 115.0, 0.20)
 		brain.reset_decision_timer()

@@ -1,0 +1,6 @@
+[gd_resource type="Resource" format=3]
+
+[ext_resource type="Script" path="res://scripts/visual/tree_shadow_profile.gd" id="1_xypky"]
+
+[resource]
+script = ExtResource("1_xypky")

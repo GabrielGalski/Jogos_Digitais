@@ -22,6 +22,9 @@ func _process(_delta: float) -> void:
 	if scene == null:
 		pointer.hide()
 		return
+	var tint: Color = scene.get_meta(&"cursor_tint", Color("#a8e387")) as Color
+	if pointer.modulate != tint:
+		pointer.call("set_tint", tint)
 	# Combat scenes already draw a reticle that also carries their card tint.
 	pointer.visible = scene.find_child("Crosshair", true, false) == null
 

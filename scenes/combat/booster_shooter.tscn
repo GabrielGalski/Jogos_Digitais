@@ -1,16 +1,21 @@
 [gd_scene format=3]
+
 [ext_resource type="Script" path="res://scripts/combat/booster_shooter.gd" id="1"]
-[ext_resource type="Texture2D" path="res://assets/weapons/booster/booster_shooter.png" id="2"]
-[node name="BoosterShooter" type="Node2D"]
+[ext_resource type="Texture2D" path="res://assets/characters/player/gun/booster_shooter.png" id="2_du32h"]
+
+[node name="BoosterShooter" type="Node2D" unique_id=1270029854]
 visible = false
 texture_filter = 1
 script = ExtResource("1")
-[node name="WeaponPivot" type="Node2D" parent="."]
+
+[node name="WeaponPivot" type="Node2D" parent="." unique_id=299042896]
 z_index = 2
-[node name="Weapon" type="Sprite2D" parent="WeaponPivot"]
-position = Vector2(-3.85, -2.2)
-scale = Vector2(0.55, 0.55)
-texture = ExtResource("2")
+
+[node name="Weapon" type="Sprite2D" parent="WeaponPivot" unique_id=1397068742]
+position = Vector2(-12.87, -15.345)
+scale = Vector2(0.495, 0.495)
+texture = ExtResource("2_du32h")
 centered = false
-[node name="Muzzle" type="Marker2D" parent="WeaponPivot"]
-position = Vector2(11.5, 0)
+
+[node name="Muzzle" type="Marker2D" parent="WeaponPivot" unique_id=1808430701]
+position = Vector2(9.405, 0)

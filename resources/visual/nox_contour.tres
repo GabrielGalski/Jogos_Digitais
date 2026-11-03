@@ -1,0 +1,10 @@
+[gd_resource type="ShaderMaterial" format=3]
+
+[ext_resource type="Shader" path="res://shaders/nox_contour.gdshader" id="1_wsbvp"]
+
+[resource]
+resource_name = "Nox — contorno suave"
+shader = ExtResource("1_wsbvp")
+shader_parameter/edge_strength = 1.0
+shader_parameter/edge_softness = 1.0
+shader_parameter/coverage_threshold = 0.5

@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="ProceduralManifestationModel" format=3]
+
+[ext_resource type="Script" path="res://scripts/combat/manifestations/manifestation_model.gd" id="model"]
+[ext_resource type="Resource" path="res://resources/cards/preview/M01.tres" id="card"]
+
+[resource]
+script = ExtResource("model")
+card = ExtResource("card")
+family = 0
+shape = 0
+shadow_color = Color(0.145098039, 0.074509804, 0.101960784, 1)
+body_color = Color(0.000000000, 0.729411765, 0.654901961, 1)
+core_color = Color(0.964705882, 0.929411765, 0.898039216, 1)
+hit_radius = 3.0
+trail_length = 17.0
+halo_size = 22.0
+halo_opacity = 0.18

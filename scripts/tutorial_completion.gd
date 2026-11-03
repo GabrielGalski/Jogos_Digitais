@@ -4,9 +4,10 @@ signal lesson_dismissed(lesson_id: StringName)
 
 const ELITE_LESSON_DELAY: float = 0.5
 const REWARD_TOAST: PackedScene = preload("res://scenes/visual/booster_reward_toast.tscn")
-const MERCHANT_HALL: String = "res://scenes/merchant_corridor.tscn"
+const ASTERION_SPEAKER: DialogueSpeaker = preload("res://resources/dialogue/speakers/asterion.tres")
 const ELITE_LESSON_COPY := "ASTERION É UM ELITE\n\nElites fortalecem os inimigos da câmara.\nDerrote o Elite para encerrar o combate."
-const CONTROLS_LESSON_COPY := "COMANDOS\n\nWASD · Mover\nEspaço · Dash\nMouse · Mirar\nClique esquerdo · Atirar"
+const CONTROLS_LESSON_COPY := "COMANDOS\n\nWASD · Mover\nShift · Rolagem dupla\nMouse · Mirar / Clique esquerdo · Disparar\nBotão direito · Parry"
+const SWORD_LESSON_COPY := "ESPADA DE NOX\n\nEspaço · Preparar / recolher\nClique · Arremessar; mouse corrige levemente\n\nRetorna após 3 minions, 1 elite ou alcance.\nCada inimigo recebe dano uma vez por lançamento."
 const TUTORIAL_REWARDS: Array[String] = [
 	"Monster Booster vol. 1",
 	"Monster Booster vol. 2",
@@ -30,7 +31,6 @@ var active_lesson: StringName = &""
 @onready var elite_modal: Control = $EliteLesson
 @onready var lesson_text: Label = $EliteLesson/Panel/Content/Margin/Text
 @onready var elite_ok: Button = $EliteLesson/Panel/Content/Ok
-@onready var stair_direction: Control = $StairDirection
 
 func setup(owner_encounter: Node) -> void:
 	encounter = owner_encounter
@@ -44,7 +44,6 @@ func setup(owner_encounter: Node) -> void:
 	boss.defeat_animation_finished.connect(_begin_surrender)
 	boss.impact_started.connect(_explain_elite)
 	encounter.dialogue.dialogue_finished.connect(_on_dialogue_finished)
-	arena.tutorial_exited.connect(_on_exit)
 	elite_ok.pressed.connect(_dismiss_elite_lesson)
 	_nox_health(player.health, player.max_health)
 	_boss_health(boss.health, boss.max_resistance)
@@ -67,6 +66,13 @@ func show_controls_lesson() -> void:
 		return
 	set_meta(&"controls_explained", true)
 	_show_lesson(&"controls", CONTROLS_LESSON_COPY)
+
+
+func show_sword_lesson() -> void:
+	if has_meta(&"sword_explained"):
+		return
+	set_meta(&"sword_explained", true)
+	_show_lesson(&"sword", SWORD_LESSON_COPY)
 
 
 func _show_lesson(lesson_id: StringName, message: String) -> void:
@@ -115,7 +121,7 @@ func _on_boss_defeated() -> void:
 	player.intro_locked = true
 	player.velocity = Vector2.ZERO
 	player.knockback_velocity = Vector2.ZERO
-	player.body.play(&"idle")
+	player.body.set_motion(Vector2.ZERO)
 
 func _begin_surrender() -> void:
 	if encounter.phase != encounter.Phase.VICTORY:
@@ -135,8 +141,9 @@ func _begin_surrender() -> void:
 	]
 	for index: int in range(texts.size()):
 		var line: DialogueLine = DialogueLine.new()
-		var speaker: DialogueSpeaker = DialogueSpeaker.new()
-		speaker.display_name = speakers[index]
+		var speaker: DialogueSpeaker = ASTERION_SPEAKER if speakers[index] == "ASTERION" else DialogueSpeaker.new()
+		if speakers[index] != "ASTERION":
+			speaker.display_name = speakers[index]
 		line.speaker = speaker
 		line.text = texts[index]
 		sequence.lines.append(line)
@@ -154,9 +161,8 @@ func _on_dialogue_finished(sequence_id: StringName) -> void:
 	player.intro_locked = true
 	await _present_rewards()
 	player.intro_locked = false
-	encounter.weapon.set_cutscene_pose(false)
-	arena.restore_stair()
-	stair_direction.call(&"point_to", arena.stair, player)
+	completed = true
+	encounter.phase = encounter.Phase.FINISHED
 
 
 func _present_rewards() -> void:
@@ -176,33 +182,4 @@ func _on_player_defeated() -> void:
 	boss.actor.velocity = Vector2.ZERO
 	boss._restore_camera()
 	encounter.dialogue.close_dialogue()
-	stair_direction.call(&"clear")
-	end_text.text = "Nox foi derrotado.\nRecomeçando…"
-	end_screen.show()
-	await get_tree().create_timer(1.5).timeout
-	get_tree().reload_current_scene()
-
-func _on_exit() -> void:
-	if completed:
-		return
-	completed = true
-	encounter.phase = encounter.Phase.FINISHED
-	_stop_combat()
-	encounter.dialogue.close_dialogue()
-	boss.set_physics_process(false)
-	player.intro_locked = true
-	player.velocity = Vector2.ZERO
-	encounter.hint.hide()
-	stair_direction.call(&"clear")
-	end_text.text = ""
-	end_screen.modulate.a = 0.0
-	end_screen.show()
-	var departure: Tween = create_tween()
-	departure.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
-	departure.tween_property(end_screen, "modulate:a", 1.0, 0.6)
-	await departure.finished
-	get_tree().change_scene_to_file(MERCHANT_HALL)
-
-
-func skip_to_merchant() -> void:
-	_on_exit()
+	# The arena's PlayerDefeat owns the cinematic and explicit retry at its warp.

@@ -1,30 +1,42 @@
 extends Node2D
-## Door Dash/Gameplay rules adapted from MonsterShift's LdtkFloorRuntime.
+## Gameplay rules: collisions, traversal, room flow, and reserved hazard cells.
 
 signal player_fell(body: Node2D)
 signal end_reached(body: Node2D)
+signal condition_changed(condition_id: String, satisfied: bool)
 
 const TILE_SIZE: int = 16
 const MAP_LIMIT: int = 1
 const DASH_GAP: int = 2
 const DOOR_BLOCK: int = 3
+const DOORS: Script = preload("res://scripts/dungeon/ldtk_door_blocks.gd")
 const START: int = 4
 const END: int = 5
+const SOLID: int = 6
+const HAZARD: int = 7
 
 var gap_cells: Dictionary[Vector2i, bool] = {}
 var gap_rects: Array[Rect2] = []
 var start_position: Vector2 = Vector2.ZERO
 var has_start: bool = false
-var doors_locked: bool = false
+var doors_locked: bool = true
 var _gap_area: Area2D
 var _end_area: Area2D
 var _start_area: Area2D
-var _doors: Array[CollisionShape2D] = []
+var _doors: StaticBody2D = null
+var _condition_triggers: Array[Dictionary] = []
 
 
 func configure(layers: Array) -> void:
 	var solids: StaticBody2D = _body("MapLimits", &"ldtk_map_limits")
-	var doors: StaticBody2D = _body("DoorBlocks", &"ldtk_door_blocks")
+	_doors = DOORS.new() as StaticBody2D
+	_doors.name = "DoorBlocks"
+	_doors.collision_layer = 1
+	_doors.collision_mask = 0
+	_doors.add_to_group(&"ldtk_door_blocks")
+	_doors.set("doors_locked",doors_locked)
+	add_child(_doors)
+	_doors.connect("condition_changed",func(key: String, met: bool) -> void: condition_changed.emit(key,met))
 	_gap_area = _area("DashGaps", &"ldtk_dash_gaps")
 	_end_area = _area("Ends", &"ldtk_ends")
 	_start_area = _area("Starts", &"ldtk_starts")
@@ -40,9 +52,9 @@ func configure(layers: Array) -> void:
 				var point: Vector2 = Vector2(index % width, floori(float(index) / width)) * grid + offset
 				var rect: Rect2 = Rect2(point, Vector2.ONE * grid)
 				match int(values[index]):
-					MAP_LIMIT: _rectangle(solids, rect)
+					MAP_LIMIT, SOLID, HAZARD: _rectangle(solids, rect)
 					DASH_GAP: _add_gap(rect)
-					DOOR_BLOCK: _doors.append(_rectangle(doors, rect))
+					DOOR_BLOCK: _doors.call("add_cell",rect)
 					START:
 						_rectangle(_start_area, rect)
 						start_sum += rect.get_center()
@@ -53,23 +65,39 @@ func configure(layers: Array) -> void:
 				var pixel: Array = entity.get("px", [0, 0])
 				var point: Vector2 = Vector2(float(pixel[0]), float(pixel[1])) + offset
 				var identifier: String = str(entity.get("__identifier", ""))
-				if identifier == "DoorDash":
+				if identifier in ["DashGapArea", "DoorDash"]:
 					var size: Vector2 = Vector2(float(entity.get("width", 32)), float(entity.get("height", 48)))
 					var pivot: Array = entity.get("__pivot", [0, 0])
 					_add_gap(Rect2(point - size * Vector2(float(pivot[0]), float(pivot[1])), size))
 				elif identifier == "NoxStart":
 					start_sum += point
 					start_count += 1
+				elif identifier == "GameplayTrigger" and bool(layer.get("visible",true)):
+					_add_condition_trigger(entity,offset)
 	if start_count > 0:
 		start_position = start_sum / float(start_count)
 		has_start = true
 	set_doors_locked(doors_locked)
+	_doors.call("configure_controls",layers)
 	_gap_area.body_entered.connect(_on_gap_entered)
 	_start_area.body_entered.connect(_on_start_entered)
 	_end_area.body_entered.connect(func(body: Node2D) -> void: end_reached.emit(body))
 
 
 func _physics_process(_delta: float) -> void:
+	for trigger: Dictionary in _condition_triggers:
+		if bool(trigger.done):
+			continue
+		var inside: bool = false
+		for body: Node2D in (trigger.area as Area2D).get_overlapping_bodies():
+			var player: Player = body as Player
+			if player != null and not player.dead and not player.intro_locked:
+				inside = true
+				break
+		if inside and not bool(trigger.inside):
+			set_condition(str(trigger.condition_id),bool(trigger.value))
+			trigger["done"] = bool(trigger.once)
+		trigger["inside"] = inside
 	if _gap_area == null:
 		return
 	for body: Node2D in _gap_area.get_overlapping_bodies():
@@ -120,8 +148,44 @@ func _on_start_entered(body: Node2D) -> void:
 
 func set_doors_locked(locked: bool) -> void:
 	doors_locked = locked
-	for collision: CollisionShape2D in _doors:
-		collision.set_deferred(&"disabled", not locked)
+	if _doors != null:
+		_doors.call("set_doors_locked",locked)
+
+
+func set_door_region_locked(region: Rect2i, locked: bool) -> void:
+	_doors.call("set_door_region_locked",region,locked)
+
+
+func set_door_locked(door_id: String, locked: bool) -> void:
+	_doors.call("set_door_locked",door_id,locked)
+
+
+func is_door_cell_locked(cell: Vector2i) -> bool:
+	return bool(_doors.call("is_door_cell_locked",cell))
+
+
+func get_door_cell_count() -> int:
+	return int(_doors.call("get_door_cell_count"))
+
+
+func set_condition(condition_id: String, satisfied: bool = true) -> void:
+	_doors.call("set_condition",condition_id,satisfied)
+
+
+func is_condition_met(condition_id: String) -> bool:
+	return bool(_doors.call("is_condition_met",condition_id))
+
+
+func _add_condition_trigger(entity: Dictionary, offset: Vector2) -> void:
+	var config: Dictionary = DOORS.fields(entity)
+	var condition_id: String = str(config.get("ConditionId","")).strip_edges()
+	if condition_id.is_empty() or not bool(config.get("Enabled",true)):
+		return
+	var area: Area2D = _area("ConditionTrigger_%d" % _condition_triggers.size(),&"ldtk_condition_triggers")
+	_rectangle(area,DOORS.entity_rect(entity,offset))
+	_condition_triggers.append({"area":area,"condition_id":condition_id,
+		"value":bool(config.get("ConditionValue",true)),"once":bool(config.get("Once",true)),
+		"inside":false,"done":false})
 
 
 func _body(node_name: String, group_name: StringName) -> StaticBody2D:

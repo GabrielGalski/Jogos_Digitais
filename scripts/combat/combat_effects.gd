@@ -1,5 +1,7 @@
 extends Node2D
 class_name CombatEffects
+signal hit_confirmed(at: Vector2, direction: Vector2, killed: bool)
+signal surface_hit(at: Vector2, direction: Vector2)
 
 const ELECTRIC_ARC_SCENE := preload("res://scenes/combat/effects/electric_arc.tscn")
 const ELECTRIC_EXPLOSION_SCENE := preload(
@@ -28,7 +30,7 @@ func _process(delta: float) -> void:
 		return
 	impact_camera.offset -= feedback_offset
 	feedback_offset = Vector2.ZERO
-	if not camera_feedback_enabled:
+	if not camera_feedback_enabled or impact_camera.has_meta(&"owns_combat_camera_feedback"):
 		camera_impulse = 0.0
 		return
 	feedback_time += delta
@@ -47,15 +49,27 @@ func _exit_tree() -> void:
 func apply_hit(enemy: Node2D, damage: float, direction: Vector2, impulse: float, on_kill: Callable = Callable()) -> void:
 	if damage <= 0.0 or not _is_valid_enemy(enemy):
 		return
+	var hit_position: Vector2 = enemy.global_position
+	var health_before: float = float(enemy.call("get_current_health")) if enemy.has_method("get_current_health") else -1.0
 	if enemy.has_method(&"receive_impact"):
 		enemy.call(&"receive_impact", direction, impulse)
 	enemy.call(&"take_damage", damage)
 	if (not is_instance_valid(enemy) or not bool(enemy.call(&"is_alive"))) and on_kill.is_valid():
 		on_kill.call()
+	var killed: bool = not is_instance_valid(enemy) or not bool(enemy.call(&"is_alive"))
+	var damage_confirmed: bool = health_before < 0.0 or killed
+	if is_instance_valid(enemy) and health_before >= 0.0:
+		damage_confirmed = float(enemy.call("get_current_health")) < health_before
+	if damage_confirmed:
+		hit_confirmed.emit(hit_position, direction, killed)
 
 
 func _ready() -> void:
 	reset_random_seed()
+
+
+func notify_surface_hit(at: Vector2, direction: Vector2) -> void:
+	surface_hit.emit(at, direction)
 
 
 func reset_random_seed(seed_value: int = DEFAULT_RANDOM_SEED) -> void:

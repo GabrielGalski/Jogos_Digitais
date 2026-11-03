@@ -12,7 +12,7 @@ extends Resource
 
 static func accent(code: StringName) -> Color:
 	match code:
-		&"M01": return Color("#a8e387")
+		&"M01": return Color("#00baa7")
 		&"M02": return Color("#67c974")
 		&"M03": return Color("#b9f4ee")
 		&"M04": return Color("#ffe26b")

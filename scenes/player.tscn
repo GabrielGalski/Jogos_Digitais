@@ -3,8 +3,10 @@
 [ext_resource type="Script" path="res://scripts/player.gd" id="1_player"]
 [ext_resource type="SpriteFrames" path="res://resources/player_frames.tres" id="2_frames"]
 [ext_resource type="Script" path="res://scripts/visual/simple_mob_shadow.gd" id="3_shadow"]
+[ext_resource type="Script" path="res://scripts/visual/nox_visual.gd" id="3_tuyoq"]
 [ext_resource type="PackedScene" path="res://scenes/combat/booster_shooter.tscn" id="4_qlg0r"]
 [ext_resource type="Script" path="res://scripts/combat/booster_shooter.gd" id="5_tuyoq"]
+[ext_resource type="Script" path="res://scripts/visual/nox_momentum_line.gd" id="7_fjrip"]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_player"]
 radius = 4.0
@@ -25,6 +27,7 @@ scale = Vector2(1.05, 1.05)
 sprite_frames = ExtResource("2_frames")
 animation = &"idle"
 autoplay = "idle"
+script = ExtResource("3_tuyoq")
 
 [node name="GroundShadow" type="Node2D" parent="." unique_id=867207707]
 show_behind_parent = true
@@ -46,3 +49,8 @@ position_smoothing_enabled = true
 visible = false
 texture_filter = 1
 script = ExtResource("5_tuyoq")
+
+[node name="MomentumLine" type="Node2D" parent="." unique_id=17709210]
+physics_interpolation_mode = 2
+z_index = 3
+script = ExtResource("7_fjrip")

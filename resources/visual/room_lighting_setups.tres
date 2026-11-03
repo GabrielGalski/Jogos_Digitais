@@ -1,0 +1,10 @@
+[gd_resource type="Resource" format=3]
+
+[ext_resource type="Script" path="res://scripts/visual/room_lighting_setups.gd" id="1_4lk4w"]
+[ext_resource type="Resource" path="res://resources/visual/room_1_lighting.tres" id="1_yn6ks"]
+
+[resource]
+resource_name = "Room_1 — comparacao de luz"
+script = ExtResource("1_4lk4w")
+profiles = Array[Resource]([ExtResource("1_yn6ks")])
+cycling_enabled = false

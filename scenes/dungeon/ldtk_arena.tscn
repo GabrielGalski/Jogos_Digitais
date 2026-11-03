@@ -1,6 +1,19 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene format=3]
 
 [ext_resource type="Script" path="res://scripts/dungeon/ldtk_arena.gd" id="1_arena"]
+[ext_resource type="Resource" path="res://resources/visual/room_1_lighting.tres" id="2_mnk7g"]
+[ext_resource type="Resource" path="res://resources/visual/room_lighting_setups.tres" id="3_ikurx"]
+[ext_resource type="PackedScene" path="res://scenes/ui/player_life_hud.tscn" id="4_sburd"]
+[ext_resource type="Script" path="res://scripts/ui/player_life_hud.gd" id="5_dlf2q"]
 
-[node name="LdtkArena" type="Node2D"]
+[node name="LdtkArena" type="Node2D" unique_id=277080450]
 script = ExtResource("1_arena")
+level_name = "Room_1"
+automatic_water = false
+lighting_profile = ExtResource("2_mnk7g")
+lighting_setups = ExtResource("3_ikurx")
+border_brightness = 1.65
+
+[node name="PlayerHUD" type="CanvasLayer" parent="." unique_id=1586275008 instance=ExtResource("4_sburd")]
+layer = 55
+script = ExtResource("5_dlf2q")

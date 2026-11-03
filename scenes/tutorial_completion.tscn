@@ -3,7 +3,6 @@
 [ext_resource type="Script" path="res://scripts/tutorial_completion.gd" id="1"]
 [ext_resource type="FontFile" path="res://assets/font/Fixedsys Excelsior 3.01.ttf" id="2"]
 [ext_resource type="PackedScene" path="res://scenes/ui/player_life_bar.tscn" id="2_ilhwo"]
-[ext_resource type="Script" path="res://scripts/ui/stair_direction_indicator.gd" id="3"]
 [ext_resource type="Script" path="res://scripts/ui/player_life_bar.gd" id="3_dxu1y"]
 [ext_resource type="PackedScene" path="res://scenes/ui/asterion_boss_bar.tscn" id="3_tf8tn"]
 [ext_resource type="Script" path="res://scripts/ui/tutorial_lesson_panel.gd" id="6_i5s7a"]
@@ -227,16 +226,5 @@ theme_override_styles/normal = SubResource("EliteButton")
 theme_override_styles/pressed = SubResource("EliteButton")
 theme_override_styles/hover = SubResource("EliteButtonHover")
 text = "E · Continuar"
-
-[node name="StairDirection" type="Control" parent="." unique_id=140091244]
-visible = false
-layout_mode = 3
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-script = ExtResource("3")
 
 [connection signal="dismiss_requested" from="EliteLesson" to="." method="_dismiss_elite_lesson"]

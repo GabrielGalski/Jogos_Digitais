@@ -1,0 +1,33 @@
+[gd_resource type="Resource" script_class="WaterProfile" format=3]
+
+[ext_resource type="Script" path="res://scripts/visual/water_profile.gd" id="profile"]
+
+[resource]
+script = ExtResource("profile")
+preset_id = &"Sea"
+deep_color = Color(0.07058824, 0.24313726, 0.3137255, 1)
+mid_color = Color(0.11372549, 0.5058824, 0.5764706, 1)
+highlight_color = Color(0.36862746, 0.8509804, 0.8392157, 1)
+cell_size_px = 36.0
+distortion_strength_px = 3.0
+flow_speed_px_s = 12.0
+smooth_surface = true
+reflection_style = 1
+wave_length_px = 38.0
+wave_strength = 0.75
+reflection_strength = 1.0
+voronoi_strength = 0.0
+shore_tint_strength = 0.28
+secondary_wave_strength = 0.28
+calmness = 0.65
+sparkle_spacing_px = 34.0
+sparkle_density = 0.32
+sparkle_size_px = 1.55
+sparkle_intensity = 0.0
+sparkle_halo_strength = 0.5
+foam_color = Color(0.67058825, 0.8392157, 0.8, 1)
+foam_width_px = 1.4
+foam_opacity = 0.0
+foam_coverage = 0.68
+foam_irregularity = 0.85
+foam_residue = 0.3

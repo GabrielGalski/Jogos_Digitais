@@ -1,14 +1,20 @@
 extends Area2D
 ## Shared combat projectile. Presentation listeners are optional and never own damage.
 signal visual_impact(at: Vector2, code: StringName)
+const ENEMY_CONTACTS: Script = preload("res://scripts/combat/projectile_enemy_contacts.gd")
 
-const M01_A: Texture2D = preload("res://assets/cards/manifestacao/gotas_de_slime M01/projectile/slime_ball.png")
-const M01_B: Texture2D = preload("res://assets/cards/manifestacao/gotas_de_slime M01/projectile/slime_ball1.png")
+const M01_FRAMES: Array[Texture2D] = [
+	preload("res://assets/cards/manifestacao/gotas_de_slime M01/projectile/bullet1.png"),
+	preload("res://assets/cards/manifestacao/gotas_de_slime M01/projectile/bullet2.png"),
+	preload("res://assets/cards/manifestacao/gotas_de_slime M01/projectile/bullet3.png"),
+	preload("res://assets/cards/manifestacao/gotas_de_slime M01/projectile/bullet4.png"),
+	preload("res://assets/cards/manifestacao/gotas_de_slime M01/projectile/bullet5.png"),
+]
+const M01_LAUNCH_FPS: float = 60.0
+const M01_LAUNCH_SCALE: float = 0.8
+const M01_FLIGHT_SCALE: float = 0.56
 const M02_A: Texture2D = preload("res://assets/cards/manifestacao/massa_de_slime M02/projectile/slime_ball.png")
 const M02_B: Texture2D = preload("res://assets/cards/manifestacao/massa_de_slime M02/projectile/slime_ball2.png")
-const M01_IMPACT_UPDOWN: Texture2D = preload("res://assets/cards/manifestacao/gotas_de_slime M01/projectile/impact_updown.png")
-const M01_IMPACT_LEFT: Texture2D = preload("res://assets/cards/manifestacao/gotas_de_slime M01/projectile/impact_left.png")
-const M01_IMPACT_RIGHT: Texture2D = preload("res://assets/cards/manifestacao/gotas_de_slime M01/projectile/impact_right.png")
 const M02_IMPACT_UPDOWN: Texture2D = preload("res://assets/cards/manifestacao/massa_de_slime M02/projectile/impact_updown.png")
 const M02_IMPACT_LEFT: Texture2D = preload("res://assets/cards/manifestacao/massa_de_slime M02/projectile/impact_left.png")
 const M02_IMPACT_RIGHT: Texture2D = preload("res://assets/cards/manifestacao/massa_de_slime M02/projectile/impact_right.png")
@@ -98,8 +104,11 @@ func configure(card_code: StringName, shot_direction: Vector2, attack: CardAttac
 		direction = Vector2.RIGHT
 	match mode:
 		&"M01":
-			frames = [M01_A, M01_B]
-			visual.scale = Vector2.ONE * 0.8
+			frames = M01_FRAMES
+			frame_rate = M01_LAUNCH_FPS
+			visual.scale = Vector2.ONE * M01_LAUNCH_SCALE
+			# The authored head stays at the same point while the impulse tail contracts.
+			visual.offset = Vector2(-3.0, 2.0)
 			_set_radius(3.0)
 		&"M02":
 			frames = [M02_A, M02_B]
@@ -141,6 +150,8 @@ func _set_radius(radius: float) -> void:
 func _physics_process(delta: float) -> void:
 	if phase == &"impact_ending":
 		slime_impact_time -= delta
+		if mode == &"M01":
+			visual.modulate.a = clampf(slime_impact_time / SLIME_IMPACT_DURATION, 0.0, 1.0)
 		if slime_impact_time <= 0.0:
 			queue_free()
 		return
@@ -173,15 +184,13 @@ func _physics_process(delta: float) -> void:
 				_explode_mushroom(target)
 				return
 		rotation = 0.0
-	# A stable first frame makes the small muzzle segment readable.
-	var animated_age: float = maxf(0.0, animation_clock - (0.10 if mode == &"M01" else 0.0))
-	var frame_index: int = int(animated_age * frame_rate)
-	if mode == &"M01":
-		frame_index = 0 if animation_clock < 0.10 else frame_index + 1
+	var frame_index: int = int(animation_clock * frame_rate)
 	if mode == &"M01" or mode == &"M02":
 		slime_impact_time = maxf(0.0, slime_impact_time - delta)
 		if slime_impact_time <= 0.0:
-			visual.texture = frames[frame_index % frames.size()]
+			visual.texture = frames[mini(frame_index, frames.size() - 1)] if mode == &"M01" else frames[frame_index % frames.size()]
+			if mode == &"M01":
+				visual.scale = Vector2.ONE * (M01_FLIGHT_SCALE if visual.texture == M01_FRAMES[4] else M01_LAUNCH_SCALE)
 			visual.flip_v = false
 			rotation = direction.angle()
 		_advance_slime(delta)
@@ -191,8 +200,8 @@ func _physics_process(delta: float) -> void:
 		_advance_efreeti(delta)
 		return
 	var next_position: Vector2 = global_position + direction * speed * delta
-	var query: PhysicsRayQueryParameters2D = PhysicsRayQueryParameters2D.create(global_position, next_position, 4)
-	var hit: Dictionary = get_world_2d().direct_space_state.intersect_ray(query)
+	var hit: Dictionary = ENEMY_CONTACTS.sweep(get_tree(), get_world_2d().direct_space_state,
+		global_position, next_position, 4, (hit_shape.shape as CircleShape2D).radius)
 	if not hit.is_empty():
 		_on_body_entered(hit.get("collider") as Node2D)
 	if phase == &"flying" and not is_queued_for_deletion():
@@ -204,8 +213,8 @@ func _advance_efreeti(delta: float) -> void:
 	var exclusions: Array[RID] = []
 	if is_instance_valid(shooter_body):
 		exclusions.append(shooter_body.get_rid())
-	var query: PhysicsRayQueryParameters2D = PhysicsRayQueryParameters2D.create(global_position, endpoint, 5, exclusions)
-	var hit: Dictionary = get_world_2d().direct_space_state.intersect_ray(query)
+	var hit: Dictionary = ENEMY_CONTACTS.sweep(get_tree(), get_world_2d().direct_space_state,
+		global_position, endpoint, 5, (hit_shape.shape as CircleShape2D).radius, exclusions)
 	if hit.is_empty():
 		global_position = endpoint
 		return
@@ -229,8 +238,8 @@ func _advance_slime(delta: float) -> void:
 	while travel_left > 0.001 and not consumed:
 		var origin: Vector2 = global_position
 		var endpoint: Vector2 = origin + direction * travel_left
-		var query: PhysicsRayQueryParameters2D = PhysicsRayQueryParameters2D.create(origin, endpoint, 5, exclusions)
-		var hit: Dictionary = get_world_2d().direct_space_state.intersect_ray(query)
+		var hit: Dictionary = ENEMY_CONTACTS.sweep(get_tree(), get_world_2d().direct_space_state,
+			origin, endpoint, 5, (hit_shape.shape as CircleShape2D).radius, exclusions)
 		if hit.is_empty():
 			global_position = endpoint
 			break
@@ -262,6 +271,8 @@ func _ricochet_at(body: Node2D, contact: Vector2, normal: Vector2) -> void:
 			card_attack.apply_secondary_hit(body, damage, incoming, combat_effects)
 		else:
 			card_attack.apply_primary_hit(body, contact, incoming, combat_effects)
+	elif is_instance_valid(combat_effects):
+		combat_effects.notify_surface_hit(contact, incoming)
 	_show_slime_impact(normal)
 	if remaining_ricochets <= 0:
 		consumed = true
@@ -307,15 +318,20 @@ func _explode_m02(body: Node2D, contact: Vector2, normal: Vector2) -> void:
 
 func _show_slime_impact(normal: Vector2) -> void:
 	slime_impact_time = SLIME_IMPACT_DURATION
+	if mode == &"M01":
+		# Bullet5 is both the settled flight silhouette and its brief impact pulse.
+		visual.texture = M01_FRAMES[4]
+		visual.scale = Vector2.ONE * M01_FLIGHT_SCALE * 1.18
+		visual.flip_v = false
+		rotation = direction.angle()
+		return
 	# Directional impact art is authored in world axes, not the bullet's rotation.
 	rotation = 0.0
 	visual.flip_v = false
 	if absf(normal.x) > absf(normal.y):
-		visual.texture = M01_IMPACT_LEFT if normal.x < 0.0 else M01_IMPACT_RIGHT
-		if mode == &"M02":
-			visual.texture = M02_IMPACT_LEFT if normal.x < 0.0 else M02_IMPACT_RIGHT
+		visual.texture = M02_IMPACT_LEFT if normal.x < 0.0 else M02_IMPACT_RIGHT
 	else:
-		visual.texture = M02_IMPACT_UPDOWN if mode == &"M02" else M01_IMPACT_UPDOWN
+		visual.texture = M02_IMPACT_UPDOWN
 		visual.flip_v = normal.y > 0.0
 
 

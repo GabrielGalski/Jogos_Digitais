@@ -1,0 +1,9 @@
+[gd_resource type="Resource" format=3]
+
+[ext_resource type="Script" path="res://scripts/visual/room_lighting_profile.gd" id="1_qybg8"]
+
+[resource]
+resource_name = "Equilibrado"
+script = ExtResource("1_qybg8")
+ambient_multiplier = Color(0.92, 0.9, 0.96, 1)
+center_multiplier = Color(1.12, 1.08, 1.16, 1)

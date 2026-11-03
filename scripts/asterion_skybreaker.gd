@@ -13,10 +13,11 @@ signal skybreaker_finished
 signal health_changed(current: float, maximum: float)
 signal defeated
 signal defeat_animation_finished
+const FINISHING_RAY: Script = preload("res://scripts/combat/effects/enemy_finishing_ray.gd")
 
 @export_category("Combat balance")
-@export var max_resistance: float = 270.0
-var health: float = 270.0
+@export var max_resistance: float = 250.0
+var health: float = 250.0
 var damage_flash: Tween
 enum State {
 	SITTING,
@@ -94,10 +95,10 @@ const TARGET_LOCK_TIME := 2.05
 const DESCENT_DURATION := 0.65
 const HIT_1_DURATION := 0.12
 const HIT_2_DURATION := 0.18
-const RECOVERY_DURATION := 0.30
+const RECOVERY_DURATION: float = 0.90
 const WALK_FRAME_DURATION := 0.09
 const ATTACK_FRAME_DURATION := 0.10
-const MELEE_RECOVERY_DURATION := 0.45
+const MELEE_RECOVERY_DURATION: float = 0.70
 const LARGE_FRAME_FOOT := Vector2(64, 93)
 const FLYING_FRAME_FOOT := Vector2(64, 96)
 const HIT_1_FRAME_FOOT := Vector2(63, 96)
@@ -141,6 +142,7 @@ var facing_left := false
 var shake_time := 0.0
 var shake_duration := 0.0
 var shake_pixels := 0.0
+var shake_screen_pixels: float = 0.0
 var shake_angle := 0.0
 var camera_offset := Vector2.ZERO
 var camera_rotation := 0.0
@@ -167,7 +169,8 @@ var _decision: EnemyAIDecision
 func _ready() -> void:
 	health = max_resistance
 	dialogue_box.dialogue_finished.connect(_on_intro_dialogue_finished)
-	tutorial_encounter.setup(self, arena, player, dialogue_box)
+	# Arena composition installs the shared melee/sword kit in its parent's _ready.
+	tutorial_encounter.call_deferred(&"setup", self, arena, player, dialogue_box)
 	ai_world_sensor.configure(arena, Rect2(arena.to_global(player.arena_bounds.position), player.arena_bounds.size * arena.global_scale))
 	actor.add_to_group(&"enemy_ai_actor")
 	actor.set_meta(&"enemy_ai_is_elite", true)
@@ -274,6 +277,7 @@ func _enter_defeated() -> void:
 		damage_flash.kill()
 	visual.modulate = Color.WHITE
 	_set_pose(DEFEATED_FRAMES[0], Vector2(32, 48))
+	FINISHING_RAY.play(self, visual)
 	defeated.emit()
 
 func _update_defeated(delta: float) -> void:
@@ -289,8 +293,7 @@ func _begin_player_approach() -> void:
 	intro_started = true
 	player.intro_locked = true
 	player.velocity = Vector2.ZERO
-	player.body.play(&"run")
-	player.body.flip_h = intro_destination.x < player.position.x
+	player.body.set_motion(arena.to_global(intro_destination) - player.global_position)
 	_enter(State.PLAYER_APPROACH)
 	encounter_started.emit()
 
@@ -301,7 +304,7 @@ func _update_player_approach(delta: float) -> void:
 	if distance <= intro_walk_speed * delta:
 		player.global_position = destination
 		player.velocity = Vector2.ZERO
-		player.body.play(&"idle")
+		player.body.set_motion(Vector2.ZERO)
 		_enter(State.THRONE_PAUSE)
 		return
 	player.global_position = player.global_position.move_toward(destination, intro_walk_speed * delta)
@@ -311,7 +314,7 @@ func _begin_intro_dialogue() -> void:
 	# Keep the seated idle and the existing player lock until the first takeoff.
 	_enter(State.INTRO_DIALOGUE)
 	player.velocity = Vector2.ZERO
-	player.body.play(&"idle")
+	player.body.set_motion(Vector2.ZERO)
 	tutorial_encounter.begin_dialogue()
 
 
@@ -389,7 +392,7 @@ func _update_launch(delta: float) -> void:
 		_set_pose(FLYING, FLYING_FRAME_FOOT)
 		if player.intro_locked:
 			player.intro_locked = false
-			player.body.play(&"idle")
+			player.body.set_motion(Vector2.ZERO)
 		_enter(State.OFFSCREEN)
 		launch_left_camera.emit()
 
@@ -541,7 +544,8 @@ func _melee_impact() -> void:
 	melee_damage_emitted = true
 	melee_damage_requested.emit(actor.global_position, melee_hit_range, melee_damage)
 	if actor.global_position.distance_to(player.global_position + Vector2(0, 3)) <= melee_hit_range:
-		player.receive_skybreaker_hit(melee_damage)
+		if not player.try_parry_enemy_attack(actor, player.global_position):
+			player.receive_skybreaker_hit(melee_damage)
 
 
 func _tick_timed_state(delta: float, duration: float, completion: Callable) -> void:
@@ -681,7 +685,8 @@ func _impact() -> void:
 	query.exclude = [actor.get_rid(), get_rid()]
 	for result in get_world_2d().direct_space_state.intersect_shape(query, 64):
 		if result.collider == player:
-			player.receive_skybreaker_hit(preview_damage)
+			if not player.try_parry_enemy_attack(actor, player.global_position):
+				player.receive_skybreaker_hit(preview_damage)
 			break
 
 
@@ -730,7 +735,8 @@ func _enable_body_when_clear() -> void:
 
 
 func _capture_camera() -> void:
-	camera_offset = camera.offset
+	var rig: Node = _gameplay_camera_rig()
+	camera_offset = rig.call("get_encounter_offset") as Vector2 if rig != null else camera.offset
 	camera_rotation = camera.rotation
 	camera_ignore_rotation = camera.ignore_rotation
 
@@ -738,7 +744,9 @@ func _capture_camera() -> void:
 func _shake(pixels: float, degrees: float, duration: float) -> void:
 	shake_time = duration
 	shake_duration = duration
-	shake_pixels = pixels
+	shake_screen_pixels = pixels
+	# Keep the authored shake in screen pixels at every selected distance.
+	shake_pixels = pixels / maxf(camera.zoom.x, 0.01)
 	shake_angle = deg_to_rad(degrees)
 	camera.ignore_rotation = false
 
@@ -749,7 +757,9 @@ func _update_shake(delta: float) -> void:
 	shake_time = maxf(0.0, shake_time - delta)
 	var t := shake_duration - shake_time
 	var strength := pow(shake_time / shake_duration, 2.0) * shake_intensity
-	camera.offset = camera_offset + Vector2(sin(t * 95), cos(t * 77)) * shake_pixels * strength
+	# Backspace and dash can change zoom while an impact is still shaking.
+	shake_pixels = shake_screen_pixels / maxf(camera.zoom.x, 0.01)
+	_write_camera_offset(camera_offset + Vector2(sin(t * 95), cos(t * 77)) * shake_pixels * strength)
 	camera.rotation = camera_rotation + sin(t * 51) * shake_angle * strength
 	if shake_time <= 0.0:
 		_restore_camera()
@@ -757,9 +767,21 @@ func _update_shake(delta: float) -> void:
 
 func _restore_camera() -> void:
 	if is_instance_valid(camera):
-		camera.offset = camera_offset
+		_write_camera_offset(camera_offset)
 		camera.rotation = camera_rotation
 		camera.ignore_rotation = camera_ignore_rotation
+
+
+func _gameplay_camera_rig() -> Node:
+	return player.get_node_or_null("GameplayKit/GameplayCameraRig") if is_instance_valid(player) else null
+
+
+func _write_camera_offset(value: Vector2) -> void:
+	var rig: Node = _gameplay_camera_rig()
+	if rig != null:
+		rig.call("set_encounter_offset", value)
+	else:
+		camera.offset = value
 
 
 func _exit_tree() -> void:

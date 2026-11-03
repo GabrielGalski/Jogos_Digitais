@@ -1,0 +1,40 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/player_life_hud.gd" id="1_hud"]
+[ext_resource type="PackedScene" path="res://scenes/ui/player_life_bar.tscn" id="2_bar"]
+
+[node name="PlayerHUD" type="CanvasLayer"]
+layer = 55
+script = ExtResource("1_hud")
+
+[node name="Interface" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="SafeArea" type="MarginContainer" parent="Interface"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 8
+
+[node name="Column" type="VBoxContainer" parent="Interface/SafeArea"]
+layout_mode = 2
+size_flags_horizontal = 0
+size_flags_vertical = 0
+mouse_filter = 2
+
+[node name="HP" parent="Interface/SafeArea/Column" instance=ExtResource("2_bar")]
+layout_mode = 2
+size_flags_vertical = 0

@@ -1,0 +1,18 @@
+[gd_resource type="ShaderMaterial" format=3]
+
+[ext_resource type="Shader" path="res://shaders/terrain_clouds.gdshader" id="1_e4mis"]
+
+[resource]
+shader = ExtResource("1_e4mis")
+shader_parameter/enabled = true
+shader_parameter/brightness = 0.94
+shader_parameter/saturation = 0.9
+shader_parameter/contrast = 0.98
+shader_parameter/asset_palette = 0
+shader_parameter/clouds_enabled = true
+shader_parameter/cloud_elapsed = 0.0
+shader_parameter/cloud_velocity = Vector2(7, 1.5)
+shader_parameter/cloud_scale = 384.0
+shader_parameter/cloud_threshold = 0.68
+shader_parameter/cloud_detail = 0.22
+shader_parameter/shadow_strength = 0.2

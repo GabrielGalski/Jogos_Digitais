@@ -1,18 +1,14 @@
-[gd_resource type="Resource" script_class="DialogueSequence" format=3 uid="uid://cutocx2oqk2es"]
+[gd_resource type="Resource" script_class="DialogueSequence" format=3]
 
-[ext_resource type="Script" uid="uid://s54egej4p8fa" path="res://tools/dialogue system/dialogue_sequence.gd" id="1_sequence"]
-[ext_resource type="Script" uid="uid://bsk2a4g3nivos" path="res://tools/dialogue system/dialogue_choice.gd" id="2_fq0xg"]
-[ext_resource type="Script" uid="uid://cc0ek2u8se00e" path="res://tools/dialogue system/dialogue_line.gd" id="2_line"]
-[ext_resource type="Script" uid="uid://bvbptvsb0tkrv" path="res://tools/dialogue system/dialogue_speaker.gd" id="3_speaker"]
-
-[sub_resource type="Resource" id="Speaker_asterion"]
-script = ExtResource("3_speaker")
-display_name = "ASTERION"
-name_color = Color(0.960784, 0.85098, 0.462745, 1)
+[ext_resource type="Script" path="res://tools/dialogue system/dialogue_sequence.gd" id="1_sequence"]
+[ext_resource type="Script" path="res://tools/dialogue system/dialogue_choice.gd" id="2_fq0xg"]
+[ext_resource type="Script" path="res://tools/dialogue system/dialogue_line.gd" id="2_line"]
+[ext_resource type="Resource" path="res://resources/dialogue/speakers/asterion.tres" id="3_8d4k8"]
+[ext_resource type="Script" path="res://tools/dialogue system/dialogue_speaker.gd" id="3_speaker"]
 
 [sub_resource type="Resource" id="Line_01"]
 script = ExtResource("2_line")
-speaker = SubResource("Speaker_asterion")
+speaker = ExtResource("3_8d4k8")
 text = "Ei. Essa escada termina nos meus domínios. Você se perdeu ou tem algum problema?"
 
 [sub_resource type="Resource" id="Speaker_nox"]
@@ -28,12 +24,12 @@ characters_per_second = 50.0
 
 [sub_resource type="Resource" id="Line_03"]
 script = ExtResource("2_line")
-speaker = SubResource("Speaker_asterion")
+speaker = ExtResource("3_8d4k8")
 text = "Nox? Isso tudo era o seu nome?"
 
 [sub_resource type="Resource" id="Line_04"]
 script = ExtResource("2_line")
-speaker = SubResource("Speaker_asterion")
+speaker = ExtResource("3_8d4k8")
 text = "Muito bem, Nox. O que uma criaturinha como você quer com o [wave amp=8 freq=3]GRANDE Asterion[/wave]?"
 
 [sub_resource type="Resource" id="Line_05"]
@@ -44,12 +40,12 @@ characters_per_second = 50.0
 
 [sub_resource type="Resource" id="Line_06"]
 script = ExtResource("2_line")
-speaker = SubResource("Speaker_asterion")
+speaker = ExtResource("3_8d4k8")
 text = "Me derrotar, levar minhas cartas e montar a maior coleção de [color=#f5d976]Monster Booster[/color]?!"
 
 [sub_resource type="Resource" id="Line_07"]
 script = ExtResource("2_line")
-speaker = SubResource("Speaker_asterion")
+speaker = ExtResource("3_8d4k8")
 text = "[shake rate=15 level=3]HA![/shake] Gostei da ordem. Principalmente da parte impossível, logo no começo."
 
 [sub_resource type="Resource" id="Line_08"]

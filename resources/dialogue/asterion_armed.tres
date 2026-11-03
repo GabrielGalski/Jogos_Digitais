@@ -1,23 +1,18 @@
-[gd_resource type="Resource" script_class="DialogueSequence" format=3 uid="uid://c0cfds8tvwqx5"]
+[gd_resource type="Resource" script_class="DialogueSequence" format=3]
 
-[ext_resource type="Script" uid="uid://s54egej4p8fa" path="res://tools/dialogue system/dialogue_sequence.gd" id="1_sequence"]
-[ext_resource type="Script" uid="uid://bsk2a4g3nivos" path="res://tools/dialogue system/dialogue_choice.gd" id="2_hjem6"]
-[ext_resource type="Script" uid="uid://cc0ek2u8se00e" path="res://tools/dialogue system/dialogue_line.gd" id="2_line"]
-[ext_resource type="Script" uid="uid://bvbptvsb0tkrv" path="res://tools/dialogue system/dialogue_speaker.gd" id="3_speaker"]
-
-[sub_resource type="Resource" id="Speaker_asterion"]
-script = ExtResource("3_speaker")
-display_name = "ASTERION"
-name_color = Color(0.960784, 0.85098, 0.462745, 1)
+[ext_resource type="Script" path="res://tools/dialogue system/dialogue_sequence.gd" id="1_sequence"]
+[ext_resource type="Script" path="res://tools/dialogue system/dialogue_choice.gd" id="2_hjem6"]
+[ext_resource type="Script" path="res://tools/dialogue system/dialogue_line.gd" id="2_line"]
+[ext_resource type="Resource" path="res://resources/dialogue/speakers/asterion.tres" id="3_hjem6"]
 
 [sub_resource type="Resource" id="Threat"]
 script = ExtResource("2_line")
-speaker = SubResource("Speaker_asterion")
-text = "Você está apontando uma Booster Shooter para MIM?! Abaixe essa coisa, monstrinho!"
+speaker = ExtResource("3_hjem6")
+text = "Você está apontando esse booster para MIM?! Abaixe essa coisa, monstrinho!"
 
 [sub_resource type="Resource" id="Call"]
 script = ExtResource("2_line")
-speaker = SubResource("Speaker_asterion")
+speaker = ExtResource("3_hjem6")
 text = "[shake rate=18 level=4]MINOTAUROS![/shake] Tirem esse colecionador de perto das minhas cartas!"
 next_line_index = -2
 

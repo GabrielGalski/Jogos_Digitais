@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="WaterProfile" format=3]
+
+[ext_resource type="Script" path="res://scripts/visual/water_profile.gd" id="profile"]
+
+[resource]
+script = ExtResource("profile")
+preset_id = &"River"
+deep_color = Color(0.105882, 0.270588, 0.313725, 1)
+mid_color = Color(0.180392, 0.419608, 0.447059, 1)
+highlight_color = Color(0.556863, 0.74902, 0.666667, 1)
+cell_size_px = 20.0
+distortion_strength_px = 2.0
+flow_speed_px_s = 12.0
+highlight_width = 0.065
+highlight_breakup = 0.52

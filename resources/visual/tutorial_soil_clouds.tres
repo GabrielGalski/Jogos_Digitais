@@ -1,0 +1,11 @@
+[gd_resource type="ShaderMaterial" format=3]
+
+[ext_resource type="Shader" path="res://shaders/tutorial_soil_clouds.gdshader" id="shader"]
+
+[resource]
+shader = ExtResource("shader")
+shader_parameter/cloud_elapsed = 0.0
+shader_parameter/cloud_velocity = Vector2(7, 1.5)
+shader_parameter/cloud_scale = 96.0
+shader_parameter/shadow_strength = 0.08
+shader_parameter/clouds_enabled = true

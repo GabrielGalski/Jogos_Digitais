@@ -3,6 +3,7 @@ extends RefCounted
 ## Per-emission numerical snapshot. Never reads the currently equipped cards.
 
 var damage: float
+var manifestation_id: StringName = &""
 var fire_interval: float
 var projectile_speed: float
 var projectile_lifetime: float

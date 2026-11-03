@@ -1,25 +1,80 @@
-[gd_resource type="SpriteFrames" load_steps=11 format=3]
+[gd_resource type="SpriteFrames" format=3]
 
-[ext_resource type="Texture2D" path="res://assets/characters/player/idle/player_idle_01.png" id="1_idle1"]
-[ext_resource type="Texture2D" path="res://assets/characters/player/idle/player_idle_02.png" id="2_idle2"]
-[ext_resource type="Texture2D" path="res://assets/characters/player/idle/player_idle_03.png" id="3_idle3"]
-[ext_resource type="Texture2D" path="res://assets/characters/player/idle/player_idle_04.png" id="4_idle4"]
-[ext_resource type="Texture2D" path="res://assets/characters/player/idle/player_idle_05.png" id="5_idle5"]
-[ext_resource type="Texture2D" path="res://assets/characters/player/idle/player_idle_06.png" id="6_idle6"]
-[ext_resource type="Texture2D" path="res://assets/characters/player/run/player_run_01.png" id="7_run1"]
-[ext_resource type="Texture2D" path="res://assets/characters/player/run/player_run_02.png" id="8_run2"]
-[ext_resource type="Texture2D" path="res://assets/characters/player/run/player_run_03.png" id="9_run3"]
-[ext_resource type="Texture2D" path="res://assets/characters/player/run/player_run_04.png" id="10_run4"]
+[ext_resource type="Texture2D" path="res://assets/characters/player/idle/player_idle_01.png" id="1_xt3xs"]
+[ext_resource type="Texture2D" path="res://assets/characters/player/idle/player_idle_02.png" id="2_rc2pw"]
+[ext_resource type="Texture2D" path="res://assets/characters/player/idle/player_idle_03.png" id="3_d1xvm"]
+[ext_resource type="Texture2D" path="res://assets/characters/player/idle/player_idle_04.png" id="4_v0yyd"]
+[ext_resource type="Texture2D" path="res://assets/characters/player/idle/player_idle_05.png" id="5_6y34p"]
+[ext_resource type="Texture2D" path="res://assets/characters/player/idle/player_idle_06.png" id="6_6risd"]
+[ext_resource type="Texture2D" path="res://assets/characters/player/roll/roll1.png" id="7_ksd4q"]
+[ext_resource type="Texture2D" path="res://assets/characters/player/roll/roll2.png" id="8_aqr6o"]
+[ext_resource type="Texture2D" path="res://assets/characters/player/roll/roll3.png" id="9_xhylo"]
+[ext_resource type="Texture2D" path="res://assets/characters/player/run/player_run_01.png" id="10_rjhrv"]
+[ext_resource type="Texture2D" path="res://assets/characters/player/run/player_run_02.png" id="11_s2y7v"]
+[ext_resource type="Texture2D" path="res://assets/characters/player/run/player_run_03.png" id="12_4gmgu"]
+[ext_resource type="Texture2D" path="res://assets/characters/player/run/player_run_04.png" id="13_xp0yh"]
 
 [resource]
 animations = [{
-"frames": [{"duration": 1.0, "texture": ExtResource("1_idle1")}, {"duration": 1.0, "texture": ExtResource("2_idle2")}, {"duration": 1.0, "texture": ExtResource("3_idle3")}, {"duration": 1.0, "texture": ExtResource("4_idle4")}, {"duration": 1.0, "texture": ExtResource("5_idle5")}, {"duration": 1.0, "texture": ExtResource("6_idle6")}],
-"loop": true,
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("1_xt3xs")
+}, {
+"duration": 1.0,
+"texture": ExtResource("2_rc2pw")
+}, {
+"duration": 1.0,
+"texture": ExtResource("3_d1xvm")
+}, {
+"duration": 1.0,
+"texture": ExtResource("4_v0yyd")
+}, {
+"duration": 1.0,
+"texture": ExtResource("5_6y34p")
+}, {
+"duration": 1.0,
+"texture": ExtResource("6_6risd")
+}],
+"loop": 1,
 "name": &"idle",
 "speed": 7.0
 }, {
-"frames": [{"duration": 1.0, "texture": ExtResource("7_run1")}, {"duration": 1.0, "texture": ExtResource("8_run2")}, {"duration": 1.0, "texture": ExtResource("9_run3")}, {"duration": 1.0, "texture": ExtResource("10_run4")}],
-"loop": true,
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("7_ksd4q")
+}, {
+"duration": 1.0,
+"texture": ExtResource("8_aqr6o")
+}, {
+"duration": 1.0,
+"texture": ExtResource("9_xhylo")
+}],
+"loop": 0,
+"name": &"roll",
+"speed": 1.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("1_xt3xs")
+}],
+"loop": 0,
+"name": &"roll_ready",
+"speed": 1.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("10_rjhrv")
+}, {
+"duration": 1.0,
+"texture": ExtResource("11_s2y7v")
+}, {
+"duration": 1.0,
+"texture": ExtResource("12_4gmgu")
+}, {
+"duration": 1.0,
+"texture": ExtResource("13_xp0yh")
+}],
+"loop": 1,
 "name": &"run",
 "speed": 10.0
 }]

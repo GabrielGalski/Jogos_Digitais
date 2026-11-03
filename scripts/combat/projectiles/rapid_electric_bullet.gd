@@ -1,5 +1,6 @@
 extends Area2D
 class_name RapidElectricBullet
+const ENEMY_CONTACTS: Script = preload("res://scripts/combat/projectile_enemy_contacts.gd")
 
 @export var movement_speed := 180.0
 @export var direct_damage := 3.0
@@ -36,8 +37,9 @@ func _physics_process(delta: float) -> void:
 	if consumed or is_queued_for_deletion():
 		return
 	var next_position: Vector2 = global_position + direction * movement_speed * delta
-	var query: PhysicsRayQueryParameters2D = PhysicsRayQueryParameters2D.create(global_position, next_position, 4 | obstacle_mask)
-	var hit: Dictionary = get_world_2d().direct_space_state.intersect_ray(query)
+	var shape: CircleShape2D = ($CollisionShape2D as CollisionShape2D).shape as CircleShape2D
+	var hit: Dictionary = ENEMY_CONTACTS.sweep(get_tree(), get_world_2d().direct_space_state,
+		global_position, next_position, 4 | obstacle_mask, shape.radius)
 	if not hit.is_empty():
 		_on_body_entered(hit["collider"] as Node2D)
 		if consumed:

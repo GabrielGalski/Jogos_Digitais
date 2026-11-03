@@ -9,10 +9,12 @@ var _floor: Dictionary = {}
 var _root: Node2D
 var _arena: Node2D
 var _definitions: Dictionary = {}
+var _terrain_height: Callable = Callable()
 
 
-func build(arena: Node2D, layers: Array, definitions: Dictionary, floor_cells: Dictionary, texture_source: RefCounted = null) -> void:
+func build(arena: Node2D, layers: Array, definitions: Dictionary, floor_cells: Dictionary, texture_source: RefCounted = null, terrain_height: Callable = Callable()) -> void:
 	_arena = arena
+	_terrain_height = terrain_height
 	_floor = floor_cells
 	_definitions = definitions
 	_root = Node2D.new()
@@ -23,6 +25,8 @@ func build(arena: Node2D, layers: Array, definitions: Dictionary, floor_cells: D
 	var ordered: Array = layers.duplicate()
 	ordered.reverse()
 	for layer: Dictionary in ordered:
+		if not bool(layer.get("visible", true)):
+			continue
 		var layer_name: String = str(layer.get("__identifier", ""))
 		if layer_name == "Collisions":
 			_build_intgrid(layer)
@@ -159,11 +163,17 @@ func _finish_unit(unit: Dictionary) -> void:
 		baseline = origin.y + (0.0 if south else 48.0)
 		if kind == "wall" and bounds.size.x > 1.0:
 			footprint = Rect2(Vector2(bounds.position.x, origin.y + (0.0 if south else 40.0)), Vector2(bounds.size.x, 8.0))
+			# An isolated 8px bottom cap may fall into the next legacy atlas
+			# band. Never let its inferred base block empty floor 40px below
+			# the rendered fragments; complete wall bases keep their footprint.
+			footprint = footprint.intersection(bounds)
 		# Junctions carry a lateral support across the projected face.
 		# Continuous LE/LD tiles and floor containment close the outer sides.
 	node.position = Vector2(0.0, baseline - FEET_OFFSET)
 	for child: Node in node.get_children():
 		(child as Node2D).position -= node.position
+		if _terrain_height.is_valid() and child is Sprite2D:
+			(child as Sprite2D).position.y -= roundf(float(_terrain_height.call(_arena.to_global(Vector2(bounds.get_center().x, baseline)))))
 	node.set_meta("kind", kind)
 	node.set_meta("authored_origin", origin)
 	node.set_meta("footprint", footprint)
