@@ -1,6 +1,6 @@
 extends Node2D
-## Atlas bridges: walkable deck stays in Floor_Bridges; rails and wet masonry
-## have separate depth, static physics and a water-synchronised local shader.
+## Classify the authored atlas before terrain support is built. Complete stamps
+## can live in any bridge layer; rails and wet masonry keep their own depth.
 
 const CONTACT_SHADER: Shader = preload("res://shaders/bridge_submersion.gdshader")
 const PARTS: Array[String] = ["Bridge_BackRail", "Bridge_FrontRail", "Bridge_Facade"]
@@ -8,6 +8,53 @@ var bridges: Array[Node2D] = []
 var contact_materials: Array[ShaderMaterial] = []
 var water_elapsed: float = 0.0
 var _water: Node = null
+
+
+static func prepare_layers(layers: Array, definitions: Dictionary) -> Array:
+	var prepared: Array = []
+	var parts: Dictionary[String, Dictionary] = {}
+	var has_paint: bool = false
+	for layer: Dictionary in layers:
+		var source_id: int = int(layer.get("__tilesetDefUid", -1)) if layer.get("__tilesetDefUid") != null else -1
+		var definition: Dictionary = definitions.get(source_id, {}) as Dictionary
+		var path: String = str(definition.get("relPath", "")).replace("\\", "/")
+		if not path.ends_with("/bridge_all.png"):
+			prepared.append(layer)
+			continue
+		if not bool(layer.get("visible", true)):
+			continue
+		var tiles: Array = (layer.get("autoLayerTiles", []) as Array).duplicate()
+		tiles.append_array(layer.get("gridTiles", []))
+		var offset: Vector2i = Vector2i(int(layer.get("__pxTotalOffsetX", 0)), int(layer.get("__pxTotalOffsetY", 0)))
+		for original: Dictionary in tiles:
+			var source: Array = original.get("src", []) as Array
+			var point: Array = original.get("px", []) as Array
+			if source.size() < 2 or point.size() < 2:
+				continue
+			# bridge_all 144x112: rear rail y=0; deck y=16/32;
+			# front rail y=48; lower supports y=64/80/96.
+			var source_y: int = int(source[1])
+			var part_name: String = "Floor_Bridges" if source_y in [16, 32] else "Bridge_BackRail" if source_y == 0 else "Bridge_FrontRail" if source_y == 48 else "Bridge_Facade"
+			if not parts.has(part_name):
+				var part: Dictionary = layer.duplicate()
+				part["__identifier"] = part_name
+				part["gridTiles"] = []
+				part["autoLayerTiles"] = []
+				part["__opacity"] = 1.0
+				for key: String in ["pxOffsetX", "pxOffsetY", "__pxTotalOffsetX", "__pxTotalOffsetY"]:
+					part[key] = 0
+				parts[part_name] = part
+			var tile: Dictionary = original.duplicate()
+			tile["px"] = [int(point[0]) + offset.x, int(point[1]) + offset.y]
+			tile["a"] = float(tile.get("a", 1.0)) * float(layer.get("__opacity", 1.0))
+			(parts[part_name]["gridTiles"] as Array).append(tile)
+			has_paint = true
+	if not has_paint:
+		return layers
+	for part_name: String in ["Floor_Bridges", "Bridge_BackRail", "Bridge_FrontRail", "Bridge_Facade"]:
+		if parts.has(part_name):
+			prepared.append(parts[part_name])
+	return prepared
 
 
 static func is_bridge_decoration(layer_name: String) -> bool:

@@ -163,15 +163,6 @@ func _build_ldtk_level() -> bool:
 		if str(layer.get("__identifier", "")) == "GroundBase" and bool(layer.get("visible", true)):
 			has_solid_base = true
 	set_meta(&"composed_levels", composition.source_levels)
-	_level_layers = layers
-	_elevation = ELEVATION.new() as Node2D
-	_elevation.name = "TerrainElevation"
-	add_child(_elevation)
-	_elevation.call("configure", layers)
-	_gameplay = GAMEPLAY.new() as Node2D
-	_gameplay.name = "Gameplay"
-	add_child(_gameplay)
-	_gameplay.call("configure", layers)
 	var tileset_defs: Dictionary = {}
 	var definitions: Dictionary = map_data.get("defs", {})
 	for definition_variant in definitions.get("tilesets", []):
@@ -182,6 +173,16 @@ func _build_ldtk_level() -> bool:
 			if FileAccess.file_exists(local_source) or ResourceLoader.exists(local_source):
 				definition["relPath"] = local_source
 		tileset_defs[int(definition.get("uid", -1))] = definition
+	layers = BRIDGES.prepare_layers(layers, tileset_defs)
+	_level_layers = layers
+	_elevation = ELEVATION.new() as Node2D
+	_elevation.name = "TerrainElevation"
+	add_child(_elevation)
+	_elevation.call("configure", layers)
+	_gameplay = GAMEPLAY.new() as Node2D
+	_gameplay.name = "Gameplay"
+	add_child(_gameplay)
+	_gameplay.call("configure", layers)
 	var tile_set: TileSet = TileSet.new()
 	tile_set.tile_size = Vector2i(TILE_SIZE, TILE_SIZE)
 	var atlas_sources: Dictionary = {}
