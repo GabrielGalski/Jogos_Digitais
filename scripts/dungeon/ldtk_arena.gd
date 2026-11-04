@@ -34,6 +34,7 @@ const ELEVATION: Script = preload("res://scripts/dungeon/ldtk_elevation.gd")
 const PLAYER_DEFEAT: Script = preload("res://scripts/visual/player_defeat.gd")
 const TERRAIN_CLOUDS: Script = preload("res://scripts/visual/terrain_cloud_shadows.gd")
 const SOIL_MATERIAL: ShaderMaterial = preload("res://resources/visual/terrain/open_world_soil.tres")
+const JUMPER: Script = preload("res://scripts/debug/scene_jumper.gd")
 const BACKGROUND_COLOR: Color = Color("#25131a")
 
 var _floor_cells: Dictionary = {}
@@ -81,25 +82,41 @@ func _process(delta: float) -> void:
 		_completion_skip_requested = false
 		var player: Player = get_node_or_null("Nox") as Player
 		if player != null and not player.dead:
-			for encounter: Node2D in get_node("SpiritHordes").get("encounters"):
-				encounter.call("skip_to_completion")
+			var skipped: bool = false
+			if level_name == "Room_1":
+				for encounter: Node2D in get_node("SpiritHordes").get("encounters"):
+					if int(encounter.get("defeated_count")) < int(encounter.get("kill_target")):
+						encounter.call("skip_to_completion")
+						skipped = true
+			if not skipped:
+				_jump_to_scene(JUMPER.ASTERION_SCENE if level_name == "Room_1" else JUMPER.SPIRIT_SCENE)
 	_texture_refresh_remaining -= delta
 	if _texture_refresh_remaining <= 0.0:
 		_texture_refresh_remaining = 0.3
 		_textures.call("refresh")
 
 
-func _input(event: InputEvent) -> void:
-	var key: InputEventKey = event as InputEventKey
-	if level_name != "Room_1" or key == null or not key.pressed or key.echo or _travel_busy:
+func request_scene_jump() -> void:
+	if _travel_busy:
 		return
-	if key.physical_keycode != KEY_TAB and key.keycode != KEY_TAB:
+	var player: Player = get_node_or_null("Nox") as Player
+	if player != null and player.dead:
+		get_node("/root/SceneJumper").call("travel_to_scene", self, JUMPER.ASTERION_SCENE if level_name == "Room_1" else JUMPER.SPIRIT_SCENE)
 		return
 	_completion_skip_requested = true
-	get_viewport().set_input_as_handled()
+
+
+func _jump_to_scene(destination: String) -> void:
+	var player: Player = get_node("Nox") as Player
+	_pending_route = {"scene_path": destination}
+	_travel_busy = true
+	entry_complete = false
+	player.contact_invulnerability = maxf(player.contact_invulnerability, warp_departure_duration + 1.0)
+	_start_warp_effect(false)
 
 
 func _ready() -> void:
+	add_to_group(&"scene_jump_controllers")
 	if not _build_ldtk_level():
 		push_error("Nao foi possivel carregar a arena LDtk: " + map_path)
 		return
@@ -122,15 +139,15 @@ func _ready() -> void:
 	hordes.name = "SpiritHordes"
 	add_child(hordes)
 	var allowed_cells: Dictionary = _combat_allowed_cells()
-	hordes.call("build", _level_layers, get_node("Nox"), _gameplay, is_sword_ground_point, remains, Callable(_elevation, "height_at"), allowed_cells)
+	hordes.call("build", _level_layers, get_node("Nox"), _gameplay, is_sword_ground_point, remains, _terrain_and_warp_height, allowed_cells)
 	var pedestals: Node2D = HORDE_PEDESTALS.new() as Node2D
 	pedestals.name = "HordePedestals"
 	add_child(pedestals)
-	pedestals.call("build", _level_layers, _textures, get_node("Nox"), hordes.get("encounters"), Callable(_elevation, "height_at"))
+	pedestals.call("build", _level_layers, _textures, get_node("Nox"), hordes.get("encounters"), _terrain_and_warp_height)
 	var ambient_enemies: Node2D = FLYING_EYE_ZONES.new() as Node2D
 	ambient_enemies.name = "FlyingEyeZones"
 	add_child(ambient_enemies)
-	ambient_enemies.call("configure", _level_layers, get_node("Nox"), _gameplay, allowed_cells, is_ground_surface_point, Callable(_elevation, "height_at"), hordes.get("encounters"))
+	ambient_enemies.call("configure", _level_layers, get_node("Nox"), _gameplay, allowed_cells, is_ground_surface_point, _terrain_and_warp_height, hordes.get("encounters"))
 	if lighting_profile != null:
 		var lighting: CanvasLayer = ROOM_LIGHTING.new() as CanvasLayer
 		lighting.name = "RoomLighting"
@@ -451,6 +468,7 @@ func _layer_z_index(layer_name: String) -> int:
 		"Floor_GrassBorders": return -17
 		"Floor_StonePaths": return -17
 		"Floor_Paths": return -18
+		"Floor_WarpPlaza": return -18
 		"Floor_Bridges": return -16
 		"TerrainFaces": return -17
 		"TerrainCliffRim": return -18
@@ -539,6 +557,11 @@ func is_sword_ground_point(world_point: Vector2) -> bool:
 
 func _local_terrain_height(point: Vector2) -> float:
 	return float(_elevation.call("height_at", to_global(point)))
+
+
+func _terrain_and_warp_height(world_point: Vector2) -> float:
+	# Ground artwork stays on its original plane. Only actors use prop relief.
+	return float(_elevation.call("height_at", world_point)) + float(_warps.call("height_at", world_point))
 
 
 func _combat_allowed_cells() -> Dictionary:

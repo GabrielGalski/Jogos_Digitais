@@ -17,6 +17,7 @@ config/features=PackedStringArray("4.7", "GL Compatibility")
 [autoload]
 
 GameCursor="*res://scripts/ui/game_cursor.gd"
+SceneJumper="*res://scripts/debug/scene_jumper.gd"
 
 [display]
 

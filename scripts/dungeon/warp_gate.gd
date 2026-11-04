@@ -1,19 +1,18 @@
 extends Node2D
-## Flat authored warp sprite. Its opaque footprint triggers travel, without elevation.
+## Authored warp, static yellow inlays and a centre-aligned arrival point.
 
 signal travel_requested(gate: Node2D)
-const SPAWN_OFFSET: Vector2 = Vector2(0,-10)
-const CIRCULATION: Script = preload("res://scripts/visual/warp_circulation.gd")
+const VISUAL: Script = preload("res://scripts/visual/warp_visual.gd")
 const ACTION_PROMPT: Script = preload("res://scripts/visual/world_action_prompt.gd")
+const PLATFORM: Script = preload("res://scripts/dungeon/central_warp_platform.gd")
 var data: Dictionary = {}
 var actor: Player = null
 var gameplay: Node2D = null
-var _ring: Node2D = null
 var _armed: bool = false
 var _plate: Sprite2D = null
-var _surface_image: Image = null
-var _surface_pixels: Rect2 = Rect2()
+var _visual: Node2D = null
 var _action: Sprite2D = null
+var _platform: Node2D = null
 
 
 func configure(description: Dictionary, texture: Texture2D) -> void:
@@ -21,66 +20,39 @@ func configure(description: Dictionary, texture: Texture2D) -> void:
 	position = data.position
 	z_index = -15
 	texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
-	_plate = Sprite2D.new()
-	_plate.name = "Plate"
-	_plate.texture = texture
-	_plate.centered = false
-	add_child(_plate)
+	y_sort_enabled = true
+	_visual = VISUAL.new() as Node2D
+	_visual.name = "Presentation"
+	var display_scale: float = clampf(float(data.get("DisplayScale", 1.0 if bool(data.get("Central", false)) else 0.5)), 0.125, 4.0)
+	_visual.call("configure", bool(data.get("Central", false)), texture, display_scale)
+	add_child(_visual)
+	_plate = _visual.get("plate") as Sprite2D
+	if bool(data.get("Central", false)):
+		_platform = PLATFORM.new() as Node2D
+		_platform.name = "Platform"
+		_platform.call("configure", _visual, data)
+		add_child(_platform)
 	_action = ACTION_PROMPT.new() as Sprite2D
 	_action.name = "ActionPrompt"
 	add_child(_action)
-	_refresh_surface()
-	if texture != null:
-		texture.changed.connect(_refresh_surface)
-	if bool(data.get("WhiteRing", false)):
-		_ring = CIRCULATION.new() as Node2D
-		_ring.name = "WhiteCirculation"
-		_ring.visible = false
-		add_child(_ring)
-		_update_circulation_size()
+	_action.call("configure", Vector2(0, roundf((-121.0 if bool(data.get("Central", false)) else -51.0) * display_scale)))
 
 
 func spawn_position() -> Vector2:
-	return position + SPAWN_OFFSET
-
-
-func _refresh_surface() -> void:
-	_surface_image = null
-	_surface_pixels = Rect2()
-	if _plate.texture == null:
-		return
-	var source: Image = _plate.texture.get_image()
-	if source == null or source.is_empty():
-		return
-	if source.is_compressed() and source.decompress() != OK:
-		return
-	_surface_image = source
-	_plate.position = -Vector2(source.get_size())*0.5
-	var used: Rect2i = source.get_used_rect()
-	_surface_pixels = Rect2(used)
-	_action.call("configure", Vector2(0, minf(-45.0, _plate.position.y - 13.0)))
-	_update_circulation_size()
-
-
-func _update_circulation_size() -> void:
-	if _ring != null and _surface_pixels.has_area():
-		_ring.call("configure", _surface_pixels.size * 0.25, _plate.position + _surface_pixels.get_center())
+	return position - VISUAL.FEET_OFFSET + Vector2(0, float(_platform.get("elevation")) if _platform != null else 0.0)
 
 
 func supports_feet(world_feet: Vector2) -> bool:
-	if _surface_image == null:
-		return false
-	var pixel: Vector2 = to_local(world_feet)-_plate.position
-	return _supports_pixel(pixel)
+	if _platform != null:
+		return bool(_platform.call("supports_feet", world_feet))
+	return _visual != null and bool(_visual.call("supports_feet", _visual.to_local(world_feet)))
 
 
-func _supports_pixel(pixel: Vector2) -> bool:
-	return _surface_pixels.has_point(pixel) and _surface_image.get_pixel(floori(pixel.x),floori(pixel.y)).a >= 0.5
+func height_at(world_feet: Vector2) -> float:
+	return float(_platform.call("height_at", world_feet)) if _platform != null else 0.0
 
 
 func _physics_process(_delta: float) -> void:
-	if _ring != null:
-		_ring.visible = condition_satisfied()
 	if _action != null:
 		_action.call("set_available", can_interact())
 	if not is_instance_valid(actor):

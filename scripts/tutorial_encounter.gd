@@ -128,13 +128,22 @@ func _on_boss_jump() -> void:
 	# The boss owns camera shake during its combat loop.
 	effects.camera_feedback_enabled = false
 
-func _input(event: InputEvent) -> void:
-	if event is InputEventKey and event.pressed and not event.echo and event.physical_keycode == KEY_TAB:
-		if phase == Phase.FINISHED or phase == Phase.LOST:
-			return
-		if phase < Phase.BOSS:
-			skip_requested = true
-		get_viewport().set_input_as_handled()
+func request_boss_skip() -> bool:
+	if phase >= Phase.BOSS:
+		return false
+	completion.call("_dismiss_elite_lesson")
+	get_tree().paused = false
+	skip_requested = true
+	return true
+
+
+func prepare_scene_jump() -> void:
+	# Prevent delayed dialogue/combat callbacks from starting another tutorial step.
+	phase = Phase.FINISHED
+	skip_requested = false
+	completion.call("_stop_combat")
+	dialogue.close_dialogue()
+	set_process(false)
 
 func skip_to_boss() -> void:
 	if phase >= Phase.BOSS:

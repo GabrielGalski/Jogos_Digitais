@@ -1,5 +1,5 @@
 extends SceneTree
-## Three physical Tab presses reach the boss, hall, then the corridor-end arena.
+## First Tab reaches Asterion; the next fresh press returns to the open map.
 
 var failures: int = 0
 
@@ -34,28 +34,20 @@ func _run() -> void:
 	var arena: Node2D = current_scene as Node2D
 	var boss: Node2D = arena.get_node("MinotaurChair") as Node2D
 	var encounter: Node = boss.get_node("TutorialEncounter")
-	var crosshair: Sprite2D = encounter.get_node_or_null("CombatAim/Crosshair") as Sprite2D
+	var crosshair: Sprite2D = arena.get_node_or_null("ArenaUI/Crosshair") as Sprite2D
 	_check(is_instance_valid(crosshair) and crosshair.texture != null and crosshair.scale.is_equal_approx(Vector2.ONE * 0.5), "Tutorial reticle is missing or incorrectly scaled")
 	_tab()
 	await process_frame
 	_check(bool(encounter.get("skip_requested")), "First Tab did not request the existing boss skip")
-	paused = true
-	_check(not (encounter.get_node("Horde") as Node).can_process(), "Tutorial combat continued while an overlay paused the game")
-	_tab()
-	await process_frame
-	await process_frame
-	_check(bool(encounter.get("completion").get("completed")), "Second Tab did not start merchant transition")
-	_check(not paused, "Second Tab left tutorial UI paused")
-	await create_timer(0.85).timeout
-	_check(is_instance_valid(current_scene) and current_scene.scene_file_path == "res://scenes/merchant_corridor.tscn", "Second Tab did not fade into merchant hall")
+	await create_timer(1.7).timeout
+	_check(int(encounter.get("phase")) == 7, "First Tab starts the boss after arrival")
 	_tab(true)
 	await process_frame
-	_check(not bool(current_scene.get("restart_started")), "Held Tab incorrectly skipped the merchant hall")
+	_check(current_scene == arena, "Keyboard repeat does not leave the boss phase")
 	_tab()
-	await process_frame
-	_check(bool(current_scene.get("restart_started")), "Third Tab did not request the corridor-end jump")
-	_tab()
-	await create_timer(0.7).timeout
-	_check(is_instance_valid(current_scene) and current_scene.scene_file_path == "res://scenes/dungeon/ldtk_arena.tscn", "Third Tab did not reach the existing corridor-end scene")
+	var deadline: int = Time.get_ticks_msec() + 12000
+	while current_scene == arena and Time.get_ticks_msec() < deadline:
+		await process_frame
+	_check(current_scene != null and current_scene.scene_file_path == SceneJumper.WORLD_SCENE, "The next Tab returns to the open world without the merchant")
 	print("TUTORIAL TAB SKIP: " + ("PASS" if failures == 0 else "FAIL"))
 	quit(0 if failures == 0 else 1)

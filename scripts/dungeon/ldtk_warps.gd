@@ -21,7 +21,7 @@ static func descriptions(layers: Array) -> Array[Dictionary]:
 			continue
 		var offset: Vector2 = Vector2(float(layer.get("__pxTotalOffsetX",0)),float(layer.get("__pxTotalOffsetY",0)))
 		for entity: Dictionary in layer.get("entityInstances",[]):
-			if str(entity.get("__identifier","")) != "Warp":
+			if str(entity.get("__identifier","")) not in ["Warp", "CentralWarp"]:
 				continue
 			var config: Dictionary = {"WarpId":"entry","TargetLevel":"","TargetWarp":"entry","TargetMap":"","IsEntrance":false,"Enabled":true}
 			for field: Dictionary in entity.get("fieldInstances",[]):
@@ -30,15 +30,21 @@ static func descriptions(layers: Array) -> Array[Dictionary]:
 			if not bool(config.Enabled):
 				continue
 			var pixel: Array = entity.get("px",[0,0])
-			var pivot: Array = entity.get("__pivot",[0.5,0.5])
-			config["position"] = Vector2(float(pixel[0]),float(pixel[1])) + offset + Vector2((0.5-float(pivot[0]))*float(entity.get("width",48)),(0.5-float(pivot[1]))*float(entity.get("height",48)))
+			config["Central"] = str(entity.get("__identifier", "")) == "CentralWarp"
+			# Keep source art intact; the authored entity dimensions control its display size.
+			var source_size: Vector2 = Vector2(192, 256) if bool(config.Central) else Vector2(96, 96)
+			config["DisplayScale"] = minf(float(entity.get("width", source_size.x)) / source_size.x, float(entity.get("height", source_size.y)) / source_size.y)
+			# LDtk pivots are authored at the usable centre, not the image rectangle centre.
+			config["position"] = Vector2(float(pixel[0]),float(pixel[1])) + offset
 			result.append(config)
 	return result
 
 
 func build(layers: Array, textures: RefCounted) -> void:
-	var texture: Texture2D = textures.call("get_texture","assets/tiles/floor/warp.png") as Texture2D
+	y_sort_enabled = true
 	for config: Dictionary in descriptions(layers):
+		var path: String = "assets/tiles/structures/central_warp.png" if bool(config.get("Central", false)) else "assets/tiles/structures/warp.png"
+		var texture: Texture2D = textures.call("get_texture", path) as Texture2D
 		var gate: Node2D = GATE.new() as Node2D
 		gate.name = "Warp_" + str(gates.size())
 		gate.call("configure",config,texture)
@@ -59,6 +65,13 @@ func bind_actor(player: Player, gameplay: Node2D = null) -> void:
 	for gate: Node2D in gates:
 		gate.set("actor",player)
 		gate.set("gameplay", gameplay)
+
+
+func height_at(world_feet: Vector2) -> float:
+	var result: float = 0.0
+	for gate: Node2D in gates:
+		result = maxf(result, float(gate.call("height_at", world_feet)))
+	return result
 
 
 static func resolve(current_map: String, config: Dictionary) -> Dictionary:
@@ -105,7 +118,8 @@ static func resolve(current_map: String, config: Dictionary) -> Dictionary:
 				matches.append(candidate)
 		if matches.size() != 1:
 			return {"ok":false,"error":"Warp de destino ausente ou com ID duplicado."}
-		var spawn: Vector2 = (matches[0].position as Vector2) + Vector2(0,-10)
+		var warp_height: float = clampf(float(matches[0].get("HeightPx", 8)), 0.0, 32.0) if bool(matches[0].get("Central", false)) else 0.0
+		var spawn: Vector2 = (matches[0].position as Vector2) - Vector2(0, 3) + Vector2(0, warp_height)
 		for layer: Dictionary in destination_layers:
 			if str(layer.get("__identifier","")) != "Gameplay":
 				continue

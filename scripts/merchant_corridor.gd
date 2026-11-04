@@ -188,10 +188,8 @@ func _input(event: InputEvent) -> void:
 	if event is InputEventKey:
 		var key: InputEventKey = event as InputEventKey
 		if key.pressed and not key.echo and (key.physical_keycode == KEY_TAB or key.keycode == KEY_TAB):
-			if not restart_started:
-				restart_started = true
-				get_viewport().set_input_as_handled()
-				_restart_corridor.call_deferred()
+			get_viewport().set_input_as_handled()
+			get_node("/root/SceneJumper").call("request_jump")
 			return
 	if event is InputEventMouseMotion:
 		var motion: InputEventMouseMotion = event as InputEventMouseMotion

@@ -1,5 +1,5 @@
 extends Node2D
-## LDtk adapter and shared relief query; the warp remains a separate flat platform.
+## LDtk pedestal adapter; combines local relief with the supplied ground query.
 const PEDESTAL: Script = preload("res://scripts/dungeon/horde_pedestal.gd")
 const ENTITIES: Script = preload("res://scripts/dungeon/ldtk_door_blocks.gd")
 var pedestals: Array[Node2D] = []

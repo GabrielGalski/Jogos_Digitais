@@ -6,13 +6,17 @@ const GAMEPLAY_KIT: Script = preload("res://scripts/combat/player_gameplay_kit.g
 const SOIL_SURFACE: Script = preload("res://scripts/visual/tutorial_soil_surface.gd")
 const WARP_TRANSITION: Script = preload("res://scripts/visual/warp_transition.gd")
 const PLAYER_DEFEAT: Script = preload("res://scripts/visual/player_defeat.gd")
+const JUMPER: Script = preload("res://scripts/debug/scene_jumper.gd")
 
 var entry_player_state: Dictionary = {}
 var entrance_complete: bool = false
+var _world_jump_requested: bool = false
+var _departing: bool = false
 @onready var player: Player = $Mox
 
 
 func _ready() -> void:
+	add_to_group(&"scene_jump_controllers")
 	var soil: Node = SOIL_SURFACE.new()
 	soil.name = "TutorialSoilSurface"
 	add_child(soil)
@@ -22,6 +26,9 @@ func _ready() -> void:
 	kit.set("combat_enabled", false)
 	player.add_child(kit)
 	_restore_player_state()
+	# Both the standalone arena and LDtk gates put the feet at the platform centre.
+	var entrance: Node2D = get_node("EntranceWarp") as Node2D
+	player.position = entrance.position - Vector2(0, 3)
 	var defeat: CanvasLayer = PLAYER_DEFEAT.new() as CanvasLayer
 	defeat.name = "PlayerDefeat"
 	add_child(defeat)
@@ -40,6 +47,44 @@ func _ready() -> void:
 	player.intro_locked = false
 	entrance_complete = true
 	entrance_finished.emit()
+
+
+func request_scene_jump() -> void:
+	if _departing:
+		return
+	if player.dead:
+		get_node("/root/SceneJumper").call("travel_to_scene", self, JUMPER.WORLD_SCENE)
+		return
+	var encounter: Node = get_node("MinotaurChair/TutorialEncounter")
+	if bool(encounter.call("request_boss_skip")):
+		return
+	else:
+		var completion: Node = encounter.get("completion") as Node
+		completion.call("_dismiss_elite_lesson")
+		get_tree().paused = false
+		_world_jump_requested = true
+
+
+func _process(_delta: float) -> void:
+	if _world_jump_requested and entrance_complete and not _departing:
+		_world_jump_requested = false
+		_depart_to_world.call_deferred()
+
+
+func _depart_to_world() -> void:
+	if _departing:
+		return
+	_departing = true
+	var boss: Node2D = get_node("MinotaurChair") as Node2D
+	var encounter: Node = boss.get_node("TutorialEncounter")
+	encounter.call("prepare_scene_jump")
+	boss.set_physics_process(false)
+	(boss.get("actor") as CharacterBody2D).velocity = Vector2.ZERO
+	boss.call("_restore_camera")
+	var transition: CanvasLayer = get_node("WarpTransition") as CanvasLayer
+	transition.call("play", false, player)
+	await transition.finished
+	get_node("/root/SceneJumper").call("travel_to_scene", self, JUMPER.WORLD_SCENE, player)
 
 
 func _restore_player_state() -> void:
