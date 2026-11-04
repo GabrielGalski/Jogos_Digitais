@@ -28,6 +28,24 @@ static func _local_rect(area: Rect2, origin: Rect2, size: Vector2i) -> Rect2i:
 	return Rect2i(first, ending - first).intersection(Rect2i(Vector2i.ZERO, size))
 
 
+static func _seal_cliff_joints(mask: Image, cliff: Image, floor_image: Image, faces: Array[Rect2i]) -> void:
+	var extent: Rect2i = Rect2i(Vector2i.ZERO, mask.get_size())
+	for face: Rect2i in faces:
+		# The neighbouring rim and face can each have transparent edge pixels.
+		# Seal only the space between existing terrain pixels, never past the
+		# outer rock silhouette or along unrelated river banks.
+		var strip: Rect2i = Rect2i(face.position - Vector2i(GRID, 0), face.size + Vector2i(GRID * 2, 0)).intersection(extent)
+		for y: int in range(strip.position.y, strip.end.y):
+			var first: int = -1
+			var last: int = -1
+			for x: int in range(strip.position.x, strip.end.x):
+				if cliff.get_pixel(x, y).r > 0.5 or floor_image.get_pixel(x, y).r > 0.5:
+					if first < 0: first = x
+					last = x
+			if first >= 0 and last > first:
+				mask.fill_rect(Rect2i(first, y, last - first + 1, 1), Color.TRANSPARENT)
+
+
 static func build(rect: Rect2, floor_cells: Dictionary, layers: Array, definitions: Dictionary, textures: RefCounted, height_at: Callable) -> ImageTexture:
 	var size: Vector2i = Vector2i(ceili(rect.size.x), ceili(rect.size.y))
 	# LA8 stores luminance + alpha: two bytes per pixel, nearest, no mipmaps.
@@ -47,6 +65,7 @@ static func build(rect: Rect2, floor_cells: Dictionary, layers: Array, definitio
 	var opaque_cliff: Image = Image.create_empty(size.x, size.y, false, Image.FORMAT_L8)
 	opaque_cliff.fill(Color.BLACK)
 	var coast_rects: Array[Rect2i] = []
+	var face_rects: Array[Rect2i] = []
 	var projection: int = 0
 	for layer: Dictionary in layers:
 		if str(layer.get("__identifier", "")) == "TerrainCliffRim" and bool(layer.get("visible", true)):
@@ -65,6 +84,8 @@ static func build(rect: Rect2, floor_cells: Dictionary, layers: Array, definitio
 			var bounds: Rect2i = _local_rect(Rect2(point, Vector2.ONE * GRID), rect, size)
 			if not bounds.has_area():
 				continue
+			if str(layer.get("__identifier", "")) == "TerrainFaces":
+				face_rects.append(bounds)
 			var foot: Vector2i = Vector2i(((point + Vector2(8, 8 if is_bank else projection + 8)) / GRID).floor())
 			# Only the water-facing contour may reveal water through the atlas alpha.
 			# Interior front faces retain logical clipping, including their soft base.
@@ -85,4 +106,5 @@ static func build(rect: Rect2, floor_cells: Dictionary, layers: Array, definitio
 			for x: int in range(bounds.position.x, bounds.end.x):
 				var hidden: bool = projected_floor.get_pixel(x, y).r > 0.5 or opaque_cliff.get_pixel(x, y).r > 0.5
 				mask.set_pixel(x, y, Color.TRANSPARENT if hidden else Color.WHITE)
+	_seal_cliff_joints(mask, opaque_cliff, projected_floor, face_rects)
 	return ImageTexture.create_from_image(mask)

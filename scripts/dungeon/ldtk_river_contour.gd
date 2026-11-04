@@ -10,6 +10,10 @@ var west_bank_start_y: float = -INF
 
 func configure(layers: Array, descriptions: Array, softness: float) -> bool:
 	edge_softness_px = clampf(softness, 0.25, 1.5)
+	var rivers: Array[Dictionary] = []
+	for description: Dictionary in descriptions:
+		if str(description.get("preset", "")) == "River":
+			rivers.append(description)
 	var wet: Dictionary = {}
 	var decks: Dictionary = {}
 	var west_lock: float = -INF
@@ -31,8 +35,8 @@ func configure(layers: Array, descriptions: Array, softness: float) -> bool:
 	if wet.is_empty():
 		diagnostics.append("RiverMask ausente/vazia; margem original mantida.")
 		return false
-	if descriptions.size() != 1:
-		diagnostics.append("O contorno do rio exige uma unica WaterArea.")
+	if rivers.size() != 1:
+		diagnostics.append("O contorno do rio exige uma unica WaterArea com preset River.")
 		return false
 	var spans: Array[Rect2] = []
 	while not decks.is_empty():
@@ -52,7 +56,7 @@ func configure(layers: Array, descriptions: Array, softness: float) -> bool:
 		spans.append(Rect2(Vector2(start), Vector2(ending - start + Vector2i(16, 16))))
 	spans.sort_custom(func(a: Rect2, b: Rect2) -> bool: return a.position.y < b.position.y)
 	contour = CONTOUR.new()
-	if not bool(contour.call("configure", wet, descriptions[0].rect as Rect2, spans, west_lock)):
+	if not bool(contour.call("configure", wet, rivers[0].rect as Rect2, spans, west_lock)):
 		diagnostics.assign(contour.get("diagnostics") as Array[String])
 		contour = null
 		return false
@@ -138,6 +142,7 @@ func bind_ground(surfaces: Array[TileMapLayer], cloud_clock: Node, floor_cells: 
 func bind_water(water: Node2D, foam: bool) -> void:
 	if contour == null: return
 	for region: Node2D in water.get("regions") as Array[Node2D]:
+		if str(region.get_meta(&"preset", "")) != "River": continue
 		var sprite: Sprite2D = region.get_node("Surface") as Sprite2D
 		var water_material: ShaderMaterial = sprite.material as ShaderMaterial
 		_parameters(water_material)
