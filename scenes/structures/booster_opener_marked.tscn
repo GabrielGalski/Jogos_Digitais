@@ -1,0 +1,10 @@
+[gd_scene format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/structures/booster_opener.tscn" id="1_opener"]
+[ext_resource type="Script" path="res://scripts/visual/booster_exclamation.gd" id="2_marker"]
+
+[node name="MarkedBoosterOpener" instance=ExtResource("1_opener")]
+interaction_enabled = false
+
+[node name="ExclamationMarker" type="Node2D" parent="Visuals"]
+script = ExtResource("2_marker")

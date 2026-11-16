@@ -1,0 +1,147 @@
+[gd_resource type="SpriteFrames" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/enemies/insects/little/attack/attack_01.png" id="1_7jxc8"]
+[ext_resource type="Texture2D" path="res://assets/enemies/insects/little/attack/attack_02.png" id="2_b1aw7"]
+[ext_resource type="Texture2D" path="res://assets/enemies/insects/little/attack/attack_03.png" id="3_uuhjg"]
+[ext_resource type="Texture2D" path="res://assets/enemies/insects/little/attack/attack_04.png" id="4_h5e86"]
+[ext_resource type="Texture2D" path="res://assets/enemies/insects/little/attack/attack_05.png" id="5_v30cf"]
+[ext_resource type="Texture2D" path="res://assets/enemies/insects/little/attack/attack_06.png" id="6_lg4fl"]
+[ext_resource type="Texture2D" path="res://assets/enemies/insects/little/attack/attack_07.png" id="7_r5pau"]
+[ext_resource type="Texture2D" path="res://assets/enemies/insects/little/death/death_01.png" id="8_y7yob"]
+[ext_resource type="Texture2D" path="res://assets/enemies/insects/little/death/death_02.png" id="9_vj8n4"]
+[ext_resource type="Texture2D" path="res://assets/enemies/insects/little/death/death_03.png" id="10_mfnio"]
+[ext_resource type="Texture2D" path="res://assets/enemies/insects/little/death/death_04.png" id="11_ps2gu"]
+[ext_resource type="Texture2D" path="res://assets/enemies/insects/little/death/death_05.png" id="12_8201j"]
+[ext_resource type="Texture2D" path="res://assets/enemies/insects/little/death/death_06.png" id="13_3fcg4"]
+[ext_resource type="Texture2D" path="res://assets/enemies/insects/little/hit/hit_01.png" id="14_aa81d"]
+[ext_resource type="Texture2D" path="res://assets/enemies/insects/little/hit/hit_02.png" id="15_w655v"]
+[ext_resource type="Texture2D" path="res://assets/enemies/insects/little/hit/hit_03.png" id="16_sti33"]
+[ext_resource type="Texture2D" path="res://assets/enemies/insects/little/idle/idle_01.png" id="17_5g751"]
+[ext_resource type="Texture2D" path="res://assets/enemies/insects/little/idle/idle_02.png" id="18_01sod"]
+[ext_resource type="Texture2D" path="res://assets/enemies/insects/little/idle/idle_03.png" id="19_y1qk7"]
+[ext_resource type="Texture2D" path="res://assets/enemies/insects/little/idle/idle_04.png" id="20_vqf72"]
+[ext_resource type="Texture2D" path="res://assets/enemies/insects/little/idle_blink/idle_blink_01.png" id="21_ddvur"]
+[ext_resource type="Texture2D" path="res://assets/enemies/insects/little/idle_blink/idle_blink_02.png" id="22_0de5b"]
+[ext_resource type="Texture2D" path="res://assets/enemies/insects/little/idle_blink/idle_blink_03.png" id="23_un6ao"]
+[ext_resource type="Texture2D" path="res://assets/enemies/insects/little/idle_blink/idle_blink_04.png" id="24_55bt1"]
+[ext_resource type="Texture2D" path="res://assets/enemies/insects/little/walk/walk_01.png" id="25_of7kj"]
+[ext_resource type="Texture2D" path="res://assets/enemies/insects/little/walk/walk_02.png" id="26_rbfch"]
+[ext_resource type="Texture2D" path="res://assets/enemies/insects/little/walk/walk_03.png" id="27_b6jy3"]
+[ext_resource type="Texture2D" path="res://assets/enemies/insects/little/walk/walk_04.png" id="28_gpt3v"]
+
+[resource]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("1_7jxc8")
+}, {
+"duration": 1.0,
+"texture": ExtResource("2_b1aw7")
+}, {
+"duration": 1.0,
+"texture": ExtResource("3_uuhjg")
+}, {
+"duration": 1.0,
+"texture": ExtResource("4_h5e86")
+}, {
+"duration": 1.0,
+"texture": ExtResource("5_v30cf")
+}, {
+"duration": 1.0,
+"texture": ExtResource("6_lg4fl")
+}, {
+"duration": 1.0,
+"texture": ExtResource("7_r5pau")
+}],
+"loop": 0,
+"name": &"attack",
+"speed": 14.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("8_y7yob")
+}, {
+"duration": 1.0,
+"texture": ExtResource("9_vj8n4")
+}, {
+"duration": 1.0,
+"texture": ExtResource("10_mfnio")
+}, {
+"duration": 1.0,
+"texture": ExtResource("11_ps2gu")
+}, {
+"duration": 1.0,
+"texture": ExtResource("12_8201j")
+}, {
+"duration": 1.0,
+"texture": ExtResource("13_3fcg4")
+}],
+"loop": 0,
+"name": &"death",
+"speed": 14.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("14_aa81d")
+}, {
+"duration": 1.0,
+"texture": ExtResource("15_w655v")
+}, {
+"duration": 1.0,
+"texture": ExtResource("16_sti33")
+}],
+"loop": 0,
+"name": &"hit",
+"speed": 14.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("17_5g751")
+}, {
+"duration": 1.0,
+"texture": ExtResource("18_01sod")
+}, {
+"duration": 1.0,
+"texture": ExtResource("19_y1qk7")
+}, {
+"duration": 1.0,
+"texture": ExtResource("20_vqf72")
+}],
+"loop": 1,
+"name": &"idle",
+"speed": 10.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("21_ddvur")
+}, {
+"duration": 1.0,
+"texture": ExtResource("22_0de5b")
+}, {
+"duration": 1.0,
+"texture": ExtResource("23_un6ao")
+}, {
+"duration": 1.0,
+"texture": ExtResource("24_55bt1")
+}],
+"loop": 1,
+"name": &"idle_blink",
+"speed": 10.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("25_of7kj")
+}, {
+"duration": 1.0,
+"texture": ExtResource("26_rbfch")
+}, {
+"duration": 1.0,
+"texture": ExtResource("27_b6jy3")
+}, {
+"duration": 1.0,
+"texture": ExtResource("28_gpt3v")
+}],
+"loop": 1,
+"name": &"walk",
+"speed": 10.0
+}]

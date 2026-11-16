@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="InsectProfile" format=3]
+
+[ext_resource type="Script" path="res://scripts/enemies/insects/insect_profile.gd" id="1_i1srq"]
+
+[resource]
+script = ExtResource("1_i1srq")
+kind = &"fly"
+maximum_health = 6.0
+damage = 3
+movement_speed = 76.0
+attack_range = 23.0
+windup = 0.22
+active_duration = 0.12
+recovery = 0.24
+attack_cooldown = 0.35
+impact_frame = 2
+lunge_speed = 124.0
+retreat_duration = 1.1
+retreat_distance = 76.0

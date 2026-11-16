@@ -33,6 +33,7 @@ var _dash_interpolation_disabled: bool = false
 var respawn_position: Vector2 = Vector2.ZERO
 
 @export_category("Combat balance")
+const HEALTH_BLOCK_COUNT: int = 6
 @export var max_health: float = 60.0
 var health: float = 60.0
 var dead: bool = false
@@ -42,15 +43,36 @@ var knockback_velocity: Vector2 = Vector2.ZERO
 var impact_control_lock: float = 0.0
 var contact_slow_remaining: float = 0.0
 var contact_slow_factor: float = 1.0
+var fall_recovery_remaining: float = 0.0
 
 func receive_skybreaker_hit(amount: float) -> void:
+	if is_fall_recovery_invulnerable():
+		return
+	_apply_health_damage(ceilf(amount / 3.0) * 3.0)
+
+
+func receive_fall_damage() -> void:
+	# The HUD has six equal blocks. A fall costs exactly one, without rounding.
+	_apply_health_damage(max_health / float(HEALTH_BLOCK_COUNT))
+
+
+func is_fall_recovery_invulnerable() -> bool:
+	return fall_recovery_remaining > 0.0
+
+
+func grant_fall_recovery(duration: float) -> void:
+	fall_recovery_remaining = maxf(fall_recovery_remaining,duration)
+	contact_invulnerability = maxf(contact_invulnerability,duration)
+
+
+func _apply_health_damage(amount: float) -> void:
 	if dead or intro_locked or amount <= 0.0:
 		return
-	amount = ceilf(amount / 3.0) * 3.0
 	health = maxf(0.0, health - amount)
 	health_changed.emit(health, max_health)
 	damage_received.emit(amount)
 	if health <= 0.0:
+		fall_recovery_remaining = 0.0
 		dead = true
 		intro_locked = true
 		velocity = Vector2.ZERO
@@ -102,6 +124,7 @@ func _ready() -> void:
 
 func _physics_process(_delta: float) -> void:
 	_recover_dash_charges(_delta)
+	fall_recovery_remaining = maxf(0.0, fall_recovery_remaining - _delta)
 	contact_invulnerability = maxf(0.0, contact_invulnerability - _delta)
 	contact_slow_remaining = maxf(0.0, contact_slow_remaining - _delta)
 	if contact_slow_remaining <= 0.0:
@@ -328,7 +351,7 @@ func try_parry_projectile(projectile: Node2D) -> bool:
 
 
 func receive_contact_damage(amount: int, direction: Vector2 = Vector2.ZERO, knockback: float = 0.0) -> void:
-	if intro_locked or contact_invulnerability > 0.0:
+	if intro_locked or contact_invulnerability > 0.0 or is_fall_recovery_invulnerable():
 		return
 	contact_invulnerability = 0.65
 	if knockback > 0.0 and not direction.is_zero_approx():
@@ -338,7 +361,7 @@ func receive_contact_damage(amount: int, direction: Vector2 = Vector2.ZERO, knoc
 
 
 func receive_projectile_damage(amount: int) -> bool:
-	if dead or intro_locked or is_dashing() or contact_invulnerability > 0.0 or amount <= 0:
+	if dead or intro_locked or is_dashing() or contact_invulnerability > 0.0 or is_fall_recovery_invulnerable() or amount <= 0:
 		return false
 	# Brief projectile protection accepts distinct shots in a three-orb volley.
 	# Existing contact/slow/parry protection is checked before this short window.
@@ -359,6 +382,7 @@ func heal_full() -> void:
 	if dead:
 		return
 	health = max_health
+	fall_recovery_remaining = 0.0
 	contact_invulnerability = 0.0
 	contact_slow_remaining = 0.0
 	contact_slow_factor = 1.0

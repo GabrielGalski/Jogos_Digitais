@@ -24,6 +24,6 @@ func _draw() -> void:
 		var texture: Texture2D = textures[int(piece.get("texture_index"))]
 		# Quarter turns retain exact one-pixel outlines; no smooth sprite rotation.
 		var pose: float = roundf(float(piece.get("angle")) / (PI * 0.5)) * PI * 0.5
-		draw_set_transform(point, pose, Vector2.ONE)
-		draw_texture(texture, -(texture.get_size() * 0.5).floor(), Color(1, 1, 1, alpha))
+		draw_set_transform(point, pose, piece.get("render_scale") as Vector2)
+		draw_texture(texture, -(texture.get_size() * 0.5).floor() + (piece.get("draw_offset") as Vector2), Color(1, 1, 1, alpha))
 		draw_set_transform(Vector2.ZERO)

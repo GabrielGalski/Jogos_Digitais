@@ -1,0 +1,86 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/debug/booster_opener_preview.gd" id="1_preview"]
+[ext_resource type="PackedScene" path="res://scenes/player.tscn" id="3_player"]
+[ext_resource type="Texture2D" path="res://assets/tiles/floor/monstershift/texturized_floor.png" id="4_floor"]
+[ext_resource type="Script" path="res://scripts/player.gd" id="4_xwi1o"]
+[ext_resource type="Script" path="res://scripts/dungeon/horde_pedestal.gd" id="5_808x4"]
+[ext_resource type="Theme" path="res://resources/visual/pack_opening_theme.tres" id="5_theme"]
+[ext_resource type="PackedScene" path="res://scenes/structures/booster_opener_marked.tscn" id="6_12hfe"]
+[ext_resource type="Script" path="res://scripts/structures/booster_opener.gd" id="7_fodaq"]
+
+[node name="BoosterOpenerPreview" type="Node2D" unique_id=864176104]
+texture_filter = 1
+script = ExtResource("1_preview")
+
+[node name="Floor" type="Sprite2D" parent="." unique_id=102079569]
+z_index = -20
+texture = ExtResource("4_floor")
+region_enabled = true
+region_rect = Rect2(64, 64, 1024, 640)
+
+[node name="Actors" type="Node2D" parent="." unique_id=421791637]
+y_sort_enabled = true
+
+[node name="Nox" type="CharacterBody2D" parent="Actors" unique_id=2013839706 instance=ExtResource("3_player")]
+z_index = 2
+texture_filter = 1
+position = Vector2(108, 30)
+script = ExtResource("4_xwi1o")
+arena_bounds = Rect2(-240, -160, 480, 320)
+movement_bounds = Rect2(-220, -120, 460, 240)
+
+[node name="HordePlatform" type="Node2D" parent="Actors" unique_id=150543639]
+scale = Vector2(1.5, 1.5)
+script = ExtResource("5_808x4")
+
+[node name="MarkedBoosterOpener" type="Node2D" parent="Actors" unique_id=1116424019 instance=ExtResource("6_12hfe")]
+texture_filter = 1
+position = Vector2(136, 0)
+scale = Vector2(0.64, 0.64)
+script = ExtResource("7_fodaq")
+interaction_enabled = false
+
+[node name="HUD" type="CanvasLayer" parent="." unique_id=1394914024]
+layer = 55
+
+[node name="Top" type="MarginContainer" parent="HUD" unique_id=1465894567]
+offset_right = 480.0
+offset_bottom = 28.0
+mouse_filter = 2
+theme = ExtResource("5_theme")
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 12
+
+[node name="Title" type="Label" parent="HUD/Top" unique_id=43534246]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.72, 0.94, 1, 1)
+text = "ABRIDORES DE CARTAS"
+
+[node name="Bottom" type="MarginContainer" parent="HUD" unique_id=471632354]
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -43.0
+grow_vertical = 0
+mouse_filter = 2
+theme = ExtResource("5_theme")
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 8
+
+[node name="Instructions" type="VBoxContainer" parent="HUD/Bottom" unique_id=1994496189]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 1
+
+[node name="Proximity" type="Label" parent="HUD/Bottom/Instructions" unique_id=1082694657]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.88, 0.72, 0.85, 1)
+text = "Aproxime-se do altar para abrir. O da direita fica fechado."
+
+[node name="Controls" type="Label" parent="HUD/Bottom/Instructions" unique_id=1303409115]
+layout_mode = 2
+text = "WASD / setas: mover   E: interagir   R: reiniciar"

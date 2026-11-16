@@ -9,11 +9,15 @@
 /render/
 /renders/
 
-# Documentação ativa: somente os três documentos canônicos
+# Documentação ativa: três documentos canônicos e a apresentação one-page
 /docs/*
 !/docs/GDD.md
 !/docs/TDD.md
 !/docs/GUIA.md
+!/docs/ONE_PAGE.md
+
+# Documentos e previews gerados; conteúdo e ferramentas permanecem versionáveis
+/output/
 
 # Capturas de testes são locais; scripts, cenários e fixtures continuam versionáveis
 /tests/*.png

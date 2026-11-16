@@ -1,0 +1,6 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/bosses/elemental_golem/elemental_arena.gd" id="arena"]
+
+[node name="ElementalGolemArena" type="Node2D" unique_id=1342331056]
+script = ExtResource("arena")

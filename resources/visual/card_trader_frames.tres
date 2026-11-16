@@ -1,0 +1,40 @@
+[gd_resource type="SpriteFrames" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/tiles/structures/card trader/machine.png" id="machine"]
+[ext_resource type="Texture2D" path="res://assets/tiles/structures/card trader/machine_opening1.png" id="opening1"]
+[ext_resource type="Texture2D" path="res://assets/tiles/structures/card trader/machine_opening2.png" id="opening2"]
+[ext_resource type="Texture2D" path="res://assets/tiles/structures/card trader/machine_opening3.png" id="opening3"]
+[ext_resource type="Texture2D" path="res://assets/tiles/structures/card trader/machine_opening4.png" id="opening4"]
+[ext_resource type="Texture2D" path="res://assets/tiles/structures/card trader/machine_opening5.png" id="opening5"]
+[ext_resource type="Texture2D" path="res://assets/tiles/structures/card trader/machine_opened1.png" id="opened1"]
+[ext_resource type="Texture2D" path="res://assets/tiles/structures/card trader/machine_opened2.png" id="opened2"]
+[ext_resource type="Texture2D" path="res://assets/tiles/structures/card trader/machine_opened3.png" id="opened3"]
+[ext_resource type="Texture2D" path="res://assets/tiles/structures/card trader/machine_opened4.png" id="opened4"]
+
+[resource]
+animations = [
+{
+"frames": [{"duration": 1.0, "texture": ExtResource("machine")}],
+"loop": false,
+"name": &"machine",
+"speed": 1.0
+},
+{
+"frames": [{"duration": 1.0, "texture": ExtResource("opening1")}, {"duration": 1.0, "texture": ExtResource("opening2")}, {"duration": 1.0, "texture": ExtResource("opening3")}, {"duration": 1.0, "texture": ExtResource("opening4")}, {"duration": 1.0, "texture": ExtResource("opening5")}],
+"loop": false,
+"name": &"opening",
+"speed": 10.0
+},
+{
+"frames": [{"duration": 1.0, "texture": ExtResource("opened1")}, {"duration": 1.0, "texture": ExtResource("opened2")}, {"duration": 1.0, "texture": ExtResource("opened3")}, {"duration": 1.0, "texture": ExtResource("opened4")}],
+"loop": true,
+"name": &"opened",
+"speed": 8.0
+},
+{
+"frames": [{"duration": 1.0, "texture": ExtResource("opened4")}, {"duration": 1.0, "texture": ExtResource("opened3")}, {"duration": 1.0, "texture": ExtResource("opened2")}, {"duration": 1.0, "texture": ExtResource("opened1")}],
+"loop": false,
+"name": &"closing",
+"speed": 10.0
+}
+]

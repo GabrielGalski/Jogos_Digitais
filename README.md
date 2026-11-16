@@ -16,6 +16,7 @@ A identidade visual combina pixel art, cenários em vinho e roxo escuro e podere
 
 ## Documentação
 
+- [One-page - visão geral do jogo](docs/ONE_PAGE.md)
 - [GDD — proposta e regras do jogo](docs/GDD.md)
 - [TDD — estrutura técnica](docs/TDD.md)
 - [Guia — trabalho no projeto e mapas LDtk](docs/GUIA.md)

@@ -1,0 +1,9 @@
+{
+  "purpose": "Visual preview of proposed collection highlights; colors do not assign gameplay rarity.",
+  "source": "docs/old/documentacao/CARTAS.md — Distribuição ilustrativa dos três base sets; Destaques de coleção",
+  "cards": {
+    "M04": {"name": "Olho de Beholder", "tint": "#b678ff", "finish": "roxo"},
+    "I04": {"name": "Ovo de Slaad", "tint": "#65e6a0", "finish": "verde"},
+    "U04": {"name": "Mandrágora de Bolso", "tint": "#f4c45c", "finish": "dourado"}
+  }
+}

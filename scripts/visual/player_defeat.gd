@@ -9,6 +9,7 @@ const MENU_TIME: float = 1.05
 
 var active: bool = false
 var menu_ready: bool = false
+var exit_action: Callable = Callable()
 var _retrying: bool = false
 var _player: Player = null
 var _arena: Node = null
@@ -145,6 +146,17 @@ func _build_presentation(white: ShaderMaterial) -> void:
 		_retry.add_theme_stylebox_override(style_name, style)
 	column.add_child(_retry)
 	_retry.pressed.connect(retry)
+	if exit_action.is_valid():
+		var leave: Button = Button.new()
+		leave.name = "LeaveArena"
+		leave.text = "Sair da arena"
+		leave.custom_minimum_size = Vector2(164.0, 32.0)
+		leave.add_theme_font_override("font", FONT)
+		leave.add_theme_font_size_override("font_size", 18)
+		for style_name: String in ["normal", "hover", "pressed", "focus", "disabled"]:
+			leave.add_theme_stylebox_override(style_name, _retry.get_theme_stylebox(style_name))
+		column.add_child(leave)
+		leave.pressed.connect(_leave_arena)
 	_menu.hide()
 	_fade = ColorRect.new()
 	_fade.name = "RetryFade"
@@ -208,9 +220,17 @@ func retry() -> void:
 	_arena.queue_free()
 
 
+func _leave_arena() -> void:
+	if not menu_ready or _retrying or not exit_action.is_valid(): return
+	_retrying = true
+	_restore_clock()
+	exit_action.call_deferred()
+
+
 func _restore_clock() -> void:
 	if not active:
 		return
+	set_process(false)
 	Engine.time_scale = _previous_scale
 	get_tree().paused = _previous_pause
 	active = false

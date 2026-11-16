@@ -174,8 +174,10 @@ func set_manifestation_driver(driver: Node) -> void:
 		_effect_glow.hide()
 
 
-func present_procedural_shot() -> void:
+func present_procedural_shot(tint: Color = Color.WHITE, projectile: bool = true) -> void:
 	shot_recoil = 0.85
+	if projectile:
+		_start_muzzle_effect(tint)
 	shot_fired.emit()
 
 
@@ -264,11 +266,20 @@ func _resolve_aim() -> void:
 
 
 func trigger_muzzle_effect(code: StringName) -> void:
+	_start_muzzle_effect(Color("#00baa7") if code == &"M01" else Color.WHITE)
+
+
+func clear_muzzle_effect() -> void:
+	_effect_remaining = 0.0
+	_update_gun_effects(0.0)
+
+
+func _start_muzzle_effect(tint: Color) -> void:
 	if use_deck_box or _effect == null:
 		return
 	_effect_remaining = EFFECT_DURATION
 	shot_recoil = maxf(shot_recoil, 0.85)
-	_effect.modulate = Color("#00baa7") if code == &"M01" else Color.WHITE
+	_effect.modulate = tint
 	_effect_glow.modulate = Color(_effect.modulate, 0.6)
 	_update_gun_effects(0.0)
 

@@ -1,0 +1,339 @@
+{
+  "source": "death sprite sheet.png",
+  "source_sha256": "7741f833c788b984acc9a957857c0e055a03e37249b884512a4f064f176c32f9",
+  "source_size": [
+    1505,
+    80
+  ],
+  "frame_pitch": 156,
+  "frame_canvas": [
+    96,
+    80
+  ],
+  "death_fps": 16,
+  "death_loop": false,
+  "death_pivot": [
+    48,
+    37
+  ],
+  "death_frames": [
+    {
+      "file": "death_01.png",
+      "source_rect": [
+        0,
+        0,
+        96,
+        80
+      ],
+      "canvas": [
+        96,
+        80
+      ],
+      "pivot": [
+        48,
+        37
+      ],
+      "used_rect": [
+        22,
+        7,
+        74,
+        66
+      ]
+    },
+    {
+      "file": "death_02.png",
+      "source_rect": [
+        156,
+        0,
+        96,
+        80
+      ],
+      "canvas": [
+        96,
+        80
+      ],
+      "pivot": [
+        48,
+        37
+      ],
+      "used_rect": [
+        16,
+        6,
+        82,
+        72
+      ]
+    },
+    {
+      "file": "death_03.png",
+      "source_rect": [
+        312,
+        0,
+        96,
+        80
+      ],
+      "canvas": [
+        96,
+        80
+      ],
+      "pivot": [
+        48,
+        37
+      ],
+      "used_rect": [
+        14,
+        5,
+        85,
+        73
+      ]
+    },
+    {
+      "file": "death_04.png",
+      "source_rect": [
+        468,
+        0,
+        96,
+        80
+      ],
+      "canvas": [
+        96,
+        80
+      ],
+      "pivot": [
+        48,
+        37
+      ],
+      "used_rect": [
+        11,
+        4,
+        88,
+        76
+      ]
+    },
+    {
+      "file": "death_05.png",
+      "source_rect": [
+        624,
+        0,
+        96,
+        80
+      ],
+      "canvas": [
+        96,
+        80
+      ],
+      "pivot": [
+        48,
+        37
+      ],
+      "used_rect": [
+        8,
+        2,
+        89,
+        78
+      ]
+    },
+    {
+      "file": "death_06.png",
+      "source_rect": [
+        780,
+        0,
+        96,
+        80
+      ],
+      "canvas": [
+        96,
+        80
+      ],
+      "pivot": [
+        48,
+        37
+      ],
+      "used_rect": [
+        7,
+        0,
+        90,
+        79
+      ]
+    },
+    {
+      "file": "death_07.png",
+      "source_rect": [
+        936,
+        0,
+        96,
+        80
+      ],
+      "canvas": [
+        96,
+        80
+      ],
+      "pivot": [
+        48,
+        37
+      ],
+      "used_rect": [
+        4,
+        0,
+        92,
+        80
+      ]
+    },
+    {
+      "file": "death_08.png",
+      "source_rect": [
+        1092,
+        0,
+        96,
+        80
+      ],
+      "canvas": [
+        96,
+        80
+      ],
+      "pivot": [
+        48,
+        37
+      ],
+      "used_rect": [
+        2,
+        0,
+        93,
+        77
+      ]
+    },
+    {
+      "file": "death_09.png",
+      "source_rect": [
+        1248,
+        0,
+        96,
+        80
+      ],
+      "canvas": [
+        96,
+        80
+      ],
+      "pivot": [
+        48,
+        37
+      ],
+      "used_rect": [
+        16,
+        7,
+        82,
+        60
+      ]
+    },
+    {
+      "file": "death_10.png",
+      "source_rect": [
+        1404,
+        0,
+        96,
+        80
+      ],
+      "canvas": [
+        96,
+        80
+      ],
+      "pivot": [
+        48,
+        37
+      ],
+      "used_rect": [
+        16,
+        7,
+        82,
+        57
+      ]
+    }
+  ],
+  "poses": [
+    {
+      "file": "idle.png",
+      "canvas": [
+        48,
+        48
+      ],
+      "used_rect": [
+        18,
+        13,
+        37,
+        32
+      ],
+      "display_body_px": [
+        16,
+        16
+      ]
+    },
+    {
+      "file": "attack1.png",
+      "canvas": [
+        48,
+        48
+      ],
+      "used_rect": [
+        18,
+        13,
+        37,
+        32
+      ],
+      "display_body_px": [
+        16,
+        16
+      ]
+    },
+    {
+      "file": "attack2.png",
+      "canvas": [
+        48,
+        48
+      ],
+      "used_rect": [
+        18,
+        13,
+        37,
+        32
+      ],
+      "display_body_px": [
+        16,
+        16
+      ]
+    },
+    {
+      "file": "back_looking_left.png",
+      "canvas": [
+        48,
+        48
+      ],
+      "used_rect": [
+        18,
+        13,
+        37,
+        32
+      ],
+      "display_body_px": [
+        16,
+        16
+      ]
+    },
+    {
+      "file": "back_lookin_right.png",
+      "canvas": [
+        48,
+        48
+      ],
+      "used_rect": [
+        11,
+        13,
+        30,
+        32
+      ],
+      "display_body_px": [
+        16,
+        16
+      ]
+    }
+  ],
+  "all_opaque_source_pixels_preserved": true
+}

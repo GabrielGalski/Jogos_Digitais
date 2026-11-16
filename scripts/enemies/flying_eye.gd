@@ -4,6 +4,8 @@ signal died(actor: Node2D)
 signal damaged(amount: float, remaining_health: float)
 
 const VISUAL: Script = preload("res://scripts/visual/flying_eye_visual.gd")
+var visual_script: Script = VISUAL
+var species_group: StringName = &"flying_eyes"
 var profile: FlyingEyeProfile
 var health: float = 6.0
 var desired_velocity: Vector2 = Vector2.ZERO
@@ -28,7 +30,7 @@ func _ready() -> void:
 	z_index = 2
 	add_to_group(&"enemy_bodies")
 	add_to_group(&"enemy_ai_actor")
-	add_to_group(&"flying_eyes")
+	add_to_group(species_group)
 	set_meta(&"enemy_ai_role", EnemyAIEnums.Role.RANGED)
 	set_meta(&"enemy_ai_is_attacking", false)
 	var circle: CircleShape2D = CircleShape2D.new()
@@ -46,7 +48,7 @@ func _ready() -> void:
 	_shadow.z_index = -1
 	_shadow.position.y = -floor_height
 	add_child(_shadow)
-	visual = VISUAL.new() as Sprite2D
+	visual = visual_script.new() as Sprite2D
 	visual.name = "Sprite"
 	visual.set("phase", phase)
 	visual.set("floor_height", floor_height)
@@ -125,5 +127,5 @@ func _stop_combat() -> void:
 	collision_layer = 0
 	collision_mask = 0
 	set_meta(&"enemy_ai_is_attacking", false)
-	for group: StringName in [&"enemy_bodies", &"enemy_ai_actor", &"flying_eyes"]:
+	for group: StringName in [&"enemy_bodies", &"enemy_ai_actor", species_group]:
 		remove_from_group(group)

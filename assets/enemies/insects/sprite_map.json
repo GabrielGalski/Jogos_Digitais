@@ -1,0 +1,958 @@
+{
+	"canvas": [
+		48,
+		48
+	],
+	"feet_pivot": [
+		24,
+		32
+	],
+	"models": {
+		"fly": {
+			"attack": {
+				"frames": 6,
+				"poses": [
+					{
+						"file": "res://assets/enemies/insects/fly/attack/attack_01.png",
+						"source_rect": [
+							0,
+							0,
+							48,
+							48
+						],
+						"used_rect": "[P: (17, 17), S: (14, 13)]"
+					},
+					{
+						"file": "res://assets/enemies/insects/fly/attack/attack_02.png",
+						"source_rect": [
+							48,
+							0,
+							48,
+							48
+						],
+						"used_rect": "[P: (16, 16), S: (14, 13)]"
+					},
+					{
+						"file": "res://assets/enemies/insects/fly/attack/attack_03.png",
+						"source_rect": [
+							96,
+							0,
+							48,
+							48
+						],
+						"used_rect": "[P: (19, 20), S: (17, 13)]"
+					},
+					{
+						"file": "res://assets/enemies/insects/fly/attack/attack_04.png",
+						"source_rect": [
+							144,
+							0,
+							48,
+							48
+						],
+						"used_rect": "[P: (17, 19), S: (21, 16)]"
+					},
+					{
+						"file": "res://assets/enemies/insects/fly/attack/attack_05.png",
+						"source_rect": [
+							192,
+							0,
+							48,
+							48
+						],
+						"used_rect": "[P: (17, 17), S: (22, 18)]"
+					},
+					{
+						"file": "res://assets/enemies/insects/fly/attack/attack_06.png",
+						"source_rect": [
+							240,
+							0,
+							48,
+							48
+						],
+						"used_rect": "[P: (17, 17), S: (24, 19)]"
+					}
+				],
+				"source": "res://assets/enemies/insects/Fly-Enemy/Sprite-Sheet/Fly-Enemy-Attack-Sheet.png",
+				"source_sha256": "cfc17a457bf314d77088cb4cd68f3227ad10e14c76344a4bcf09919f22b200db"
+			},
+			"death": {
+				"frames": 6,
+				"poses": [
+					{
+						"file": "res://assets/enemies/insects/fly/death/death_01.png",
+						"source_rect": [
+							0,
+							0,
+							48,
+							48
+						],
+						"used_rect": "[P: (17, 17), S: (14, 13)]"
+					},
+					{
+						"file": "res://assets/enemies/insects/fly/death/death_02.png",
+						"source_rect": [
+							48,
+							0,
+							48,
+							48
+						],
+						"used_rect": "[P: (16, 16), S: (13, 14)]"
+					},
+					{
+						"file": "res://assets/enemies/insects/fly/death/death_03.png",
+						"source_rect": [
+							96,
+							0,
+							48,
+							48
+						],
+						"used_rect": "[P: (17, 17), S: (12, 13)]"
+					},
+					{
+						"file": "res://assets/enemies/insects/fly/death/death_04.png",
+						"source_rect": [
+							144,
+							0,
+							48,
+							48
+						],
+						"used_rect": "[P: (17, 21), S: (12, 10)]"
+					},
+					{
+						"file": "res://assets/enemies/insects/fly/death/death_05.png",
+						"source_rect": [
+							192,
+							0,
+							48,
+							48
+						],
+						"used_rect": "[P: (16, 24), S: (14, 8)]"
+					},
+					{
+						"file": "res://assets/enemies/insects/fly/death/death_06.png",
+						"source_rect": [
+							240,
+							0,
+							48,
+							48
+						],
+						"used_rect": "[P: (13, 28), S: (17, 4)]"
+					}
+				],
+				"source": "res://assets/enemies/insects/Fly-Enemy/Sprite-Sheet/Fly-Enemy-Death-Sheet.png",
+				"source_sha256": "aab20ed95de446dcf5a75ee73e4c23b1b8bfe36cdbf9cd09453e699ad50d29f7"
+			},
+			"hit": {
+				"frames": 3,
+				"poses": [
+					{
+						"file": "res://assets/enemies/insects/fly/hit/hit_01.png",
+						"source_rect": [
+							0,
+							0,
+							48,
+							48
+						],
+						"used_rect": "[P: (17, 17), S: (14, 13)]"
+					},
+					{
+						"file": "res://assets/enemies/insects/fly/hit/hit_02.png",
+						"source_rect": [
+							48,
+							0,
+							48,
+							48
+						],
+						"used_rect": "[P: (16, 16), S: (13, 14)]"
+					},
+					{
+						"file": "res://assets/enemies/insects/fly/hit/hit_03.png",
+						"source_rect": [
+							96,
+							0,
+							48,
+							48
+						],
+						"used_rect": "[P: (17, 17), S: (12, 13)]"
+					}
+				],
+				"source": "res://assets/enemies/insects/Fly-Enemy/Sprite-Sheet/Fly-Enemy-Hit-Sheet.png",
+				"source_sha256": "2682cf5fd9bdc67ddd75d623b9f46a68c868aaf8f17ee3e75b3affa689bfbd87"
+			},
+			"idle": {
+				"frames": 5,
+				"poses": [
+					{
+						"file": "res://assets/enemies/insects/fly/idle/idle_01.png",
+						"source_rect": [
+							0,
+							0,
+							48,
+							48
+						],
+						"used_rect": "[P: (17, 17), S: (14, 13)]"
+					},
+					{
+						"file": "res://assets/enemies/insects/fly/idle/idle_02.png",
+						"source_rect": [
+							48,
+							0,
+							48,
+							48
+						],
+						"used_rect": "[P: (17, 19), S: (14, 13)]"
+					},
+					{
+						"file": "res://assets/enemies/insects/fly/idle/idle_03.png",
+						"source_rect": [
+							96,
+							0,
+							48,
+							48
+						],
+						"used_rect": "[P: (17, 20), S: (14, 14)]"
+					},
+					{
+						"file": "res://assets/enemies/insects/fly/idle/idle_04.png",
+						"source_rect": [
+							144,
+							0,
+							48,
+							48
+						],
+						"used_rect": "[P: (17, 20), S: (14, 12)]"
+					},
+					{
+						"file": "res://assets/enemies/insects/fly/idle/idle_05.png",
+						"source_rect": [
+							192,
+							0,
+							48,
+							48
+						],
+						"used_rect": "[P: (17, 17), S: (14, 13)]"
+					}
+				],
+				"source": "res://assets/enemies/insects/Fly-Enemy/Sprite-Sheet/Fly-Enemy-Idle-Sheet.png",
+				"source_sha256": "a700c77c22ea77e29083467fec7f0cafd590632607685be207aadd99bcb49eaa"
+			},
+			"idle_blink": {
+				"frames": 5,
+				"poses": [
+					{
+						"file": "res://assets/enemies/insects/fly/idle_blink/idle_blink_01.png",
+						"source_rect": [
+							0,
+							0,
+							48,
+							48
+						],
+						"used_rect": "[P: (17, 17), S: (14, 13)]"
+					},
+					{
+						"file": "res://assets/enemies/insects/fly/idle_blink/idle_blink_02.png",
+						"source_rect": [
+							48,
+							0,
+							48,
+							48
+						],
+						"used_rect": "[P: (17, 19), S: (14, 13)]"
+					},
+					{
+						"file": "res://assets/enemies/insects/fly/idle_blink/idle_blink_03.png",
+						"source_rect": [
+							96,
+							0,
+							48,
+							48
+						],
+						"used_rect": "[P: (17, 20), S: (14, 14)]"
+					},
+					{
+						"file": "res://assets/enemies/insects/fly/idle_blink/idle_blink_04.png",
+						"source_rect": [
+							144,
+							0,
+							48,
+							48
+						],
+						"used_rect": "[P: (17, 20), S: (14, 12)]"
+					},
+					{
+						"file": "res://assets/enemies/insects/fly/idle_blink/idle_blink_05.png",
+						"source_rect": [
+							192,
+							0,
+							48,
+							48
+						],
+						"used_rect": "[P: (17, 17), S: (14, 13)]"
+					}
+				],
+				"source": "res://assets/enemies/insects/Fly-Enemy/Sprite-Sheet/Fly-Enemy-Idle-Blink-Sheet.png",
+				"source_sha256": "133309dc14ef6cc25b93154968e3949849ba74eb6b84f0fdce7dfe2e4cf9a519"
+			}
+		},
+		"little": {
+			"attack": {
+				"frames": 7,
+				"poses": [
+					{
+						"file": "res://assets/enemies/insects/little/attack/attack_01.png",
+						"source_rect": [
+							0,
+							0,
+							48,
+							48
+						],
+						"used_rect": "[P: (17, 17), S: (16, 15)]"
+					},
+					{
+						"file": "res://assets/enemies/insects/little/attack/attack_02.png",
+						"source_rect": [
+							48,
+							0,
+							48,
+							48
+						],
+						"used_rect": "[P: (15, 17), S: (16, 15)]"
+					},
+					{
+						"file": "res://assets/enemies/insects/little/attack/attack_03.png",
+						"source_rect": [
+							96,
+							0,
+							48,
+							48
+						],
+						"used_rect": "[P: (14, 17), S: (16, 15)]"
+					},
+					{
+						"file": "res://assets/enemies/insects/little/attack/attack_04.png",
+						"source_rect": [
+							144,
+							0,
+							48,
+							48
+						],
+						"used_rect": "[P: (17, 17), S: (27, 15)]"
+					},
+					{
+						"file": "res://assets/enemies/insects/little/attack/attack_05.png",
+						"source_rect": [
+							192,
+							0,
+							48,
+							48
+						],
+						"used_rect": "[P: (21, 17), S: (25, 15)]"
+					},
+					{
+						"file": "res://assets/enemies/insects/little/attack/attack_06.png",
+						"source_rect": [
+							240,
+							0,
+							48,
+							48
+						],
+						"used_rect": "[P: (21, 17), S: (26, 15)]"
+					},
+					{
+						"file": "res://assets/enemies/insects/little/attack/attack_07.png",
+						"source_rect": [
+							288,
+							0,
+							48,
+							48
+						],
+						"used_rect": "[P: (21, 17), S: (17, 15)]"
+					}
+				],
+				"source": "res://assets/enemies/insects/Little-Enemy/Sprite-Sheet/Little-Enemy-Attack-Sheet.png",
+				"source_sha256": "8338556ec13c9ccfd9780d969f30b5f8001946d5bbcb81562be3685eaff9eaf8"
+			},
+			"death": {
+				"frames": 6,
+				"poses": [
+					{
+						"file": "res://assets/enemies/insects/little/death/death_01.png",
+						"source_rect": [
+							0,
+							0,
+							48,
+							48
+						],
+						"used_rect": "[P: (17, 17), S: (16, 15)]"
+					},
+					{
+						"file": "res://assets/enemies/insects/little/death/death_02.png",
+						"source_rect": [
+							48,
+							0,
+							48,
+							48
+						],
+						"used_rect": "[P: (15, 16), S: (16, 16)]"
+					},
+					{
+						"file": "res://assets/enemies/insects/little/death/death_03.png",
+						"source_rect": [
+							96,
+							0,
+							48,
+							48
+						],
+						"used_rect": "[P: (17, 19), S: (16, 13)]"
+					},
+					{
+						"file": "res://assets/enemies/insects/little/death/death_04.png",
+						"source_rect": [
+							144,
+							0,
+							48,
+							48
+						],
+						"used_rect": "[P: (17, 21), S: (16, 11)]"
+					},
+					{
+						"file": "res://assets/enemies/insects/little/death/death_05.png",
+						"source_rect": [
+							192,
+							0,
+							48,
+							48
+						],
+						"used_rect": "[P: (16, 27), S: (16, 5)]"
+					},
+					{
+						"file": "res://assets/enemies/insects/little/death/death_06.png",
+						"source_rect": [
+							240,
+							0,
+							48,
+							48
+						],
+						"used_rect": "[P: (16, 27), S: (16, 5)]"
+					}
+				],
+				"source": "res://assets/enemies/insects/Little-Enemy/Sprite-Sheet/Little-Enemy-Death-Sheet.png",
+				"source_sha256": "7a8cadc9862db55b5ebcaf9fa2b551f5240223ecf824cec1264b8914125c441f"
+			},
+			"hit": {
+				"frames": 3,
+				"poses": [
+					{
+						"file": "res://assets/enemies/insects/little/hit/hit_01.png",
+						"source_rect": [
+							0,
+							0,
+							48,
+							48
+						],
+						"used_rect": "[P: (17, 17), S: (16, 15)]"
+					},
+					{
+						"file": "res://assets/enemies/insects/little/hit/hit_02.png",
+						"source_rect": [
+							48,
+							0,
+							48,
+							48
+						],
+						"used_rect": "[P: (15, 16), S: (16, 16)]"
+					},
+					{
+						"file": "res://assets/enemies/insects/little/hit/hit_03.png",
+						"source_rect": [
+							96,
+							0,
+							48,
+							48
+						],
+						"used_rect": "[P: (15, 17), S: (16, 15)]"
+					}
+				],
+				"source": "res://assets/enemies/insects/Little-Enemy/Sprite-Sheet/Little-Enemy-Hit-Sheet.png",
+				"source_sha256": "e2cf4560ffd723efae0257715371266b7fbf848bcb6f91751d0bade1bc2574b3"
+			},
+			"idle": {
+				"frames": 4,
+				"poses": [
+					{
+						"file": "res://assets/enemies/insects/little/idle/idle_01.png",
+						"source_rect": [
+							0,
+							0,
+							48,
+							48
+						],
+						"used_rect": "[P: (17, 17), S: (16, 15)]"
+					},
+					{
+						"file": "res://assets/enemies/insects/little/idle/idle_02.png",
+						"source_rect": [
+							48,
+							0,
+							48,
+							48
+						],
+						"used_rect": "[P: (18, 19), S: (16, 13)]"
+					},
+					{
+						"file": "res://assets/enemies/insects/little/idle/idle_03.png",
+						"source_rect": [
+							96,
+							0,
+							48,
+							48
+						],
+						"used_rect": "[P: (17, 20), S: (16, 12)]"
+					},
+					{
+						"file": "res://assets/enemies/insects/little/idle/idle_04.png",
+						"source_rect": [
+							144,
+							0,
+							48,
+							48
+						],
+						"used_rect": "[P: (17, 17), S: (16, 15)]"
+					}
+				],
+				"source": "res://assets/enemies/insects/Little-Enemy/Sprite-Sheet/Little-Enemy-Idle-Sheet.png",
+				"source_sha256": "30bae3d78e5859cd6a9a874a2e931ae5aabb02f6a5871467970a73c9ac851ed3"
+			},
+			"idle_blink": {
+				"frames": 4,
+				"poses": [
+					{
+						"file": "res://assets/enemies/insects/little/idle_blink/idle_blink_01.png",
+						"source_rect": [
+							0,
+							0,
+							48,
+							48
+						],
+						"used_rect": "[P: (17, 17), S: (16, 15)]"
+					},
+					{
+						"file": "res://assets/enemies/insects/little/idle_blink/idle_blink_02.png",
+						"source_rect": [
+							48,
+							0,
+							48,
+							48
+						],
+						"used_rect": "[P: (18, 19), S: (16, 13)]"
+					},
+					{
+						"file": "res://assets/enemies/insects/little/idle_blink/idle_blink_03.png",
+						"source_rect": [
+							96,
+							0,
+							48,
+							48
+						],
+						"used_rect": "[P: (17, 20), S: (16, 12)]"
+					},
+					{
+						"file": "res://assets/enemies/insects/little/idle_blink/idle_blink_04.png",
+						"source_rect": [
+							144,
+							0,
+							48,
+							48
+						],
+						"used_rect": "[P: (17, 17), S: (16, 15)]"
+					}
+				],
+				"source": "res://assets/enemies/insects/Little-Enemy/Sprite-Sheet/Little-Enemy-Idle-Blink-Sheet.png",
+				"source_sha256": "d550d9bc3df82351df16111dc4a80a9b14c2fd4c46168d394f0f1acdcab0ef15"
+			},
+			"walk": {
+				"frames": 4,
+				"poses": [
+					{
+						"file": "res://assets/enemies/insects/little/walk/walk_01.png",
+						"source_rect": [
+							0,
+							0,
+							48,
+							48
+						],
+						"used_rect": "[P: (17, 17), S: (16, 15)]"
+					},
+					{
+						"file": "res://assets/enemies/insects/little/walk/walk_02.png",
+						"source_rect": [
+							48,
+							0,
+							48,
+							48
+						],
+						"used_rect": "[P: (17, 15), S: (16, 17)]"
+					},
+					{
+						"file": "res://assets/enemies/insects/little/walk/walk_03.png",
+						"source_rect": [
+							96,
+							0,
+							48,
+							48
+						],
+						"used_rect": "[P: (17, 17), S: (16, 15)]"
+					},
+					{
+						"file": "res://assets/enemies/insects/little/walk/walk_04.png",
+						"source_rect": [
+							144,
+							0,
+							48,
+							48
+						],
+						"used_rect": "[P: (17, 16), S: (16, 16)]"
+					}
+				],
+				"source": "res://assets/enemies/insects/Little-Enemy/Sprite-Sheet/Little-Enemy-Walk-Sheet.png",
+				"source_sha256": "38522f2c618a431789dba23a6df29db3f80476dbeab223889be481b5224400fd"
+			}
+		},
+		"tall": {
+			"attack": {
+				"frames": 6,
+				"poses": [
+					{
+						"file": "res://assets/enemies/insects/tall/attack/attack_01.png",
+						"source_rect": [
+							0,
+							0,
+							48,
+							48
+						],
+						"used_rect": "[P: (20, 11), S: (8, 21)]"
+					},
+					{
+						"file": "res://assets/enemies/insects/tall/attack/attack_02.png",
+						"source_rect": [
+							48,
+							0,
+							48,
+							48
+						],
+						"used_rect": "[P: (18, 10), S: (10, 22)]"
+					},
+					{
+						"file": "res://assets/enemies/insects/tall/attack/attack_03.png",
+						"source_rect": [
+							96,
+							0,
+							48,
+							48
+						],
+						"used_rect": "[P: (17, 10), S: (10, 22)]"
+					},
+					{
+						"file": "res://assets/enemies/insects/tall/attack/attack_04.png",
+						"source_rect": [
+							144,
+							0,
+							48,
+							48
+						],
+						"used_rect": "[P: (18, 14), S: (24, 18)]"
+					},
+					{
+						"file": "res://assets/enemies/insects/tall/attack/attack_05.png",
+						"source_rect": [
+							192,
+							0,
+							48,
+							48
+						],
+						"used_rect": "[P: (21, 14), S: (22, 18)]"
+					},
+					{
+						"file": "res://assets/enemies/insects/tall/attack/attack_06.png",
+						"source_rect": [
+							240,
+							0,
+							48,
+							48
+						],
+						"used_rect": "[P: (20, 14), S: (25, 18)]"
+					}
+				],
+				"source": "res://assets/enemies/insects/Tall-Enemy/Sprite-Sheet/Tall-Enemy-Attack-Sheet.png",
+				"source_sha256": "0289342493ef022dfe666d7acda3062b2be2205c06e6f96e8e19b17bbd8a3ccd"
+			},
+			"death": {
+				"frames": 6,
+				"poses": [
+					{
+						"file": "res://assets/enemies/insects/tall/death/death_01.png",
+						"source_rect": [
+							0,
+							0,
+							48,
+							48
+						],
+						"used_rect": "[P: (20, 11), S: (8, 21)]"
+					},
+					{
+						"file": "res://assets/enemies/insects/tall/death/death_02.png",
+						"source_rect": [
+							48,
+							0,
+							48,
+							48
+						],
+						"used_rect": "[P: (18, 12), S: (9, 20)]"
+					},
+					{
+						"file": "res://assets/enemies/insects/tall/death/death_03.png",
+						"source_rect": [
+							96,
+							0,
+							48,
+							48
+						],
+						"used_rect": "[P: (19, 12), S: (9, 20)]"
+					},
+					{
+						"file": "res://assets/enemies/insects/tall/death/death_04.png",
+						"source_rect": [
+							144,
+							0,
+							48,
+							48
+						],
+						"used_rect": "[P: (18, 15), S: (9, 17)]"
+					},
+					{
+						"file": "res://assets/enemies/insects/tall/death/death_05.png",
+						"source_rect": [
+							192,
+							0,
+							48,
+							48
+						],
+						"used_rect": "[P: (18, 23), S: (13, 9)]"
+					},
+					{
+						"file": "res://assets/enemies/insects/tall/death/death_06.png",
+						"source_rect": [
+							240,
+							0,
+							48,
+							48
+						],
+						"used_rect": "[P: (18, 23), S: (13, 9)]"
+					}
+				],
+				"source": "res://assets/enemies/insects/Tall-Enemy/Sprite-Sheet/Tall-Enemy-Death-Sheet.png",
+				"source_sha256": "f80eaa3fd8d806e166697a92c68f0dd971dcec961c3409b2204c4ee1f12ecdfd"
+			},
+			"hit": {
+				"frames": 3,
+				"poses": [
+					{
+						"file": "res://assets/enemies/insects/tall/hit/hit_01.png",
+						"source_rect": [
+							0,
+							0,
+							48,
+							48
+						],
+						"used_rect": "[P: (20, 11), S: (8, 21)]"
+					},
+					{
+						"file": "res://assets/enemies/insects/tall/hit/hit_02.png",
+						"source_rect": [
+							48,
+							0,
+							48,
+							48
+						],
+						"used_rect": "[P: (18, 12), S: (9, 20)]"
+					},
+					{
+						"file": "res://assets/enemies/insects/tall/hit/hit_03.png",
+						"source_rect": [
+							96,
+							0,
+							48,
+							48
+						],
+						"used_rect": "[P: (19, 12), S: (9, 20)]"
+					}
+				],
+				"source": "res://assets/enemies/insects/Tall-Enemy/Sprite-Sheet/Tall-Enemy-Hit-Sheet.png",
+				"source_sha256": "a35763ce39d8f220e9496b824f8d0e17e950a8a4e1aa7821fcd46c4b36bbf7e9"
+			},
+			"idle": {
+				"frames": 5,
+				"poses": [
+					{
+						"file": "res://assets/enemies/insects/tall/idle/idle_01.png",
+						"source_rect": [
+							0,
+							0,
+							48,
+							48
+						],
+						"used_rect": "[P: (20, 11), S: (8, 21)]"
+					},
+					{
+						"file": "res://assets/enemies/insects/tall/idle/idle_02.png",
+						"source_rect": [
+							48,
+							0,
+							48,
+							48
+						],
+						"used_rect": "[P: (20, 12), S: (8, 20)]"
+					},
+					{
+						"file": "res://assets/enemies/insects/tall/idle/idle_03.png",
+						"source_rect": [
+							96,
+							0,
+							48,
+							48
+						],
+						"used_rect": "[P: (20, 13), S: (8, 19)]"
+					},
+					{
+						"file": "res://assets/enemies/insects/tall/idle/idle_04.png",
+						"source_rect": [
+							144,
+							0,
+							48,
+							48
+						],
+						"used_rect": "[P: (20, 11), S: (8, 21)]"
+					},
+					{
+						"file": "res://assets/enemies/insects/tall/idle/idle_05.png",
+						"source_rect": [
+							192,
+							0,
+							48,
+							48
+						],
+						"used_rect": "[P: (20, 11), S: (8, 21)]"
+					}
+				],
+				"source": "res://assets/enemies/insects/Tall-Enemy/Sprite-Sheet/Tall-Enemy-Idle-Sheet.png",
+				"source_sha256": "33ab0054e3850ccc0734639bca279aa17748742b123115b4d24aebdf24efb6d3"
+			},
+			"idle_blink": {
+				"frames": 5,
+				"poses": [
+					{
+						"file": "res://assets/enemies/insects/tall/idle_blink/idle_blink_01.png",
+						"source_rect": [
+							0,
+							0,
+							48,
+							48
+						],
+						"used_rect": "[P: (20, 11), S: (8, 21)]"
+					},
+					{
+						"file": "res://assets/enemies/insects/tall/idle_blink/idle_blink_02.png",
+						"source_rect": [
+							48,
+							0,
+							48,
+							48
+						],
+						"used_rect": "[P: (20, 12), S: (8, 20)]"
+					},
+					{
+						"file": "res://assets/enemies/insects/tall/idle_blink/idle_blink_03.png",
+						"source_rect": [
+							96,
+							0,
+							48,
+							48
+						],
+						"used_rect": "[P: (20, 13), S: (8, 19)]"
+					},
+					{
+						"file": "res://assets/enemies/insects/tall/idle_blink/idle_blink_04.png",
+						"source_rect": [
+							144,
+							0,
+							48,
+							48
+						],
+						"used_rect": "[P: (20, 11), S: (8, 21)]"
+					},
+					{
+						"file": "res://assets/enemies/insects/tall/idle_blink/idle_blink_05.png",
+						"source_rect": [
+							192,
+							0,
+							48,
+							48
+						],
+						"used_rect": "[P: (20, 11), S: (8, 21)]"
+					}
+				],
+				"source": "res://assets/enemies/insects/Tall-Enemy/Sprite-Sheet/Tall-Enemy-Idle-Blink-Sheet.png",
+				"source_sha256": "f6995febf146d8000eeaefcfa46c483f07c96330dcde4c5d4012fff1ef59b7c2"
+			},
+			"walk": {
+				"frames": 4,
+				"poses": [
+					{
+						"file": "res://assets/enemies/insects/tall/walk/walk_01.png",
+						"source_rect": [
+							0,
+							0,
+							48,
+							48
+						],
+						"used_rect": "[P: (20, 11), S: (8, 21)]"
+					},
+					{
+						"file": "res://assets/enemies/insects/tall/walk/walk_02.png",
+						"source_rect": [
+							48,
+							0,
+							48,
+							48
+						],
+						"used_rect": "[P: (20, 10), S: (8, 22)]"
+					},
+					{
+						"file": "res://assets/enemies/insects/tall/walk/walk_03.png",
+						"source_rect": [
+							96,
+							0,
+							48,
+							48
+						],
+						"used_rect": "[P: (20, 11), S: (8, 21)]"
+					},
+					{
+						"file": "res://assets/enemies/insects/tall/walk/walk_04.png",
+						"source_rect": [
+							144,
+							0,
+							48,
+							48
+						],
+						"used_rect": "[P: (20, 10), S: (8, 22)]"
+					}
+				],
+				"source": "res://assets/enemies/insects/Tall-Enemy/Sprite-Sheet/Tall-Enemy-Walk-Sheet.png",
+				"source_sha256": "7683e8336f3cc4281f8180059033251a19322c64dae6f0a40db6fc9cd61a4f92"
+			}
+		}
+	},
+	"source_url": "https://sack-pixel.itch.io/pack-enemies-v1"
+}

@@ -56,14 +56,14 @@ func _physics_process(delta: float) -> void:
 			global_position = global_position.lerp(endpoint, float(contact.fraction))
 			if target.try_parry_projectile(self): return
 			if AFFILIATION.can_damage(faction, target): target.receive_projectile_damage(damage)
-			dismiss()
+			_impact()
 			return
 	if not hit.is_empty():
 		global_position = hit.position as Vector2
 		var body: Node = hit.get("collider") as Node
 		if reflected and AFFILIATION.can_damage(faction, body) and body.has_method("take_damage"):
 			body.call("take_damage", float(damage))
-		dismiss()
+		_impact()
 		return
 	global_position = endpoint
 	_previous_target = target.global_position
@@ -88,6 +88,10 @@ func dismiss() -> void:
 	consumed = true
 	set_physics_process(false)
 	queue_free()
+
+
+func _impact() -> void:
+	dismiss()
 
 
 func _draw() -> void:

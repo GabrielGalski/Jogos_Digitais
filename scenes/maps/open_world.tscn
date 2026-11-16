@@ -6,6 +6,8 @@
 [node name="OpenWorld" instance=ExtResource("arena")]
 level_name = "Room_2"
 arrival_warp_id = "room_2_center"
+insect_spawns_enabled = true
+flying_eye_spawns_enabled = false
 automatic_water = false
 water_profile = ExtResource("river")
 shore_foam_enabled = true

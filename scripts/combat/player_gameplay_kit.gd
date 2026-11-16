@@ -6,14 +6,12 @@ const CAMERA_RIG: Script = preload("res://scripts/visual/gameplay_camera_rig.gd"
 const DASH_SLIDES: Script = preload("res://scripts/visual/player_dash_slides.gd")
 const ROLL_EFFECTS: Script = preload("res://scripts/visual/player_roll_effects.gd")
 const PARRY: Script = preload("res://scripts/combat/player_parry.gd")
-const PRESENTATION: PackedScene = preload("res://scenes/visual/training_projectile_style.tscn")
 const TUTORIAL_M01: ManifestationCard = preload("res://resources/cards/preview/M01.tres")
 const MANIFESTATIONS: Script = preload("res://scripts/combat/manifestations/manifestation_controller.gd")
 
 var world_bounds: Rect2 = Rect2()
 var gameplay: Node2D = null
 var combat_enabled: bool = true
-var procedural_weapons_enabled: bool = false
 var reticle: Sprite2D = null
 var shooter: Node2D = null
 var effects: CombatEffects = null
@@ -48,15 +46,10 @@ func _ready() -> void:
 	projectiles = Node2D.new()
 	projectiles.name = "PlayerProjectiles"
 	player.get_parent().add_child(projectiles)
-	var presentation: Node2D = null
-	if not procedural_weapons_enabled:
-		presentation = PRESENTATION.instantiate() as Node2D
-		presentation.name = "ProjectileWorldStyle"
-		player.get_parent().add_child(presentation)
 	shooter = player.get_node("BoosterShooter") as Node2D
 	shooter.set("effects", effects)
 	shooter.set("projectiles", projectiles)
-	shooter.set("projectile_presentation", presentation)
+	shooter.set("projectile_presentation", null)
 	shooter.set("use_m01_projectile", true)
 	shooter.set("projectile_obstacle_mask", 1)
 	var loadout: CardLoadout = (shooter.get("initial_loadout") as CardLoadout).duplicate(true) as CardLoadout
@@ -72,11 +65,10 @@ func _ready() -> void:
 	reticle.call("set_tint", Color.WHITE)
 	_aim_layer.add_child(reticle)
 	player.get_parent().add_child(_aim_layer)
-	if procedural_weapons_enabled:
-		var manifestations: Node = MANIFESTATIONS.new()
-		manifestations.name = "Manifestations"
-		add_child(manifestations)
-		manifestations.call("configure", player, shooter, projectiles, reticle)
+	var manifestations: Node = MANIFESTATIONS.new()
+	manifestations.name = "Manifestations"
+	add_child(manifestations)
+	manifestations.call("configure", player, shooter, projectiles, reticle)
 	_camera_rig = CAMERA_RIG.new()
 	_camera_rig.name = "GameplayCameraRig"
 	_camera_rig.set("player", player)

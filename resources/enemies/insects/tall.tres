@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="InsectProfile" format=3]
+
+[ext_resource type="Script" path="res://scripts/enemies/insects/insect_profile.gd" id="1_t7lkw"]
+
+[resource]
+script = ExtResource("1_t7lkw")
+kind = &"tall"
+maximum_health = 30.0
+damage = 9
+movement_speed = 33.6
+body_radius = 7.2
+visual_scale = 1.2
+attack_range = 25.0
+attack_reach = 29.0
+windup = 0.72
+active_duration = 0.18
+recovery = 0.36
+attack_cooldown = 0.18
+knockback_resistance = 0.1

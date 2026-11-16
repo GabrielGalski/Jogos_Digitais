@@ -1,0 +1,98 @@
+{
+  "tool": "image_gen.imagegen (built-in)",
+  "request": "Chao roxo e caminhos de pedra baseados na referencia do usuario; modelos menos realistas.",
+  "reference_role": "Referencia de conceito, sem personagens ou cursor.",
+  "generated_source": "source/purple_floor_generated_v1.png",
+  "native_atlas": "purple_floor_v1.png",
+  "native_size": [
+    256,
+    256
+  ],
+  "tile_size": [
+    16,
+    16
+  ],
+  "padding": 0,
+  "spacing": 0,
+  "palette": [
+    "#25131A",
+    "#362030",
+    "#3D253B",
+    "#45283C",
+    "#533048",
+    "#6F4358"
+  ],
+  "preparation": "Nearest sampling to native size and mapping to the exact six project palette colors using tools/build_purple_floor.gd.",
+  "prompt_set": [
+    "Use case: stylized-concept.\nAsset type: production pixel-art ground TILESET atlas for the Godot game Monster Booster, top-down dungeon, not a screenshot, not a showcase poster.\nCreate a NEW square PNG tileset based on this visual concept: a very dark plum-purple dirt floor with scattered tiny sparse ground marks and a winding ancient path made from worn rectangular stone slabs; irregular cracked paving, broken angular corners, few loose pebbles, flat top-down perspective. Think of an old purple dungeon garden with burgundy shadows. No characters, cursor, UI, labels, walls, trees, props, objects, text, borders or watermark.\n\nPIXEL SPEC: native 256 x 256 pixel canvas. 16 columns x 16 rows, each tile exactly 16 x 16 pixels. Atlas occupies the entire canvas, zero padding, zero spacing, no drawn grid. True low-resolution hand-pixelled look, hard integer pixel clusters, 1px cracks, no antialiasing or gradients. Do not invent high-resolution details. If the delivery renderer requires a larger canvas, represent the 256x256 artwork with perfectly uniform nearest-neighbor integer magnification, NEVER smooth it.\n\nPALETTE: use ONLY these 9 opaque flat RGB colors: #25131A deepest burgundy crevices, #2D192B dark plum, #362030 base soil, #3D253B muted violet soil, #411A2F wine accents, #45283C lifted dirt, #4C2F49 stone shadows, #533048 stone midtone, #6F4358 restrained stone highlights. Keep most ground dark #362030 / #45283C. The stone path is softly lighter in purple-burgundy, never grey, beige, blue, green or white. Low visual noise suitable under fast combat. No transparency: every ground tile is fully opaque.\n\nATLAS LAYOUT:\nRows 0-1: 32 interchangeable seamless tiles of smooth purple earth, sparse single-pixel flecks, occasional tiny cracks, varied but quiet.\nRows 2-3: 32 seamless purple earth tiles with small angular gravel and pebbles, slightly denser clusters; no giant stones.\nRows 4-5: 32 seamless dark cracked earth tiles, fine intermittent cracks, small dry polygonal soil fragments, not continuous square outlines around each tile.\nRows 6-7: 32 seamless low purple ground-cover tiles, tiny tuft/leaf-like pixel marks in wine/plum only, completely flat terrain, varying density.\nRows 8-9: 32 seamless stone paving center tiles. Rectangular uneven purple slab patterns, alternating intact and cracked blocks, chipped corners, worn 1px creases; all directions can be assembled into wider paving.\nRows 10-11: reusable edges of that same stone path transitioning into the base purple earth. Include continuous top, bottom, left, right straight edges with small chips, several variations; the dirt color outside is exactly compatible with rows 0-1.\nRows 12-13: outer and inner corners, curve approximations through stepped pixel corners, horizontal and vertical path ends, T-junctions and four-way crossing components. Same slab scale and 16px grid, no vertical depth or extrusion.\nRows 14-15: scattered broken stone slabs embedded flush in purple earth, path deterioration and gradual dirt-to-stone transitions; small, medium, dense fragment variations.\n\nMake this a cohesive usable sheet, not 16 isolated framed material panels. Align every module to the exact 16px tile grid. Edge and corner pieces are top-down ground only. Match subdued dark purple pixel-art ambiance from the user's reference concept, with clear angular hand-placed paving silhouettes.",
+    "Edit this generated tileset, preserving its overall sixteen-column by sixteen-row layout and the same six families of ground materials. It is a reference for the requested game asset; make this a cleaner low-resolution production version.\n\nThe current version has too much tiny noise, vertical lighting gradients, and dark square lines around the dirt tiles. Correct those problems. Remove all artificial drawn grid lines and all dark frames around individual ground tiles. Dirt tiles should join seamlessly into a single continuous ground surface, with the SAME flat #362030 background at all their borders. No vignettes or tile-by-tile lighting. Make the floor calmer and darker in PLUM PURPLE, with deep wine shadows, matching Monster Booster's world. Remove red/pink sparkles. Stone paving must be flat embedded worn purple slabs, not raised beveled blocks. Keep angular cracks and chipped stone silhouettes as in the concept, but no glossy edge or strong drop shadow.\n\nPixel art must be drawn as actual 16x16 logical modules across a native 256x256 logical canvas, with coarse deliberate pixel clusters. If enlarged by your renderer, use exact NEAREST integer scaling with uniform pixels. Never add high-resolution grain or smoothing.\n\nUse ONLY these flat colors: #25131A, #2D192B, #362030, #3D253B, #411A2F, #45283C, #4C2F49, #533048, #6F4358. #362030 is the universal dirt background. #45283C and #533048 dominate stone, with very sparse #6F4358 highlights. No gradients or extra colors.\n\nKeep rows 0-1 as sparse smooth earth; 2-3 fine gravel; 4-5 cracked earth; 6-7 tiny purple tufts; 8-9 complete stone paving; 10-11 stone/dirt borders; 12-13 corners and path junction parts; 14-15 broken stone transitions. Make four tile edges match and provide reusable paved edges. No transparency, titles, labels, margins, grid overlays, cursor, characters, walls or props. Output only the square atlas.",
+    "Edit this atlas into a MUCH MORE STYLIZED, SIMPLER GAME TILESET, following the user's correction: less realistic. Keep the same 16x16 grid of tile modules and the same row categories, but simplify the art to chunky 16-bit pixel-art shapes like a small top-down action game. Treat every module as only 16x16 actual logical pixels.\n\nFLAT COLORS ONLY. No gradients, realistic dirt, noise, gritty material grain, ambient shading, soft edges, glossy highlights, bevels or volumetric rock rendering. Stones should be broad simple PURPLE shapes with one dark pixel outline, at most one short angular crack, a tiny flat edge accent and deliberately chipped stepped corners. Fewer larger stone blocks, simple readable rectangular paving. Gravel is only a few 1-3 pixel clusters. Plants are just 3-5 pixel wine-purple tufts. Cracked ground uses sparse short pixel lines. The ground is very quiet.\n\nColor direction is DARK PURPLE with WINE shadows, not reddish brown: use base #362030, lifted ground #45283C, dark #25131A, muted violet #3D253B, stone #533048, and restrained accents #6F4358. Six discrete colors maximum. This needs to match the existing game palette, not introduce new neon or natural grey rock colors. All dirt background is flat #362030, including tile borders. No square tile frames or grid lines.\n\nTop half: four simple ground texture families (two rows each: smooth earth, small gravel, sparse cracks, low purple tufts). Bottom half: purple paving, straight path borders, corners and intersections, then scattered broken slabs and transitions. Whole sheet tightly packed, no labels, no characters, no mouse cursor, no UI, no margin. Preserve the overall usable atlas arrangement. Native logical canvas 256x256, hard pixel edges."
+  ],
+  "rows": [
+    {
+      "rows": [
+        0,
+        1
+      ],
+      "family": "earth",
+      "description": "Terra roxa lisa com poucas marcas."
+    },
+    {
+      "rows": [
+        2,
+        3
+      ],
+      "family": "gravel",
+      "description": "Cascalho e pedras pequenas."
+    },
+    {
+      "rows": [
+        4,
+        5
+      ],
+      "family": "cracked",
+      "description": "Terra com rachaduras."
+    },
+    {
+      "rows": [
+        6,
+        7
+      ],
+      "family": "tufts",
+      "description": "Vegetacao rasteira em vinho e roxo."
+    },
+    {
+      "rows": [
+        8,
+        9
+      ],
+      "family": "paving",
+      "description": "Lajes de pedra inteiras e rachadas."
+    },
+    {
+      "rows": [
+        10,
+        11
+      ],
+      "family": "path_edges",
+      "description": "Bordas e encontros entre pedra e terra."
+    },
+    {
+      "rows": [
+        12,
+        13
+      ],
+      "family": "path_junctions",
+      "description": "Pecas para cantos e composicao de caminhos."
+    },
+    {
+      "rows": [
+        14,
+        15
+      ],
+      "family": "broken_stone",
+      "description": "Fragmentos e transicoes de piso quebrado."
+    }
+  ],
+  "usage": "Atlas manual de 256 tiles. Sem regras automaticas de terreno, colisao ou substituicao dos pisos existentes."
+}

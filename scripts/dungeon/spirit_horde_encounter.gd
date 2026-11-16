@@ -7,6 +7,9 @@ signal progress_changed(defeated: int, target: int)
 signal aborted
 
 const GHOST: Script = preload("res://scripts/enemies/spirit_ghost.gd")
+const HORDE_ENEMY: Script = preload("res://scripts/enemies/open_world_horde_enemy.gd")
+const HORDE_CATALOG: Script = preload("res://scripts/enemies/open_world_horde_catalog.gd")
+const HORDE_SHOT: Script = preload("res://scripts/combat/projectiles/open_world_horde_shot.gd")
 const PROFILE: Script = preload("res://scripts/enemies/spirit_horde_profile.gd")
 const NAVIGATION: Script = preload("res://scripts/enemies/spirit_horde_navigation.gd")
 const BUCKET: float = 24.0
@@ -40,6 +43,9 @@ var _spawn_remaining: float = 0.0
 var _routing_remaining: float = 0.0
 var _elapsed: float = 0.0
 var _spawn_sequence: int = 0
+var _mixed: bool = false
+var _walkable: Dictionary = {}
+var _spawn_deck: Array[String] = []
 var _buckets: Dictionary = {}
 var _waypoints: Dictionary = {}
 var _route_deadlines: Dictionary = {}
@@ -53,6 +59,9 @@ func configure(config: Dictionary, area: Rect2, subject: Player, rules: Node2D, 
 	floor_query = query
 	remains_system = remains
 	encounter_id = str(config.get("EncounterId", "spirit_horde_1"))
+	_mixed = HORDE_CATALOG.MIX.has(encounter_id)
+	if _mixed:
+		_walkable = config.get("AllowedArenaCells", {}) as Dictionary
 	activate_on_enter = bool(config.get("ActivateOnEnter", true))
 	arena_radius = maxf(float(config.get("ArenaRadius", 0.0)), 0.0)
 	arena_center = config.get("ArenaCenter", trigger_bounds.get_center()) as Vector2
@@ -62,7 +71,7 @@ func configure(config: Dictionary, area: Rect2, subject: Player, rules: Node2D, 
 	entry_condition = str(config.get("EntryCondition", entry_condition))
 	_random.randomize()
 	if arena_radius <= 0.0:
-		navigation.call("configure", trigger_bounds.grow(1024.0))
+		navigation.call("configure", trigger_bounds.grow(1024.0), _walkable)
 	_previous_player = to_local(player.global_position)
 	gameplay.call("set_condition", clear_condition, false)
 	gameplay.call("set_condition", entry_condition, true)
@@ -89,8 +98,10 @@ func begin() -> void:
 	if not can_begin():
 		return
 	phase = Phase.ACTIVE
+	if _mixed:
+		_prepare_spawn_deck()
 	if arena_boundary != null:
-		navigation.call("configure", trigger_bounds.grow(1024.0))
+		navigation.call("configure", trigger_bounds.grow(1024.0), _walkable)
 		gameplay.set_meta(&"active_pedestal_encounter", self)
 		arena_boundary.call("set_active", true)
 	gameplay.call("set_condition", entry_condition, false)
@@ -145,6 +156,8 @@ func viewport_bounds() -> Rect2:
 
 
 func _spawn_one() -> Node2D:
+	if _mixed and _spawn_deck.is_empty():
+		return null
 	if actors.size() >= int(profile.get("maximum_alive")) or phase != Phase.ACTIVE:
 		return null
 	var view: Rect2 = viewport_bounds()
@@ -152,6 +165,13 @@ func _spawn_one() -> Node2D:
 	var side: int = _spawn_sequence % 4
 	_spawn_sequence += 1
 	if arena_radius > 0.0:
+		if _mixed:
+			# A riverbank can close an entire approach. Try the other sectors.
+			for offset: int in range(4):
+				var recruit: Node2D = _spawn_arena_spirit(view, (side + offset) % 4)
+				if recruit != null:
+					return recruit
+			return null
 		return _spawn_arena_spirit(view, side)
 	var point: Vector2 = outer.get_center()
 	var outward: Vector2 = Vector2.ZERO
@@ -199,13 +219,35 @@ func _spawn_arena_spirit(view: Rect2, side: int) -> Node2D:
 			if other.position.distance_squared_to(point) < SPACING * SPACING:
 				occupied = true
 				break
-		if not occupied:
+		if not occupied and (not _mixed or bool(navigation.call("can_enter", point, center))):
 			return _create_spirit(point, view, side)
 	return null
 
 
+func _prepare_spawn_deck() -> void:
+	var mix: Dictionary = HORDE_CATALOG.MIX[encounter_id]
+	while _spawn_deck.size() < kill_target:
+		var batch: Array[String] = []
+		var opening: Array[String] = []
+		for kind: String in mix:
+			opening.append(kind)
+			for index: int in range(1, int(mix[kind])):
+				batch.append(kind)
+		batch.shuffle()
+		opening.shuffle()
+		_spawn_deck.append_array(batch)
+		_spawn_deck.append_array(opening)
+	_spawn_deck.resize(kill_target)
+
+
 func _create_spirit(point: Vector2, view: Rect2, side: int) -> Node2D:
-	var ghost: Node2D = GHOST.new() as Node2D
+	var ghost: Node2D
+	if _mixed:
+		var fighter: HORDE_ENEMY = HORDE_ENEMY.new()
+		fighter.configure(_spawn_deck.pop_back(), player, _height_query)
+		ghost = fighter
+	else:
+		ghost = GHOST.new() as Node2D
 	ghost.name = "Spirit_%d" % _spawn_sequence
 	ghost.position = point
 	ghost.set("remains_system", remains_system)
@@ -253,7 +295,7 @@ func _move_actor(actor: CharacterBody2D, subject: Vector2, delta: float) -> void
 		_waypoints[identifier] = navigation.call("waypoint", actor.position, subject)
 		_route_deadlines[identifier] = _elapsed + 0.32
 	var waypoint: Vector2 = _waypoints[identifier] as Vector2
-	if actor.position.distance_squared_to(subject) < 72.0 * 72.0 or actor.position.distance_squared_to(waypoint) < 16.0 * 16.0:
+	if not _mixed and (actor.position.distance_squared_to(subject) < 72.0 * 72.0 or actor.position.distance_squared_to(waypoint) < 16.0 * 16.0):
 		waypoint = subject
 	var forward: Vector2 = actor.position.direction_to(waypoint)
 	var distance: float = actor.position.distance_to(subject)
@@ -261,14 +303,20 @@ func _move_actor(actor: CharacterBody2D, subject: Vector2, delta: float) -> void
 	var oscillation: float = sin(_elapsed * (2.0 + difficulty_stage * 0.65) + float(actor.get("phase")))
 	var bend: float = sway * oscillation * clampf(distance / 80.0, 0.0, 1.0)
 	var direction: Vector2 = (forward + forward.orthogonal() * bend).normalized()
+	if actor is HORDE_ENEMY:
+		direction = (actor as HORDE_ENEMY).combat_direction(direction, distance, delta)
 	var speed: float = float(actor.get("movement_speed"))
 	var impulse: Vector2 = actor.get("hit_velocity") as Vector2
 	actor.set("hit_velocity", impulse * exp(-12.0 * delta))
 	actor.velocity = (direction + _separation(actor) * 1.35).limit_length(1.0) * speed + impulse
 	var previous: Vector2 = actor.position
 	actor.move_and_slide()
+	if _mixed and not _walkable.is_empty() and not _walkable.has(Vector2i((actor.position / 16.0).floor())):
+		actor.position = previous
 	if arena_radius > 0.0 and _height_query.is_valid():
 		(actor.get_node("Sprite") as Sprite2D).position.y = -7.0 - roundf(float(_height_query.call(actor.global_position)))
+	if actor is HORDE_ENEMY:
+		return
 	# Swept relative motion also catches a moving player between physics frames.
 	var relative_start: Vector2 = previous - (_previous_player + Vector2(0, 3))
 	var relative_end: Vector2 = actor.position - (subject + Vector2(0, 3))
@@ -333,6 +381,10 @@ func _complete() -> void:
 
 
 func _release_arena() -> void:
+	if _mixed:
+		for child: Node in get_children():
+			if child is HORDE_SHOT:
+				(child as HORDE_SHOT).dismiss()
 	if arena_boundary != null:
 		arena_boundary.call("set_active", false)
 	if gameplay.has_meta(&"active_pedestal_encounter") and gameplay.get_meta(&"active_pedestal_encounter") == self:

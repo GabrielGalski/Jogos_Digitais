@@ -25,6 +25,8 @@ func _input(event: InputEvent) -> void:
 		return
 	if key.physical_keycode != KEY_BACKSPACE and key.keycode != KEY_BACKSPACE:
 		return
+	if get_tree().get_first_node_in_group(&"manifestation_controllers") != null:
+		return
 	if not bool(presets.get("cycling_enabled")) or view_count() < 2:
 		return
 	# In rooms offering lighting comparisons, Backspace belongs to that selector.

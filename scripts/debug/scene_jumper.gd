@@ -14,6 +14,8 @@ func _ready() -> void:
 
 
 func _input(event: InputEvent) -> void:
+	if get_tree().get_first_node_in_group(&"card_table_modal") != null:
+		return
 	var key: InputEventKey = event as InputEventKey
 	if key == null or not key.pressed or key.echo:
 		return

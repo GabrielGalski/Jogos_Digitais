@@ -13,6 +13,7 @@ const LEAVES: Script = preload("res://scripts/dungeon/ldtk_leaves.gd")
 const TREES: Script = preload("res://scripts/dungeon/ldtk_trees.gd")
 const VEGETATION: Script = preload("res://scripts/dungeon/ldtk_vegetation.gd")
 const BRIDGES: Script = preload("res://scripts/dungeon/ldtk_bridges.gd")
+const CLIFF_COLLISIONS: Script = preload("res://scripts/dungeon/ldtk_cliff_collisions.gd")
 const TREE_SHADOWS: Script = preload("res://scripts/visual/tree_shadows.gd")
 const BORDERS: Script = preload("res://scripts/dungeon/ldtk_borders.gd")
 const AMBIENT_AREAS: Script = preload("res://scripts/dungeon/ldtk_ambient_areas.gd")
@@ -27,9 +28,17 @@ const ROOM_LIGHTING: Script = preload("res://scripts/visual/room_lighting.gd")
 const WARPS: Script = preload("res://scripts/dungeon/ldtk_warps.gd")
 const WARP_TRANSITION: Script = preload("res://scripts/visual/warp_transition.gd")
 const SPIRIT_HORDES: Script = preload("res://scripts/dungeon/ldtk_spirit_hordes.gd")
+const INSECT_ZONES: Script = preload("res://scripts/dungeon/insect_zones.gd")
 const FLYING_EYE_ZONES: Script = preload("res://scripts/dungeon/flying_eye_zones.gd")
+const BIOME_HABITATS: Script = preload("res://scripts/dungeon/ldtk_enemy_habitats.gd")
+const FLYING_SKULL_ZONES: Script = preload("res://scripts/dungeon/flying_skull_zones.gd")
+const SLIME_ZONES: Script = preload("res://scripts/dungeon/slime_zones.gd")
 const ENEMY_REMAINS: Script = preload("res://scripts/visual/enemy_remains.gd")
 const HORDE_PEDESTALS: Script = preload("res://scripts/dungeon/ldtk_horde_pedestals.gd")
+const CARD_TRADERS: Script = preload("res://scripts/dungeon/ldtk_card_traders.gd")
+const OPEN_WORLD_PEDESTAL_SCALE: float = 1.5
+const FINAL_PORTAL: Script = preload("res://scripts/dungeon/final_portal.gd")
+const ELEMENTAL_BOSS_JOURNEY: Script = preload("res://scripts/bosses/elemental_golem/boss_journey.gd")
 const ELEVATION: Script = preload("res://scripts/dungeon/ldtk_elevation.gd")
 const PLAYER_DEFEAT: Script = preload("res://scripts/visual/player_defeat.gd")
 const TERRAIN_CLOUDS: Script = preload("res://scripts/visual/terrain_cloud_shadows.gd")
@@ -52,6 +61,9 @@ var entry_player_state: Dictionary = {}
 @export_range(0.2,3.0,0.05) var warp_departure_duration: float = 0.4
 @export var map_path: String = MAP_PATH
 @export var level_name: String = LEVEL_NAME
+@export var insect_spawns_enabled: bool = false
+@export var flying_eye_spawns_enabled: bool = true
+@export_enum("Monocromatico", "Cobre e gelo", "Casca clara") var insect_palette_variant: int = 0
 @export var automatic_water: bool = true
 @export var water_profile: WaterProfile = preload("res://resources/visual/water/sea.tres")
 @export var shore_foam_enabled: bool = true
@@ -75,6 +87,30 @@ var _elevation: Node2D = null
 var _completion_skip_requested: bool = false
 var _defeat: CanvasLayer = null
 var _river_contour: Node2D = null
+var _card_table: CanvasLayer = null
+
+
+func _unhandled_key_input(event: InputEvent) -> void:
+	var key: InputEventKey = event as InputEventKey
+	if key == null or not key.pressed or key.echo:
+		return
+	if key.keycode in [KEY_ENTER, KEY_KP_ENTER] or key.physical_keycode in [KEY_ENTER, KEY_KP_ENTER]:
+		if open_card_table():
+			get_viewport().set_input_as_handled()
+
+
+func open_card_table() -> bool:
+	if scene_file_path != JUMPER.WORLD_SCENE or _travel_busy or not entry_complete:
+		return false
+	var player: Player = get_node_or_null("Nox") as Player
+	if player == null or player.dead or is_instance_valid(_card_table):
+		return false
+	if get_tree().get_first_node_in_group(&"card_table_modal") != null:
+		return false
+	var table_scene: PackedScene = load("res://scenes/cards/card_table.tscn") as PackedScene
+	_card_table = table_scene.instantiate() as CanvasLayer
+	add_child(_card_table)
+	return true
 
 
 func _process(delta: float) -> void:
@@ -143,11 +179,34 @@ func _ready() -> void:
 	var pedestals: Node2D = HORDE_PEDESTALS.new() as Node2D
 	pedestals.name = "HordePedestals"
 	add_child(pedestals)
-	pedestals.call("build", _level_layers, _textures, get_node("Nox"), hordes.get("encounters"), _terrain_and_warp_height)
+	pedestals.call("build", _level_layers, get_node("Nox"), hordes.get("encounters"), _terrain_and_warp_height)
+	var traders: Node2D = CARD_TRADERS.new() as Node2D
+	traders.name = "CardTraders"
+	add_child(traders)
+	traders.call("build", _level_layers, get_node("Nox"), _terrain_and_warp_height)
+	if level_name == "Room_2":
+		var boss_journey: Node = ELEMENTAL_BOSS_JOURNEY.new()
+		boss_journey.name = "ElementalBossJourney"
+		add_child(boss_journey)
+		boss_journey.call("configure", self, hordes.get("encounters"), pedestals.get("pedestals"))
+		var final_portal: Node2D = FINAL_PORTAL.new() as Node2D
+		final_portal.name = "FinalPortal"
+		add_child(final_portal)
+		final_portal.call("configure", self, _level_layers, hordes.get("encounters"))
 	var ambient_enemies: Node2D = FLYING_EYE_ZONES.new() as Node2D
 	ambient_enemies.name = "FlyingEyeZones"
 	add_child(ambient_enemies)
-	ambient_enemies.call("configure", _level_layers, get_node("Nox"), _gameplay, allowed_cells, is_ground_surface_point, _terrain_and_warp_height, hordes.get("encounters"))
+	if flying_eye_spawns_enabled:
+		ambient_enemies.call("configure", _level_layers, get_node("Nox"), _gameplay, allowed_cells, is_ground_surface_point, _terrain_and_warp_height, hordes.get("encounters"))
+	else:
+		ambient_enemies.set_physics_process(false)
+	if insect_spawns_enabled:
+		var insects: Node2D = INSECT_ZONES.new() as Node2D
+		insects.name = "InsectZones"
+		insects.set("palette_variant", insect_palette_variant)
+		add_child(insects)
+		insects.call("configure", _level_layers, get_node("Nox"), _gameplay, allowed_cells, is_ground_surface_point, _terrain_and_warp_height, hordes.get("encounters"), remains)
+	if level_name == "Room_2": _add_biome_enemies(allowed_cells, hordes, remains)
 	if lighting_profile != null:
 		var lighting: CanvasLayer = ROOM_LIGHTING.new() as CanvasLayer
 		lighting.name = "RoomLighting"
@@ -159,6 +218,24 @@ func _ready() -> void:
 		_start_warp_effect(true)
 	else:
 		_fade_in()
+
+
+func _add_biome_enemies(allowed: Dictionary, hordes: Node2D, remains: Node2D) -> void:
+	var habitats: RefCounted = BIOME_HABITATS.new() as RefCounted
+	var contour: RefCounted = _river_contour.get("contour") as RefCounted if _river_contour != null else null
+	habitats.call("configure", self, _level_layers, contour, is_ground_surface_point, _terrain_and_warp_height)
+	var skulls: Node2D = FLYING_SKULL_ZONES.new() as Node2D
+	skulls.name = "FlyingSkullZones"
+	skulls.set("habitats", habitats)
+	add_child(skulls)
+	skulls.call("configure", _level_layers, get_node("Nox"), _gameplay, allowed, is_ground_surface_point, _terrain_and_warp_height, hordes.get("encounters"))
+	var slimes: Node2D = SLIME_ZONES.new() as Node2D
+	slimes.name = "SlimeZones"
+	slimes.set("habitats", habitats)
+	slimes.set("remains_system", remains)
+	add_child(slimes)
+	slimes.call("configure", _level_layers, get_node("Nox"), _gameplay, habitats.call("slime_cells") as Dictionary,
+		Callable(habitats, "slime_support"), Callable(habitats, "slime_height"), hordes.get("encounters"))
 
 
 func _build_ldtk_level() -> bool:
@@ -191,6 +268,7 @@ func _build_ldtk_level() -> bool:
 				definition["relPath"] = local_source
 		tileset_defs[int(definition.get("uid", -1))] = definition
 	layers = BRIDGES.prepare_layers(layers, tileset_defs)
+	layers = CLIFF_COLLISIONS.prepare_layers(layers, tileset_defs, _textures)
 	_level_layers = layers
 	_elevation = ELEVATION.new() as Node2D
 	_elevation.name = "TerrainElevation"
@@ -407,10 +485,14 @@ func _build_ldtk_level() -> bool:
 	return true
 
 
+func _horde_pedestal_scale() -> float:
+	return OPEN_WORLD_PEDESTAL_SCALE if level_name == "Room_2" else 1.0
+
+
 func _add_pedestal_support(layers: Array) -> void:
 	# Platforms supply walkable support even when the author places them over absent Floor.
 	# Preserve the map paint and derive FloorBoundary from the combined surface.
-	for region: Rect2 in HORDE_PEDESTALS.support_regions(layers):
+	for region: Rect2 in HORDE_PEDESTALS.support_regions(layers, _horde_pedestal_scale()):
 		var first: Vector2i = Vector2i((region.position / TILE_SIZE).floor())
 		var ending: Vector2i = Vector2i((region.end / TILE_SIZE).ceil())
 		for y: int in range(first.y, ending.y):
@@ -532,7 +614,6 @@ func _add_player_and_controls() -> void:
 	kit.name = "GameplayKit"
 	kit.set("world_bounds", Rect2(to_global(_floor_bounds.position), _floor_bounds.size * global_scale))
 	kit.set("gameplay", _gameplay)
-	kit.set("procedural_weapons_enabled", level_name == "Room_2")
 	player.add_child(kit)
 	# Side-facing weapon shares the actor's depth; upward/recoil poses stay behind it.
 	# This lets the whole held rig disappear behind a Y-sorted tree, with the body.

@@ -48,6 +48,7 @@ func configure(layers: Array, subject: Player, rules: Node2D, allowed: Dictionar
 			if not bool(config.get("Enabled", true)): continue
 			var id: StringName = StringName(str(config.get("ZoneId", entity.iid)))
 			var rect: Rect2 = ENTITIES.entity_rect(entity, offset)
+			if not accepts_zone(Rect2(to_global(rect.position), rect.size)): continue
 			zones[id] = {"rect": Rect2(to_global(rect.position), rect.size), "config": config}
 	for encounter: Node2D in encounters:
 		encounter.connect("started", _on_altar_started)
@@ -60,6 +61,22 @@ func altar_active() -> bool:
 	if not is_instance_valid(gameplay) or not gameplay.has_meta(&"active_pedestal_encounter"): return false
 	var encounter: Node = gameplay.get_meta(&"active_pedestal_encounter") as Node
 	return is_instance_valid(encounter) and int(encounter.get("phase")) == 1
+
+
+func accepts_zone(_rect: Rect2) -> bool:
+	return true
+
+
+func accepts_spawn_point(_point: Vector2) -> bool:
+	return true
+
+
+func spawn_weight(_point: Vector2) -> float:
+	return 1.0
+
+
+func create_pack() -> Node2D:
+	return PACK.new() as Node2D
 
 
 func _on_altar_started() -> void:
@@ -135,7 +152,7 @@ func _activate_zone(id: StringName) -> void:
 	var candidates: Array[Vector2] = []
 	for cell: Vector2i in _allowed:
 		var point: Vector2 = to_global(Vector2(cell * 16) + Vector2.ONE * 8.0)
-		if rect.grow(-32.0).has_point(point): candidates.append(point)
+		if rect.grow(-32.0).has_point(point) and accepts_spawn_point(point): candidates.append(point)
 	runtime[id] = {"packs": [], "spawned": 0, "candidates": candidates}
 	active_zones.append(id)
 
@@ -175,16 +192,18 @@ func _spawn_one_pack() -> void:
 		var count: int = _random.randi_range(minimum, clampi(profile.maximum_pack_size, minimum, 5))
 		for attempt: int in range(profile.spawn_attempts):
 			var anchor: Vector2 = candidates[_random.randi_range(0, candidates.size() - 1)]
+			var weight: float = spawn_weight(anchor)
+			if weight < 1.0 and _random.randf() > weight: continue
 			var acquisition: float = float(config.get("ActivationRangePx", profile.acquisition_range))
 			if anchor.distance_to(player.global_position) <= acquisition + 32.0: continue
 			if not _anchor_spacing_ok(anchor, float(config.get("MinimumPackDistancePx", profile.minimum_anchor_distance))): continue
 			var starts: Array[Vector2] = []
 			for member: int in range(count): starts.append(anchor + Vector2.from_angle(member * TAU / count) * 20.0)
 			if not _safe_spawn(anchor, starts, view): continue
-			var pack: Node2D = PACK.new() as Node2D
+			var pack: Node2D = create_pack()
 			pack.name = "Pack_%s_%d" % [id, int(state.spawned)]
 			add_child(pack)
-			pack.connect("shot_requested", _on_shot_requested)
+			if pack.has_signal("shot_requested"): pack.connect("shot_requested", _on_shot_requested)
 			pack.tree_exiting.connect(_on_pack_exiting.bind(id, pack))
 			pack.set_meta(&"minimum_anchor_distance", float(config.get("MinimumPackDistancePx", profile.minimum_anchor_distance)))
 			pack.call("configure", anchor, starts, player, profile, _floor_query, _height_query,
@@ -211,6 +230,7 @@ func _safe_spawn(anchor: Vector2, members: Array[Vector2], view: Rect2) -> bool:
 	query.collision_mask = 1
 	if not get_world_2d().direct_space_state.intersect_shape(query, 1).is_empty(): return false
 	for point: Vector2 in members:
+		if not accepts_spawn_point(point): return false
 		if not _floor_query.is_valid() or not bool(_floor_query.call(point)): return false
 		var height: float = float(_height_query.call(point)) if _height_query.is_valid() else 0.0
 		var rendered_point: Vector2 = point - Vector2(0, height + 8.0)

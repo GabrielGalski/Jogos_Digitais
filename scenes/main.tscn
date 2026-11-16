@@ -1,8 +1,0 @@
-[gd_scene format=3 uid="uid://twmvexpaipda"]
-
-[ext_resource type="PackedScene" path="res://scenes/tutorial_arena.tscn" id="1_arena"]
-
-[node name="Main" type="Node2D" unique_id=36190445]
-
-[node name="TutorialArena" parent="." unique_id=2069989885 instance=ExtResource("1_arena")]
-position = Vector2(130, -420)

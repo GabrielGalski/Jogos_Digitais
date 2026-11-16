@@ -18,7 +18,7 @@ func invalidate() -> void:
 	revision += 1
 
 
-func build(world: World2D, world_bounds: Rect2, radius: float, mask: int) -> void:
+func build(world: World2D, world_bounds: Rect2, radius: float, mask: int, excluded: Array[RID] = []) -> void:
 	var started: int = Time.get_ticks_usec()
 	bounds = world_bounds
 	grid.region = Rect2i(Vector2i.ZERO, Vector2i(ceili(bounds.size.x / cell_size), ceili(bounds.size.y / cell_size)))
@@ -34,6 +34,7 @@ func build(world: World2D, world_bounds: Rect2, radius: float, mask: int) -> voi
 	var query: PhysicsShapeQueryParameters2D = PhysicsShapeQueryParameters2D.new()
 	query.shape = shape
 	query.collision_mask = mask
+	query.exclude = excluded
 	var safe_bounds: Rect2 = bounds.grow(-shape.radius)
 	for y: int in range(grid.region.size.y):
 		for x: int in range(grid.region.size.x):

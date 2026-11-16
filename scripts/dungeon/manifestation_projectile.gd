@@ -4,51 +4,51 @@ signal visual_impact(at: Vector2, code: StringName)
 const ENEMY_CONTACTS: Script = preload("res://scripts/combat/projectile_enemy_contacts.gd")
 
 const M01_FRAMES: Array[Texture2D] = [
-	preload("res://assets/cards/manifestacao/gotas_de_slime M01/projectile/bullet1.png"),
-	preload("res://assets/cards/manifestacao/gotas_de_slime M01/projectile/bullet2.png"),
-	preload("res://assets/cards/manifestacao/gotas_de_slime M01/projectile/bullet3.png"),
-	preload("res://assets/cards/manifestacao/gotas_de_slime M01/projectile/bullet4.png"),
-	preload("res://assets/cards/manifestacao/gotas_de_slime M01/projectile/bullet5.png"),
+	preload("res://assets/projectiles/manifestacao/gotas_de_slime M01/projectile/bullet1.png"),
+	preload("res://assets/projectiles/manifestacao/gotas_de_slime M01/projectile/bullet2.png"),
+	preload("res://assets/projectiles/manifestacao/gotas_de_slime M01/projectile/bullet3.png"),
+	preload("res://assets/projectiles/manifestacao/gotas_de_slime M01/projectile/bullet4.png"),
+	preload("res://assets/projectiles/manifestacao/gotas_de_slime M01/projectile/bullet5.png"),
 ]
 const M01_LAUNCH_FPS: float = 60.0
 const M01_LAUNCH_SCALE: float = 0.8
 const M01_FLIGHT_SCALE: float = 0.56
-const M02_A: Texture2D = preload("res://assets/cards/manifestacao/massa_de_slime M02/projectile/slime_ball.png")
-const M02_B: Texture2D = preload("res://assets/cards/manifestacao/massa_de_slime M02/projectile/slime_ball2.png")
-const M02_IMPACT_UPDOWN: Texture2D = preload("res://assets/cards/manifestacao/massa_de_slime M02/projectile/impact_updown.png")
-const M02_IMPACT_LEFT: Texture2D = preload("res://assets/cards/manifestacao/massa_de_slime M02/projectile/impact_left.png")
-const M02_IMPACT_RIGHT: Texture2D = preload("res://assets/cards/manifestacao/massa_de_slime M02/projectile/impact_right.png")
+const M02_A: Texture2D = preload("res://assets/projectiles/manifestacao/massa_de_slime M02/projectile/slime_ball.png")
+const M02_B: Texture2D = preload("res://assets/projectiles/manifestacao/massa_de_slime M02/projectile/slime_ball2.png")
+const M02_IMPACT_UPDOWN: Texture2D = preload("res://assets/projectiles/manifestacao/massa_de_slime M02/projectile/impact_updown.png")
+const M02_IMPACT_LEFT: Texture2D = preload("res://assets/projectiles/manifestacao/massa_de_slime M02/projectile/impact_left.png")
+const M02_IMPACT_RIGHT: Texture2D = preload("res://assets/projectiles/manifestacao/massa_de_slime M02/projectile/impact_right.png")
 const SLIME_IMPACT_DURATION: float = 0.08
-const M05_FALL: Texture2D = preload("res://assets/cards/manifestacao/brotos_de_fungoide M05/falling/drop_falling.png")
-const M05_WALK_1: Texture2D = preload("res://assets/cards/manifestacao/brotos_de_fungoide M05/walk/walk1.png")
-const M05_WALK_2: Texture2D = preload("res://assets/cards/manifestacao/brotos_de_fungoide M05/walk/walk2.png")
-const M05_WALK_3: Texture2D = preload("res://assets/cards/manifestacao/brotos_de_fungoide M05/walk/walk3.png")
-const M05_WALK_4: Texture2D = preload("res://assets/cards/manifestacao/brotos_de_fungoide M05/walk/walk4.png")
-const M05_WALK_5: Texture2D = preload("res://assets/cards/manifestacao/brotos_de_fungoide M05/walk/walk5.png")
-const M05_WALK_6: Texture2D = preload("res://assets/cards/manifestacao/brotos_de_fungoide M05/walk/walk6.png")
-const M05_WALK_7: Texture2D = preload("res://assets/cards/manifestacao/brotos_de_fungoide M05/walk/walk7.png")
-const M05_WALK_8: Texture2D = preload("res://assets/cards/manifestacao/brotos_de_fungoide M05/walk/walk8.png")
+const M05_FALL: Texture2D = preload("res://assets/projectiles/manifestacao/brotos_de_fungoide M05/falling/drop_falling.png")
+const M05_WALK_1: Texture2D = preload("res://assets/projectiles/manifestacao/brotos_de_fungoide M05/walk/walk1.png")
+const M05_WALK_2: Texture2D = preload("res://assets/projectiles/manifestacao/brotos_de_fungoide M05/walk/walk2.png")
+const M05_WALK_3: Texture2D = preload("res://assets/projectiles/manifestacao/brotos_de_fungoide M05/walk/walk3.png")
+const M05_WALK_4: Texture2D = preload("res://assets/projectiles/manifestacao/brotos_de_fungoide M05/walk/walk4.png")
+const M05_WALK_5: Texture2D = preload("res://assets/projectiles/manifestacao/brotos_de_fungoide M05/walk/walk5.png")
+const M05_WALK_6: Texture2D = preload("res://assets/projectiles/manifestacao/brotos_de_fungoide M05/walk/walk6.png")
+const M05_WALK_7: Texture2D = preload("res://assets/projectiles/manifestacao/brotos_de_fungoide M05/walk/walk7.png")
+const M05_WALK_8: Texture2D = preload("res://assets/projectiles/manifestacao/brotos_de_fungoide M05/walk/walk8.png")
 const M05_BOOM: Array[Texture2D] = [
-	preload("res://assets/cards/manifestacao/brotos_de_fungoide M05/explosion/boom/mush_explosion1.png"),
-	preload("res://assets/cards/manifestacao/brotos_de_fungoide M05/explosion/boom/mush_explosion2.png"),
-	preload("res://assets/cards/manifestacao/brotos_de_fungoide M05/explosion/boom/mush_explosion3.png"),
-	preload("res://assets/cards/manifestacao/brotos_de_fungoide M05/explosion/boom/mush_explosion4.png"),
-	preload("res://assets/cards/manifestacao/brotos_de_fungoide M05/explosion/boom/mush_explosion5.png"),
-	preload("res://assets/cards/manifestacao/brotos_de_fungoide M05/explosion/boom/mush_explosion6.png"),
-	preload("res://assets/cards/manifestacao/brotos_de_fungoide M05/explosion/boom/mush_explosion7.png"),
-	preload("res://assets/cards/manifestacao/brotos_de_fungoide M05/explosion/boom/mush_explosion8.png"),
-	preload("res://assets/cards/manifestacao/brotos_de_fungoide M05/explosion/boom/mush_explosion9.png"),
-	preload("res://assets/cards/manifestacao/brotos_de_fungoide M05/explosion/boom/mush_explosion10.png"),
+	preload("res://assets/projectiles/manifestacao/brotos_de_fungoide M05/explosion/boom/mush_explosion1.png"),
+	preload("res://assets/projectiles/manifestacao/brotos_de_fungoide M05/explosion/boom/mush_explosion2.png"),
+	preload("res://assets/projectiles/manifestacao/brotos_de_fungoide M05/explosion/boom/mush_explosion3.png"),
+	preload("res://assets/projectiles/manifestacao/brotos_de_fungoide M05/explosion/boom/mush_explosion4.png"),
+	preload("res://assets/projectiles/manifestacao/brotos_de_fungoide M05/explosion/boom/mush_explosion5.png"),
+	preload("res://assets/projectiles/manifestacao/brotos_de_fungoide M05/explosion/boom/mush_explosion6.png"),
+	preload("res://assets/projectiles/manifestacao/brotos_de_fungoide M05/explosion/boom/mush_explosion7.png"),
+	preload("res://assets/projectiles/manifestacao/brotos_de_fungoide M05/explosion/boom/mush_explosion8.png"),
+	preload("res://assets/projectiles/manifestacao/brotos_de_fungoide M05/explosion/boom/mush_explosion9.png"),
+	preload("res://assets/projectiles/manifestacao/brotos_de_fungoide M05/explosion/boom/mush_explosion10.png"),
 ]
-const M06_A: Texture2D = preload("res://assets/cards/manifestacao/cauda_de_manticora M06/projectiles/spike1.png")
-const M06_B: Texture2D = preload("res://assets/cards/manifestacao/cauda_de_manticora M06/projectiles/spike2.png")
-const M06_C: Texture2D = preload("res://assets/cards/manifestacao/cauda_de_manticora M06/projectiles/spike3.png")
+const M06_A: Texture2D = preload("res://assets/projectiles/manifestacao/cauda_de_manticora M06/projectiles/spike1.png")
+const M06_B: Texture2D = preload("res://assets/projectiles/manifestacao/cauda_de_manticora M06/projectiles/spike2.png")
+const M06_C: Texture2D = preload("res://assets/projectiles/manifestacao/cauda_de_manticora M06/projectiles/spike3.png")
 const M07_FRAMES: Array[Texture2D] = [
-	preload("res://assets/cards/manifestacao/coracao_de_efreeti M07/projectile/flame1.png"),
-	preload("res://assets/cards/manifestacao/coracao_de_efreeti M07/projectile/flame2.png"),
-	preload("res://assets/cards/manifestacao/coracao_de_efreeti M07/projectile/flame3.png"),
-	preload("res://assets/cards/manifestacao/coracao_de_efreeti M07/projectile/flame4.png"),
-	preload("res://assets/cards/manifestacao/coracao_de_efreeti M07/projectile/flame5.png"),
+	preload("res://assets/projectiles/manifestacao/coracao_de_efreeti M07/projectile/flame1.png"),
+	preload("res://assets/projectiles/manifestacao/coracao_de_efreeti M07/projectile/flame2.png"),
+	preload("res://assets/projectiles/manifestacao/coracao_de_efreeti M07/projectile/flame3.png"),
+	preload("res://assets/projectiles/manifestacao/coracao_de_efreeti M07/projectile/flame4.png"),
+	preload("res://assets/projectiles/manifestacao/coracao_de_efreeti M07/projectile/flame5.png"),
 ]
 
 @onready var visual: Sprite2D = $Visual

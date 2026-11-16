@@ -4,6 +4,8 @@ signal shot_requested(actor: Node2D, heading: Vector2, pack: Node2D)
 signal cleared(pack: Node2D)
 
 const ACTOR: Script = preload("res://scripts/enemies/flying_eye.gd")
+var actor_script: Script = ACTOR
+var actor_prefix: String = "FlyingEye"
 const AFFILIATION: Script = preload("res://scripts/combat/combat_affiliation.gd")
 enum State { IDLE, ENGAGED, RETURNING }
 enum Attack { READY, WINDUP, VOLLEY }
@@ -48,8 +50,8 @@ func configure(center: Vector2, starts: Array[Vector2], player: Player, settings
 	y_sort_enabled = true
 	_slot_phase = seed_phase
 	for index: int in range(starts.size()):
-		var eye: CharacterBody2D = ACTOR.new() as CharacterBody2D
-		eye.name = "FlyingEye_%d" % index
+		var eye: CharacterBody2D = actor_script.new() as CharacterBody2D
+		eye.name = "%s_%d" % [actor_prefix, index]
 		eye.set("profile", profile)
 		eye.set("height_query", height_query)
 		eye.set("floor_height", float(height_query.call(starts[index])) if height_query.is_valid() else 0.0)

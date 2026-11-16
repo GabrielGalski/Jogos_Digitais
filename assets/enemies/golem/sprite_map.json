@@ -1,0 +1,176 @@
+{
+	"animations": {
+		"attack": {
+			"frames": 11,
+			"sha256": "6c3fc83264a33ad7ab8ced9f9e55458ad6450dcb7d1c7ddf1d0de436b323b427",
+			"source": "res://assets/enemies/golem/Golem_1_attack.png"
+		},
+		"die": {
+			"frames": 13,
+			"sha256": "78ec0730283c2849a8e61e185d5256526d2b8937b9a7354b65ce3ee6a77a71ec",
+			"source": "res://assets/enemies/golem/Golem_1_die.png"
+		},
+		"hurt": {
+			"frames": 4,
+			"sha256": "00f96b00248e5d2aed606091289a90e92e72a0538ce763b53d2315acafae0bd6",
+			"source": "res://assets/enemies/golem/Golem_1_hurt.png"
+		},
+		"idle": {
+			"frames": 8,
+			"sha256": "8070ede87c43dac7bee65b5403cb7cdcf0e68b1845bdf1cc76e6e6480494c82d",
+			"source": "res://assets/enemies/golem/Golem_1_idle.png"
+		},
+		"walk": {
+			"frames": 10,
+			"sha256": "76c62587c24ddb37a2f8eb7f557a9dcc955ba4a0e0755222032ac7eea57e7ff3",
+			"source": "res://assets/enemies/golem/Golem_1_walk.png"
+		}
+	},
+	"attack_map": {
+		"clip_index_numbering": "zero_based",
+		"clips": {
+			"cast": [
+				6
+			],
+			"charge": [
+				1,
+				2,
+				3,
+				4,
+				5,
+				6
+			],
+			"fall": [
+				7
+			],
+			"jump_prepare": [
+				3,
+				4
+			],
+			"land": [
+				8,
+				9,
+				10,
+				11
+			],
+			"slam": [
+				6,
+				7,
+				8,
+				9,
+				10,
+				11,
+				1,
+				2,
+				3,
+				4,
+				5
+			]
+		},
+		"impact_pose": 7,
+		"poses": [
+			{
+				"action": "ready",
+				"pose": 1
+			},
+			{
+				"action": "anticipation",
+				"pose": 2
+			},
+			{
+				"action": "raise_arms_start",
+				"pose": 3
+			},
+			{
+				"action": "raise_arms",
+				"pose": 4
+			},
+			{
+				"action": "overhead_start",
+				"pose": 5
+			},
+			{
+				"action": "overhead_hold",
+				"pose": 6
+			},
+			{
+				"action": "ground_impact",
+				"event": "volley",
+				"pose": 7
+			},
+			{
+				"action": "impact_follow_through",
+				"pose": 8
+			},
+			{
+				"action": "recovery_start",
+				"pose": 9
+			},
+			{
+				"action": "recovery",
+				"pose": 10
+			},
+			{
+				"action": "return_to_ready",
+				"pose": 11
+			}
+		],
+		"slam_impact_clip_index": 1,
+		"source_numbering": "one_based",
+		"volley_intervals_seconds": {
+			"fire": 0.62,
+			"ice": 0.82,
+			"lightning": 0.72
+		}
+	},
+	"canvas": [
+		90,
+		64
+	],
+	"cast_pose": 6,
+	"crystal_source_colors": [
+		"0e2385",
+		"1047ad",
+		"36a0f1",
+		"90d8ff",
+		"9dd2fa"
+	],
+	"death_map": {
+		"last_visible_pose": 12,
+		"remains_pose": 12,
+		"runtime_frames": 12,
+		"trailing_empty_cells": 1
+	},
+	"fall_pose": 7,
+	"feet_pivot": [
+		45,
+		64
+	],
+	"jump_prepare_poses": [
+		3,
+		4
+	],
+	"palettes": {
+		"fire": [
+			"872b24",
+			"c65326",
+			"ff963b",
+			"ffe4a0",
+			"ffeabb"
+		],
+		"ice": [
+			"0e2385",
+			"1047ad",
+			"36a0f1",
+			"90d8ff",
+			"9dd2fa"
+		],
+		"lightning": [
+			"806321",
+			"bb942b",
+			"f7dc49",
+			"fff8bb",
+			"fffbd6"
+		]
+	}
+}

@@ -24,6 +24,7 @@ var phase: float = 0.0
 var last_hit_direction: Vector2 = Vector2.RIGHT
 var hit_velocity: Vector2 = Vector2.ZERO
 var dying: bool = false
+var hit_pose_hold: float = 0.0
 var _sprite: Sprite2D = null
 var _flash: float = 0.0
 var _age: float = 0.0
@@ -143,7 +144,7 @@ func _disappear(killed: bool) -> void:
 	dying = true
 	if killed and is_instance_valid(remains_system):
 		# Emit before changing pose/velocity and before the encounter can finish itself.
-		remains_system.call("emit_spirit", get_visual_center_of_mass(), global_position, last_hit_direction, velocity + hit_velocity)
+		_emit_remains()
 	velocity = Vector2.ZERO
 	collision_layer = 0
 	collision_mask = 0
@@ -155,5 +156,11 @@ func _disappear(killed: bool) -> void:
 		consumed.emit(self)
 	# Small native sprite fade; no spawn markers, counters or death beams.
 	var fade: Tween = create_tween()
+	if killed and hit_pose_hold > 0.0:
+		fade.tween_interval(hit_pose_hold)
 	fade.tween_property(self, "modulate:a", 0.0, 0.10)
 	fade.tween_callback(queue_free)
+
+
+func _emit_remains() -> void:
+	remains_system.call("emit_spirit", get_visual_center_of_mass(), global_position, last_hit_direction, velocity + hit_velocity)

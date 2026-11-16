@@ -1,10 +1,12 @@
 extends Node
-## Caster-local equipment command, input selector and attack cadence for the first six models.
+## Caster-local equipment, paused card selection and shared attack cadence.
 
 signal weapon_changed(code: StringName, display_name: String)
+signal equipment_menu_closed
 const FACTORY: Script = preload("res://scripts/combat/manifestations/manifestation_factory.gd")
 const IMPACT: Script = preload("res://scripts/visual/weapons/procedural_impact.gd")
 const LIGHTING: Script = preload("res://scripts/visual/weapons/procedural_weapon_lighting.gd")
+const EQUIPMENT: PackedScene = preload("res://scenes/cards/equipment_menu.tscn")
 const MODELS: Array[ProceduralManifestationModel] = [
 	preload("res://resources/weapons/procedural/M01.tres"),
 	preload("res://resources/weapons/procedural/M02.tres"),
@@ -26,6 +28,7 @@ var trigger_requested: bool = false
 var _infusion_remaining: Dictionary[StringName, float] = {}
 var _tick_remaining: Dictionary[StringName, float] = {}
 var _random: RandomNumberGenerator = RandomNumberGenerator.new()
+var _equipment_menu: CanvasLayer = null
 
 
 func configure(actor: Player, shooter: Node2D, shots: Node2D, cursor: Node2D) -> void:
@@ -33,6 +36,7 @@ func configure(actor: Player, shooter: Node2D, shots: Node2D, cursor: Node2D) ->
 	gun = shooter
 	projectiles = shots
 	reticle = cursor
+	add_to_group(&"manifestation_controllers")
 	_random.seed = 16027
 	process_physics_priority = 4
 	for model: ProceduralManifestationModel in MODELS:
@@ -51,6 +55,10 @@ func selected_model() -> ProceduralManifestationModel:
 	return MODELS[selected_index]
 
 
+func available_models() -> Array[ProceduralManifestationModel]:
+	return MODELS
+
+
 func select_model(index: int) -> bool:
 	if gun == null or index < 0 or index >= MODELS.size():
 		return false
@@ -66,19 +74,34 @@ func select_model(index: int) -> bool:
 	selected_index = index
 	gun.set("cooldown", 0.0)
 	gun.set("require_mouse_release", true)
+	gun.call("clear_muzzle_effect")
 	_update_reticle()
 	weapon_changed.emit(selected_model().code(), selected_model().card.display_name)
 	return true
 
 
-func _input(event: InputEvent) -> void:
-	var key: InputEventKey = event as InputEventKey
-	if key == null or not key.pressed or key.echo or player == null or player.dead or player.intro_locked or get_tree().paused:
-		return
-	if key.physical_keycode != KEY_BACKSPACE and key.keycode != KEY_BACKSPACE:
-		return
-	select_model((selected_index + 1) % MODELS.size())
-	get_viewport().set_input_as_handled()
+func open_equipment_menu() -> bool:
+	if not is_instance_valid(player) or player.dead or player.intro_locked or get_tree().paused or is_instance_valid(_equipment_menu):
+		return false
+	_sync_equipped_model()
+	suspend_trigger()
+	_equipment_menu = EQUIPMENT.instantiate() as CanvasLayer
+	_equipment_menu.set("controller", self)
+	_equipment_menu.tree_exited.connect(_on_equipment_menu_closed, CONNECT_ONE_SHOT)
+	get_tree().current_scene.add_child(_equipment_menu)
+	return true
+
+
+func _on_equipment_menu_closed() -> void:
+	_equipment_menu = null
+	equipment_menu_closed.emit()
+
+
+func suspend_trigger() -> void:
+	trigger_requested = false
+	_stop_channel()
+	gun.set("require_mouse_release", true)
+	gun.call("clear_muzzle_effect")
 
 
 func set_trigger(requested: bool) -> void:
@@ -173,7 +196,7 @@ func _apply_channel_tick(model: ProceduralManifestationModel) -> void:
 
 
 func _present_shot(model: ProceduralManifestationModel, origin: Vector2) -> void:
-	gun.call("present_procedural_shot")
+	gun.call("present_procedural_shot", model.body_color, model.family == ProceduralManifestationModel.Family.PROJECTILE)
 	lighting.call("flash", origin, model, false)
 
 

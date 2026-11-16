@@ -13,10 +13,13 @@ const SHAPES: Array[Array] = [
 var spirit_profile: Resource = PROFILE.new()
 var player: Player = null
 var floor_query: Callable = Callable()
+var sprite_palette: Callable = Callable()
 var active: Array[RefCounted] = []
 var _chunks: Dictionary[Vector2i, Node2D] = {}
 var _air: Node2D = null
 var _textures: Array[Texture2D] = []
+var _fragment_offsets: Dictionary[Color, int] = {}
+var _sprite_indices: Dictionary[Texture2D, int] = {}
 var _random: RandomNumberGenerator = RandomNumberGenerator.new()
 var _elapsed: float = 0.0
 var _next_expiry: float = INF
@@ -46,7 +49,8 @@ func configure(query: Callable, subject: Player = null) -> void:
 
 
 func emit_spirit(world_center: Vector2, world_ground: Vector2, impact: Vector2,
-		inherited_velocity: Vector2 = Vector2.ZERO) -> void:
+		inherited_velocity: Vector2 = Vector2.ZERO, primary: Color = Color.TRANSPARENT,
+		accent: Color = Color.TRANSPARENT) -> void:
 	var ground: Vector2 = to_local(world_ground)
 	var center: Vector2 = to_local(world_center)
 	var initial_ground: Vector2 = Vector2(center.x, ground.y)
@@ -65,13 +69,57 @@ func emit_spirit(world_center: Vector2, world_ground: Vector2, impact: Vector2,
 		piece.set("velocity", direction * speed + inherited)
 		piece.set("lift_velocity", _random.randf_range(float(spirit_profile.get("minimum_lift")), float(spirit_profile.get("maximum_lift"))))
 		piece.set("angular_velocity", _random.randf_range(-7.0, 7.0))
-		piece.set("texture_index", _random.randi_range(0, _textures.size() - 1))
+		var fill: Color = accent if accent.a > 0.0 and _random.randf() < 0.25 else primary
+		piece.set("texture_index", _fragment_offset(fill) + _random.randi_range(0, SHAPES.size() - 1))
 		piece.set("profile", spirit_profile)
 		piece.set("kick_after", _elapsed + 0.30)
 		var expiry: float = _elapsed + float(spirit_profile.get("lifetime"))
 		piece.set("expires_at", expiry)
 		piece.set("fade_end_at", expiry + maxf(float(spirit_profile.get("fade_duration")), 0.001))
 		active.append(piece)
+	_air.queue_redraw()
+
+
+func leave_sprite(texture: Texture2D, world_ground: Vector2, sprite_offset: Vector2,
+		sprite_scale: Vector2, flipped: bool, kind: StringName, palette: Callable = Callable()) -> void:
+	# Static final death frame joins the same sleeping chunks, kicks and expiry as ghosts.
+	var piece: RefCounted = PIECE.new()
+	var ground: Vector2 = to_local(world_ground)
+	piece.set("ground", ground)
+	piece.set("previous_ground", ground)
+	piece.set("source_texture", texture)
+	piece.set("sprite_kind", kind)
+	piece.set("palette_override", palette)
+	piece.set("texture_index", _sprite_texture_index(texture, kind, palette))
+	piece.set("draw_offset", sprite_offset)
+	piece.set("render_scale", sprite_scale * Vector2(-1.0 if flipped else 1.0, 1.0))
+	piece.set("profile", spirit_profile)
+	piece.set("kick_after", _elapsed + 0.30)
+	var expiry: float = _elapsed + float(spirit_profile.get("lifetime"))
+	piece.set("expires_at", expiry)
+	piece.set("fade_end_at", expiry + maxf(float(spirit_profile.get("fade_duration")), 0.001))
+	if not _sleep(piece): active.append(piece)
+
+
+func _sprite_texture_index(source: Texture2D, kind: StringName, palette: Callable = Callable()) -> int:
+	var mapper: Callable = palette if palette.is_valid() else sprite_palette
+	var texture: Texture2D = mapper.call(source, kind) as Texture2D if mapper.is_valid() else source
+	if not _sprite_indices.has(texture):
+		_sprite_indices[texture] = _textures.size()
+		_textures.append(texture)
+	return _sprite_indices[texture]
+
+
+func set_sprite_palette(mapper: Callable) -> void:
+	sprite_palette = mapper
+	var pieces: Array[RefCounted] = active.duplicate()
+	for chunk: Node2D in _chunks.values():
+		pieces.append_array(chunk.get("pieces") as Array)
+		chunk.queue_redraw()
+	for piece: RefCounted in pieces:
+		if (piece.get("palette_override") as Callable).is_valid(): continue
+		var source: Texture2D = piece.get("source_texture") as Texture2D
+		if source != null: piece.set("texture_index", _sprite_texture_index(source, StringName(piece.get("sprite_kind"))))
 	_air.queue_redraw()
 
 
@@ -285,7 +333,16 @@ func total_count() -> int:
 	return active.size() + settled_count()
 
 
-static func _make_textures(profile: Resource) -> Array[Texture2D]:
+func _fragment_offset(fill: Color) -> int:
+	if fill.a == 0.0 or fill == spirit_profile.get("fill_color"):
+		return 0
+	if not _fragment_offsets.has(fill):
+		_fragment_offsets[fill] = _textures.size()
+		_textures.append_array(_make_textures(spirit_profile, fill))
+	return _fragment_offsets[fill]
+
+
+static func _make_textures(profile: Resource, fill: Color = Color.TRANSPARENT) -> Array[Texture2D]:
 	var textures: Array[Texture2D] = []
 	for pixels: Array in SHAPES:
 		var image: Image = Image.create(5, 4, false, Image.FORMAT_RGBA8)
@@ -295,6 +352,6 @@ static func _make_textures(profile: Resource) -> Array[Texture2D]:
 				var point: Vector2i = Vector2i(pixel) + Vector2i.ONE + offset
 				image.set_pixelv(point, profile.get("outline_color") as Color)
 		for pixel: Vector2 in pixels:
-			image.set_pixelv(Vector2i(pixel) + Vector2i.ONE, profile.get("fill_color") as Color)
+			image.set_pixelv(Vector2i(pixel) + Vector2i.ONE, fill if fill.a > 0.0 else profile.get("fill_color") as Color)
 		textures.append(ImageTexture.create_from_image(image))
 	return textures
