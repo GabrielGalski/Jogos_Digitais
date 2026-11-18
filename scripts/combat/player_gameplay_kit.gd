@@ -8,6 +8,7 @@ const ROLL_EFFECTS: Script = preload("res://scripts/visual/player_roll_effects.g
 const PARRY: Script = preload("res://scripts/combat/player_parry.gd")
 const TUTORIAL_M01: ManifestationCard = preload("res://resources/cards/preview/M01.tres")
 const MANIFESTATIONS: Script = preload("res://scripts/combat/manifestations/manifestation_controller.gd")
+const CARD_EFFECTS: Script = preload("res://scripts/cards/card_effect_controller.gd")
 
 var world_bounds: Rect2 = Rect2()
 var gameplay: Node2D = null
@@ -69,6 +70,11 @@ func _ready() -> void:
 	manifestations.name = "Manifestations"
 	add_child(manifestations)
 	manifestations.call("configure", player, shooter, projectiles, reticle)
+	var card_effects: CARD_EFFECTS = CARD_EFFECTS.new()
+	card_effects.name = "CardEffects"
+	card_effects.player = player
+	card_effects.gun = shooter
+	add_child(card_effects)
 	_camera_rig = CAMERA_RIG.new()
 	_camera_rig.name = "GameplayCameraRig"
 	_camera_rig.set("player", player)

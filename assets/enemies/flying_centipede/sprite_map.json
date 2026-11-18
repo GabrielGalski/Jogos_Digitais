@@ -1,0 +1,70 @@
+{
+  "texture": "spritesheet.png",
+  "cell_size": [
+    32,
+    32
+  ],
+  "columns": 4,
+  "rows": {
+    "head": {
+      "row": 0,
+      "pivot_px": [
+        16,
+        16
+      ],
+      "idle_columns": [
+        0,
+        1,
+        0,
+        3
+      ],
+      "charge_columns": [
+        1,
+        2,
+        2,
+        3
+      ]
+    },
+    "body": {
+      "row": 1,
+      "pivot_px": [
+        16,
+        16
+      ],
+      "cycle_columns": [
+        0,
+        1,
+        2,
+        3
+      ]
+    },
+    "tail": {
+      "row": 2,
+      "pivot_px": [
+        16,
+        16
+      ],
+      "cycle_columns": [
+        0,
+        1,
+        2,
+        3
+      ]
+    }
+  },
+  "forward": [
+    0,
+    -1
+  ],
+  "suggested_center_spacing_px": {
+    "head_to_body": 17,
+    "body_to_body": 14,
+    "body_to_tail": 14,
+    "head_to_tail": 17
+  },
+  "suggested_preview_lengths": [
+    7,
+    4,
+    2
+  ]
+}

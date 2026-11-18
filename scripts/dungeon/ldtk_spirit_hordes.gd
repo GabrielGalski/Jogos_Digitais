@@ -2,11 +2,16 @@ extends Node2D
 ## LDtk adapter: authored utility areas create isolated reusable encounters.
 const ENCOUNTER: Script = preload("res://scripts/dungeon/spirit_horde_encounter.gd")
 const ENTITIES: Script = preload("res://scripts/dungeon/ldtk_door_blocks.gd")
+const WARMUP_BUDGET_USEC: int = 2200
 var encounters: Array[Node2D] = []
+var _player: Player
+var _gameplay: Node2D
 
 
 func build(layers: Array, player: Player, gameplay: Node2D, floor_query: Callable, remains: Node2D = null, height_query: Callable = Callable(), allowed_arena_cells: Dictionary = {}) -> void:
 	y_sort_enabled = true
+	_player = player
+	_gameplay = gameplay
 	var pedestal_centers: Dictionary[String, Vector2] = {}
 	for layer: Dictionary in layers:
 		if not bool(layer.get("visible", true)): continue
@@ -27,6 +32,7 @@ func build(layers: Array, player: Player, gameplay: Node2D, floor_query: Callabl
 			var config: Dictionary = ENTITIES.fields(entity)
 			if not bool(config.get("Enabled", true)):
 				continue
+			config["HasPedestal"] = pedestal_centers.has(str(config.get("EncounterId", "")))
 			var bounds: Rect2 = ENTITIES.entity_rect(entity, offset)
 			if kind == "PedestalArena":
 				config["ActivateOnEnter"] = false
@@ -43,3 +49,20 @@ func build(layers: Array, player: Player, gameplay: Node2D, floor_query: Callabl
 			add_child(encounter)
 			encounter.call("configure", config, bounds, player, gameplay, floor_query, remains, height_query)
 			encounters.append(encounter)
+
+
+func _physics_process(_delta: float) -> void:
+	if not is_instance_valid(_player) or _player.dead or _player.intro_locked or _gameplay.has_meta(&"active_pedestal_encounter"):
+		return
+	var closest: ENCOUNTER
+	var best_distance: float = INF
+	for node: Node2D in encounters:
+		var encounter: ENCOUNTER = node as ENCOUNTER
+		if not encounter.needs_navigation_warmup():
+			continue
+		var distance: float = encounter.to_global(encounter.arena_center).distance_to(_player.global_position)
+		if distance < best_distance and distance <= encounter.arena_radius + 320.0:
+			closest = encounter
+			best_distance = distance
+	if closest != null:
+		closest.warmup_navigation(Time.get_ticks_usec() + WARMUP_BUDGET_USEC)

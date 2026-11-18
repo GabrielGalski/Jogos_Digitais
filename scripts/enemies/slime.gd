@@ -215,7 +215,7 @@ func resolve_slam() -> void:
 	if absf(floor_height - player.floor_height) > 12.0 or not _line_clear(player.global_position): return
 	if player.try_parry_enemy_attack(self, player.global_position): return
 	var before: float = player.health
-	player.receive_contact_damage(profile.damage, global_position.direction_to(player.global_position), 18.0)
+	player.receive_contact_damage(profile.damage, global_position.direction_to(player.global_position), 18.0, self)
 	if player.health < before: hits_landed += 1
 
 

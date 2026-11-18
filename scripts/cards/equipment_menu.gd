@@ -1,10 +1,15 @@
 extends CanvasLayer
-## Shared paused equipment screen for every gameplay kit. Only manifestations are editable.
+## Shared three-card equipment screen for every gameplay kit.
 
+const CATALOG: Script = preload("res://scripts/cards/card_effect_catalog.gd")
 const FONT: Font = preload("res://assets/font/determination.ttf")
 const THEME: Theme = preload("res://resources/visual/pack_opening_theme.tres")
 const DESIGN_SIZE: Vector2 = Vector2(960.0, 540.0)
 
+var _aspect: int = 0
+var _slot_images: Array[TextureRect] = []
+var _slot_names: Array[Label] = []
+var _remove: Button
 var controller: Node
 var cards: Array[CardTableCard] = []
 var model_buttons: Dictionary[int, Button] = {}
@@ -73,16 +78,11 @@ func _input(event: InputEvent) -> void:
 
 
 func _read_art() -> void:
-	var layout: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://resources/cards/card_art_layout.json")) as Dictionary
-	var bounds: Array = layout["visible_rect"] as Array
-	_geometry = Rect2(float(bounds[0]), float(bounds[1]), float(bounds[2]), float(bounds[3]))
+	_geometry = CATALOG.art_bounds()
 	var finishes: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://resources/cards/card_table_finishes.json")) as Dictionary
 	_finishes = finishes["cards"] as Dictionary
-	var folder: String = "res://assets/cards/manifestacao"
-	for directory: String in DirAccess.get_directories_at(folder):
-		var path: String = folder + "/" + directory + "/" + directory + ".png"
-		if ResourceLoader.exists(path):
-			_art_paths[StringName(directory.get_slice(" ", 1))] = path
+	_art_paths = CATALOG.art_paths()
+
 
 
 func _build() -> void:
@@ -119,9 +119,9 @@ func _build() -> void:
 	_slots.add_theme_constant_override("separation", 48)
 	body.add_child(_slots)
 	for index: int in 3:
-		var slot: Button = _button("", show_manifestations if index == 0 else Callable())
+		var slot: Button = _button("", show_aspect.bind(index))
 		slot.custom_minimum_size = Vector2(224.0, 310.0)
-		slot.disabled = index != 0
+		slot.name = ["ManifestationSlot", "InfusionSlot", "MutationSlot"][index]
 		_slots.add_child(slot)
 		var inset: MarginContainer = MarginContainer.new()
 		inset.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -136,19 +136,23 @@ func _build() -> void:
 		var aspect: Label = _label(["Manifestação", "Infusão", "Mutação"][index], 20)
 		aspect.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		content.add_child(aspect)
+		var image: TextureRect = TextureRect.new()
+		image.custom_minimum_size = Vector2(128.0, 198.0)
+		image.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		image.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		image.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
+		image.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		content.add_child(image)
+		_slot_images.append(image)
+		var caption: Label = _label("", 15)
+		caption.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		content.add_child(caption)
+		_slot_names.append(caption)
 		if index == 0:
 			manifestation_slot = slot
-			slot.name = "ManifestationSlot"
-			_slot_image = TextureRect.new()
-			_slot_image.custom_minimum_size = Vector2(128.0, 198.0)
-			_slot_image.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-			_slot_image.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-			_slot_image.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
-			_slot_image.mouse_filter = Control.MOUSE_FILTER_IGNORE
-			content.add_child(_slot_image)
-			_slot_name = _label("", 15)
-			_slot_name.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-			content.add_child(_slot_name)
+			_slot_image = image
+			_slot_name = caption
+
 	_picker = VBoxContainer.new()
 	_picker.name = "ManifestationPicker"
 	_picker.custom_minimum_size.x = 880.0
@@ -159,6 +163,9 @@ func _build() -> void:
 	_card_row.alignment = BoxContainer.ALIGNMENT_CENTER
 	_card_row.add_theme_constant_override("separation", 12)
 	_picker.add_child(_card_row)
+	_remove = _button("Remover carta", _choose.bind(-1))
+	_remove.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	_picker.add_child(_remove)
 	var back: Button = _button("Voltar", _show_slots)
 	back.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	_picker.add_child(back)
@@ -193,9 +200,15 @@ func _fit() -> void:
 
 
 func show_manifestations() -> void:
+	show_aspect(0)
+
+
+func show_aspect(aspect: int) -> void:
+	_aspect = aspect
+	_remove.visible = aspect != 0
 	_slots.hide()
 	_picker.show()
-	_title.text = "Manifestação"
+	_title.text = ["Manifestação", "Infusão", "Mutação"][aspect]
 	_build_cards()
 
 
@@ -212,10 +225,20 @@ func _build_cards() -> void:
 		child.queue_free()
 	cards.clear()
 	model_buttons.clear()
-	var models: Array[ProceduralManifestationModel] = controller.call("available_models") as Array[ProceduralManifestationModel]
-	for index: int in models.size():
-		var model: ProceduralManifestationModel = models[index] as ProceduralManifestationModel
+	var definitions: Array[CardDefinition] = []
+	if _aspect == 0:
+		for model: ProceduralManifestationModel in controller.call("available_models"):
+			definitions.append(model.card)
+	elif _aspect == 1:
+		definitions.assign(CATALOG.INFUSIONS)
+	else:
+		definitions.assign(CATALOG.MUTATIONS)
+	var rewards: Node = get_node("/root/BoosterRewards")
+	for index: int in definitions.size():
+		var definition: CardDefinition = definitions[index]
+		var code: StringName = CATALOG.alias(definition)
 		var button: Button = _button("", _choose.bind(index))
+		button.tooltip_text = "%s · Obtidas em boosters: %d" % [definition.display_name, rewards.call("count", definition.card_id)]
 		button.custom_minimum_size = Vector2(136.0, 240.0)
 		button.toggle_mode = true
 		for state: String in ["normal", "hover", "pressed", "focus", "hover_pressed"]:
@@ -223,9 +246,9 @@ func _build_cards() -> void:
 		_card_row.add_child(button)
 		model_buttons[index] = button
 		var card: CardTableCard = CardTableCard.new()
-		var finish: Dictionary = _finishes.get(String(model.code()), {}) as Dictionary
+		var finish: Dictionary = _finishes.get(String(code), {}) as Dictionary
 		var tint: Color = Color(str(finish["tint"])) if finish.has("tint") else Color.TRANSPARENT
-		card.configure(load(_art_paths[model.code()]) as Texture2D, String(model.code()), 0, 0, _geometry, tint)
+		card.configure(load(_art_paths[code]) as Texture2D, String(code), 0, 0, _geometry, tint)
 		card.normal_size = Vector2(120.0, 120.0 * _geometry.size.y / _geometry.size.x)
 		card.target_size = card.normal_size
 		card.position = Vector2(68.0, 108.0)
@@ -239,8 +262,8 @@ func _build_cards() -> void:
 		selected_marker.color = Color("#f4dca0")
 		selected_marker.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		button.add_child(selected_marker)
-		if model.code() == &"M08":
-			var caption: Label = _label(model.card.display_name, 14)
+		if code == &"M08":
+			var caption: Label = _label(definition.display_name, 14)
 			caption.position = Vector2(0.0, 204.0)
 			caption.size = Vector2(136.0, 22.0)
 			caption.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -249,21 +272,32 @@ func _build_cards() -> void:
 
 
 func _choose(index: int) -> void:
-	if bool(controller.call("select_model", index)):
+	if bool(controller.call(["select_model", "select_infusion", "select_mutation"][_aspect], index)):
 		_refresh_slot()
 		_refresh_selection()
 
 
 func _refresh_slot() -> void:
-	var model: ProceduralManifestationModel = controller.call("selected_model") as ProceduralManifestationModel
-	_slot_image.texture = load(_art_paths[model.code()]) as Texture2D
-	_slot_name.text = model.card.display_name if model.code() == &"M08" else ""
-	_slot_name.visible = model.code() == &"M08"
+	var runtime: CardCombatRuntime = (controller.get("gun") as Node).get("card_runtime") as CardCombatRuntime
+	var loadout: CardLoadout = runtime.copy_loadout()
+	var definitions: Array[CardDefinition] = [loadout.manifestation, loadout.infusion, loadout.mutation]
+	for index: int in range(3):
+		var definition: CardDefinition = definitions[index]
+		var code: StringName = CATALOG.alias(definition)
+		_slot_images[index].texture = load(_art_paths[code]) as Texture2D if _art_paths.has(code) else null
+		_slot_names[index].text = "Vazio" if definition == null else definition.display_name if code == &"M08" else ""
+		_slot_names[index].visible = not _slot_names[index].text.is_empty()
 
 
 func _refresh_selection() -> void:
+	var selected: int = int(controller.get("selected_index"))
+	if _aspect != 0:
+		var runtime: CardCombatRuntime = (controller.get("gun") as Node).get("card_runtime") as CardCombatRuntime
+		var loadout: CardLoadout = runtime.copy_loadout()
+		var definition: CardDefinition = loadout.infusion as CardDefinition if _aspect == 1 else loadout.mutation as CardDefinition
+		selected = int(definition.get("effect")) if definition != null else -1
 	for index: int in model_buttons.keys():
-		var chosen: bool = index == int(controller.get("selected_index"))
+		var chosen: bool = index == selected
 		var button: Button = model_buttons[index]
 		button.button_pressed = chosen
 		(button.get_node("SelectedMarker") as ColorRect).visible = chosen

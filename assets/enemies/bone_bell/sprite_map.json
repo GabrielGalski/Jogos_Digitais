@@ -1,0 +1,61 @@
+{
+  "texture": "spritesheet.png",
+  "cell_size": [
+    40,
+    40
+  ],
+  "columns": 4,
+  "rows": 3,
+  "pivot_px": [
+    20,
+    20
+  ],
+  "animations": {
+    "hover": {
+      "frames": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "loop": true,
+      "frame_ms": [
+        140,
+        140,
+        140,
+        140
+      ]
+    },
+    "windup": {
+      "frames": [
+        4,
+        5,
+        6,
+        7
+      ],
+      "loop": false,
+      "frame_ms": [
+        90,
+        100,
+        115,
+        135
+      ]
+    },
+    "ring": {
+      "frames": [
+        8,
+        9,
+        10,
+        11
+      ],
+      "loop": false,
+      "frame_ms": [
+        120,
+        95,
+        100,
+        135
+      ]
+    }
+  },
+  "attack_release_frame": 8
+}

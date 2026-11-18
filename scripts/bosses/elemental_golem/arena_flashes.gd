@@ -130,7 +130,7 @@ func _physics_process(delta: float) -> void:
 			# The white cut is one impact. Coloured warnings and fading cuts are harmless.
 			if not target.is_dashing() and not target.is_fall_recovery_invulnerable() and _beam_contains(index,target.global_position+Vector2(0,3)):
 				_hit_beams[index] = true
-				target.receive_skybreaker_hit(target.max_health*damage_fraction)
+				target.receive_skybreaker_hit(target.max_health*damage_fraction, get_parent() as Node2D)
 				detonated.emit(1)
 			beam_activated.emit(index)
 			if target.dead or cancelled: return

@@ -206,7 +206,7 @@ func _resolve_contact() -> void:
 		attack_resolved.emit(self, false)
 		return
 	var before: float = player.health
-	player.receive_contact_damage(profile.damage, attack_direction, 34.0 if profile.kind == &"tall" else 0.0)
+	player.receive_contact_damage(profile.damage, attack_direction, 34.0 if profile.kind == &"tall" else 0.0, self)
 	var connected: bool = player.health < before
 	if connected: hits_landed += 1
 	attack_resolved.emit(self, connected)

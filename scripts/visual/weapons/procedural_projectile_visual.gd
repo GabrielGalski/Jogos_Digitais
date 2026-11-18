@@ -46,6 +46,15 @@ func _process(delta: float) -> void:
 	queue_redraw()
 
 
+func set_element(phase: int) -> void:
+	var colors: Array[Color] = [Color("#fa412d"), Color("#67e649"), Color("#ffdc45")]
+	var shader: ShaderMaterial = ShaderMaterial.new()
+	shader.shader = preload("res://shaders/chimera_projectile.gdshader")
+	shader.set_shader_parameter(&"element_color", colors[phase])
+	core.material = shader
+	halo.modulate = Color(colors[phase], 0.3)
+
+
 func _refresh() -> void:
 	if core == null:
 		return

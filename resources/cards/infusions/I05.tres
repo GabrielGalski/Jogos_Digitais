@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="InfusionCard" format=3]
+
+[ext_resource type="Script" path="res://scripts/cards/infusion_card.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+card_id = &"CARD_INF_005"
+display_name = "Essência de Quimera"
+description = "Alterna fogo, veneno e empurrão em cada emissão."
+effect = 4
+cooldown = 0

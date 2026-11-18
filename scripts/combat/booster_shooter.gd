@@ -101,14 +101,14 @@ func _process(delta: float) -> void:
 	_update_rig(delta)
 	cooldown = maxf(cooldown - delta, 0.0)
 	if is_instance_valid(manifestation_driver):
-		var allowed: bool = combat_enabled and not player.dead and not player.intro_locked and not player.is_parry_feedback_active() and is_aim_allowed()
+		var allowed: bool = combat_enabled and not player.dead and not player.intro_locked and not player.mutation_invisible and not player.is_parry_feedback_active() and is_aim_allowed()
 		if not allowed:
 			require_mouse_release = true
 		if not Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
 			require_mouse_release = false
 		manifestation_driver.call("set_trigger", allowed and not require_mouse_release and Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT))
 		return
-	if not combat_enabled or player.intro_locked or player.is_parry_feedback_active():
+	if not combat_enabled or player.intro_locked or player.mutation_invisible or player.is_parry_feedback_active():
 		require_mouse_release = true
 		return
 	if not Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
@@ -117,7 +117,7 @@ func _process(delta: float) -> void:
 		fire_once()
 
 func fire_once() -> Node2D:
-	if not equipped or not combat_enabled or player.intro_locked or player.is_parry_feedback_active() or cooldown > 0.0:
+	if not equipped or not combat_enabled or player.intro_locked or player.mutation_invisible or player.is_parry_feedback_active() or cooldown > 0.0:
 		return null
 	if not is_instance_valid(effects) or not is_instance_valid(projectiles):
 		return null
@@ -196,7 +196,7 @@ func equip_cards(loadout: CardLoadout) -> bool:
 	if not card_runtime.equip(loadout):
 		return false
 	if is_instance_valid(player):
-		player.card_movement_multiplier = 1.0
+		player.card_movement_multiplier = card_runtime.movement_multiplier()
 	return true
 
 

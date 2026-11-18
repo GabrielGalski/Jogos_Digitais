@@ -18,6 +18,7 @@ var tick_remaining: float = 0.0
 var visual: Node2D = null
 var finished: bool = false
 var mode: StringName = &""
+var parasite_visual: Sprite2D
 
 
 func _ready() -> void:
@@ -40,6 +41,15 @@ func configure(definition: ProceduralManifestationModel, snapshot: CardAttack, c
 	visual.name = "ProceduralVisual"
 	add_child(visual)
 	visual.call("configure", model, factory, direction)
+	if attack.element >= 0:
+		visual.call("set_element", attack.element)
+	if attack.slaad_carrier:
+		parasite_visual = Sprite2D.new()
+		parasite_visual.texture = preload("res://assets/cards/infusao/ovo_de_slaad I04/slaad/slad1.png")
+		parasite_visual.position.y = -5.0
+		parasite_visual.scale = Vector2.ONE * 0.65
+		parasite_visual.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+		add_child(parasite_visual)
 	reset_physics_interpolation()
 
 
@@ -92,9 +102,10 @@ func _blast(body: Node2D) -> void:
 		var enemy: Node2D = candidate as Node2D
 		if enemy == primary or not _valid_enemy(enemy):
 			continue
-		if enemy.global_position.distance_to(global_position) > model.blast_radius:
+		var center: Vector2 = CONTACTS.damage_center(enemy)
+		if center.distance_to(global_position) > model.blast_radius:
 			continue
-		var outward: Vector2 = global_position.direction_to(enemy.global_position)
+		var outward: Vector2 = global_position.direction_to(center)
 		if primary == null:
 			primary = enemy
 			attack.apply_primary_hit(enemy, global_position, outward, effects)
@@ -103,7 +114,7 @@ func _blast(body: Node2D) -> void:
 
 
 func _advance_attached(delta: float) -> void:
-	if not _valid_enemy(target):
+	if not is_instance_valid(target) or not _valid_enemy(target):
 		_finish(false)
 		return
 	global_position = target.global_position + attached_offset

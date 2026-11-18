@@ -15,6 +15,8 @@ var beam_target: Node2D = null
 var tip: Sprite2D = null
 var halo: Sprite2D = null
 var mode: StringName = &""
+var element_color: Color = Color.WHITE
+var _base_material: Material
 
 
 func configure(definition: ProceduralManifestationModel, sprites: ProceduralWeaponSpriteFactory, caster: CollisionObject2D) -> void:
@@ -30,6 +32,7 @@ func configure(definition: ProceduralManifestationModel, sprites: ProceduralWeap
 	var opaque: CanvasItemMaterial = CanvasItemMaterial.new()
 	opaque.light_mode = CanvasItemMaterial.LIGHT_MODE_UNSHADED
 	material = opaque
+	_base_material = opaque
 	var additive: CanvasItemMaterial = opaque.duplicate() as CanvasItemMaterial
 	additive.blend_mode = CanvasItemMaterial.BLEND_MODE_ADD
 	halo = Sprite2D.new()
@@ -81,6 +84,22 @@ func advance(delta: float, origin: Vector2, aim: Vector2, requested: bool) -> vo
 	queue_redraw()
 
 
+func set_element(phase: int) -> void:
+	if phase < 0:
+		element_color = Color.WHITE
+		material = _base_material
+		tip.material = _base_material
+		return
+	var colors: Array[Color] = [Color("#fa412d"), Color("#67e649"), Color("#ffdc45")]
+	element_color = colors[phase]
+	halo.modulate = Color(element_color, 0.3)
+	var shader: ShaderMaterial = ShaderMaterial.new()
+	shader.shader = preload("res://shaders/chimera_projectile.gdshader")
+	shader.set_shader_parameter(&"element_color", element_color)
+	tip.material = shader
+	material = shader
+
+
 func _exclusions() -> Array[RID]:
 	var exclusions: Array[RID] = []
 	if is_instance_valid(shooter):
@@ -112,7 +131,7 @@ func hit_targets() -> Array[Node2D]:
 	if not firing:
 		return targets
 	if model.family == ProceduralManifestationModel.Family.BEAM:
-		if _valid_enemy(beam_target):
+		if is_instance_valid(beam_target) and _valid_enemy(beam_target):
 			targets.append(beam_target)
 		return targets
 	var perpendicular: Vector2 = direction.orthogonal()
@@ -144,7 +163,7 @@ func _draw() -> void:
 		return
 	if model.family == ProceduralManifestationModel.Family.BEAM:
 		draw_line(Vector2.ZERO, endpoint, Color(model.body_color, 0.18), 5.0, true)
-		draw_line(Vector2.ZERO, endpoint, model.body_color, 2.1, true)
+		draw_line(Vector2.ZERO, endpoint, model.body_color if element_color == Color.WHITE else element_color, 2.1, true)
 		draw_line(Vector2.ZERO, endpoint, model.core_color, 0.75 + sin(firing_age * 22.0) * 0.1, true)
 		return
 	var perpendicular: Vector2 = direction.orthogonal()

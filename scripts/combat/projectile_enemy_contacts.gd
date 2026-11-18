@@ -2,15 +2,29 @@ extends RefCounted
 ## Sweeps the bullet's width through damage-only capsules; movement shapes stay intact.
 
 
+static func damage_center(enemy: Node2D) -> Vector2:
+	if enemy.has_method("get_projectile_hurt_capsule"):
+		var capsule: Dictionary = enemy.call("get_projectile_hurt_capsule") as Dictionary
+		return enemy.to_global(capsule.get("center", Vector2.ZERO) as Vector2)
+	return enemy.global_position
+
+
 static func sweep(tree: SceneTree, space: PhysicsDirectSpaceState2D, origin: Vector2,
 		endpoint: Vector2, mask: int, projectile_radius: float, exclusions: Array[RID] = []) -> Dictionary:
-	var query: PhysicsRayQueryParameters2D = PhysicsRayQueryParameters2D.create(origin, endpoint, mask, exclusions)
+	var candidates: Array[Node] = tree.get_nodes_in_group(&"enemy_bodies")
+	var physical_exclusions: Array[RID] = exclusions.duplicate()
+	if (mask & 4) != 0:
+		# A movement body at ground level must not replace a projected damage capsule.
+		for candidate: Node in candidates:
+			if candidate is CollisionObject2D and candidate.has_method("get_projectile_hurt_capsule"):
+				physical_exclusions.append((candidate as CollisionObject2D).get_rid())
+	var query: PhysicsRayQueryParameters2D = PhysicsRayQueryParameters2D.create(origin, endpoint, mask, physical_exclusions)
 	var nearest: Dictionary = space.intersect_ray(query)
 	var travel: float = origin.distance_to(endpoint)
 	var fraction: float = origin.distance_to(nearest.get("position", endpoint) as Vector2) / maxf(travel, 0.001) if not nearest.is_empty() else 1.0001
 	if (mask & 4) == 0:
 		return nearest
-	for candidate: Node in tree.get_nodes_in_group(&"enemy_bodies"):
+	for candidate: Node in candidates:
 		var enemy: Node2D = candidate as Node2D
 		if enemy == null or enemy.is_queued_for_deletion() or not enemy.has_method("get_projectile_hurt_capsule"):
 			continue

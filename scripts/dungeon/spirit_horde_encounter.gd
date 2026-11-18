@@ -8,12 +8,20 @@ signal aborted
 
 const GHOST: Script = preload("res://scripts/enemies/spirit_ghost.gd")
 const HORDE_ENEMY: Script = preload("res://scripts/enemies/open_world_horde_enemy.gd")
+const CENTIPEDE: Script = preload("res://scripts/enemies/flying_centipede.gd")
+const BONE_BELL: Script = preload("res://scripts/enemies/bone_bell.gd")
+const CONTACTS: Script = preload("res://scripts/combat/projectile_enemy_contacts.gd")
 const HORDE_CATALOG: Script = preload("res://scripts/enemies/open_world_horde_catalog.gd")
 const HORDE_SHOT: Script = preload("res://scripts/combat/projectiles/open_world_horde_shot.gd")
 const PROFILE: Script = preload("res://scripts/enemies/spirit_horde_profile.gd")
+const GROUND_NAVIGATION: Script = preload("res://scripts/enemies/ground_horde_navigation.gd")
 const NAVIGATION: Script = preload("res://scripts/enemies/spirit_horde_navigation.gd")
 const BUCKET: float = 24.0
 const SPACING: float = 16.0
+const NAVIGATION_BUDGET_USEC: int = 3500
+const OPENING_SPAWNS_PER_TICK: int = 2
+const MINIBOSS_MAX_WAIT: float = 8.0
+const MINIBOSS_COVER_DISTANCE: float = 215.0
 const ARENA_BOUNDARY: Script = preload("res://scripts/dungeon/pedestal_arena_boundary.gd")
 enum Phase { WAITING, ACTIVE, CLEARED, ABORTED }
 
@@ -40,16 +48,29 @@ var actors: Array[Node2D] = []
 var navigation: RefCounted = NAVIGATION.new()
 var _random: RandomNumberGenerator = RandomNumberGenerator.new()
 var _spawn_remaining: float = 0.0
+var _opening_remaining: int = 0
+var _opening_delay: float = 0.0
+var _miniboss_pending: bool = false
+var _first_mob_at: float = -1.0
+var _next_miniboss_check: float = 0.0
 var _routing_remaining: float = 0.0
 var _elapsed: float = 0.0
 var _spawn_sequence: int = 0
 var _mixed: bool = false
+var _has_pedestal: bool = false
+var miniboss: Node2D
 var _walkable: Dictionary = {}
-var _spawn_deck: Array[String] = []
+var completion_reason: StringName = &""
+var ground_navigation: GROUND_NAVIGATION
+var elapsed_seconds: float:
+	get:
+		return _elapsed
 var _buckets: Dictionary = {}
 var _waypoints: Dictionary = {}
 var _route_deadlines: Dictionary = {}
 var _previous_player: Vector2 = Vector2.ZERO
+var projectiles: Array[Node2D] = []
+var _projectiles_by_shooter: Dictionary[int, int] = {}
 
 
 func configure(config: Dictionary, area: Rect2, subject: Player, rules: Node2D, query: Callable, remains: Node2D = null, height_query: Callable = Callable()) -> void:
@@ -59,14 +80,15 @@ func configure(config: Dictionary, area: Rect2, subject: Player, rules: Node2D, 
 	floor_query = query
 	remains_system = remains
 	encounter_id = str(config.get("EncounterId", "spirit_horde_1"))
-	_mixed = HORDE_CATALOG.MIX.has(encounter_id)
+	_mixed = HORDE_CATALOG.POOLS.has(encounter_id)
+	_has_pedestal = bool(config.get("HasPedestal", false))
 	if _mixed:
 		_walkable = config.get("AllowedArenaCells", {}) as Dictionary
 	activate_on_enter = bool(config.get("ActivateOnEnter", true))
 	arena_radius = maxf(float(config.get("ArenaRadius", 0.0)), 0.0)
 	arena_center = config.get("ArenaCenter", trigger_bounds.get_center()) as Vector2
 	_height_query = height_query
-	kill_target = maxi(int(config.get("KillTarget", 40)), 1)
+	kill_target = int(profile.get("open_world_kill_limit")) if _mixed else maxi(int(config.get("KillTarget", 40)), 1)
 	clear_condition = str(config.get("ClearCondition", clear_condition))
 	entry_condition = str(config.get("EntryCondition", entry_condition))
 	_random.randomize()
@@ -99,16 +121,40 @@ func begin() -> void:
 		return
 	phase = Phase.ACTIVE
 	if _mixed:
-		_prepare_spawn_deck()
+		_init_ground_navigation()
 	if arena_boundary != null:
-		navigation.call("configure", trigger_bounds.grow(1024.0), _walkable)
+		if not _mixed:
+			navigation.call("configure", trigger_bounds.grow(1024.0), _walkable)
 		gameplay.set_meta(&"active_pedestal_encounter", self)
 		arena_boundary.call("set_active", true)
 	gameplay.call("set_condition", entry_condition, false)
+	var chance: float = float(profile.get("miniboss_spawn_chance"))
+	_miniboss_pending = _has_pedestal and chance > 0.0 and (chance >= 1.0 or _random.randf() < chance)
+	_opening_remaining = int(profile.get("open_world_initial_pack" if _mixed else "initial_pack"))
+	_opening_delay = _spawn_interval()
+	_spawn_remaining = _spawn_interval()
 	started.emit()
-	for index: int in range(int(profile.get("initial_pack"))):
-		_spawn_one()
-	_spawn_remaining = float(profile.get("spawn_interval"))
+
+
+func _init_ground_navigation() -> void:
+	if ground_navigation != null:
+		return
+	ground_navigation = GROUND_NAVIGATION.new()
+	ground_navigation.configure(trigger_bounds.grow(320.0), self, floor_query)
+	navigation = ground_navigation
+
+
+func needs_navigation_warmup() -> bool:
+	return _mixed and phase == Phase.WAITING and (ground_navigation == null or not ground_navigation.sampling_done)
+
+
+func warmup_navigation(deadline_usec: int) -> void:
+	_init_ground_navigation()
+	ground_navigation.sample_cells(deadline_usec)
+
+
+func _spawn_interval() -> float:
+	return float(profile.get("open_world_spawn_interval" if _mixed else "spawn_interval"))
 
 
 func _physics_process(delta: float) -> void:
@@ -125,14 +171,40 @@ func _physics_process(delta: float) -> void:
 	if phase != Phase.ACTIVE:
 		_previous_player = subject
 		return
-	_elapsed += delta
-	_spawn_remaining -= delta
-	if _spawn_remaining <= 0.0:
-		_spawn_remaining += float(profile.get("spawn_interval"))
-		for index: int in range(2 + difficulty_stage):
-			_spawn_one()
+	_opening_delay = maxf(0.0, _opening_delay - delta)
 	_routing_remaining -= delta
-	if _routing_remaining <= 0.0:
+	var refresh_routes: bool = _routing_remaining <= 0.0
+	if _mixed:
+		var deadline: int = Time.get_ticks_usec() + NAVIGATION_BUDGET_USEC
+		ground_navigation.sample_cells(deadline)
+		if ground_navigation.distances.is_empty() or ground_navigation.flow_building or refresh_routes:
+			ground_navigation.update_target(subject, deadline)
+		if ground_navigation.distances.is_empty():
+			_previous_player = subject
+			return
+	if _opening_delay > 0.0:
+		_previous_player = subject
+		return
+	_elapsed += delta
+	if _check_completion():
+		return
+	if _mixed:
+		_update_stage()
+	var boss_arrived: bool = _miniboss_pending and _try_miniboss_entry()
+	if not boss_arrived and completion_reason.is_empty():
+		if _opening_remaining > 0:
+			var batch: int = mini(_opening_remaining, OPENING_SPAWNS_PER_TICK)
+			for index: int in range(batch):
+				_spawn_one()
+			_opening_remaining -= batch
+		else:
+			_spawn_remaining -= delta
+		if _spawn_remaining <= 0.0:
+			_spawn_remaining += _spawn_interval()
+			var reinforcements: int = int(profile.get("open_world_reinforcements")) if _mixed else 2 + difficulty_stage
+			for index: int in range(reinforcements):
+				_spawn_one()
+	if refresh_routes:
 		_routing_remaining = 0.25
 		navigation.call("update_crowd", actors)
 	_rebuild_buckets()
@@ -146,6 +218,78 @@ func _physics_process(delta: float) -> void:
 	_previous_player = subject
 
 
+func _try_miniboss_entry() -> bool:
+	var delay: float = float(profile.get("miniboss_entry_delay"))
+	var waited: float = _elapsed - maxf(_first_mob_at, 0.0)
+	var force_entry: bool = not completion_reason.is_empty() or waited >= maxf(MINIBOSS_MAX_WAIT, delay)
+	if not force_entry and (_first_mob_at < 0.0 or waited < delay or _elapsed < _next_miniboss_check):
+		return false
+	_next_miniboss_check = _elapsed + 0.2
+	var subject: Vector2 = to_local(player.surface_world_position()) - Vector2(0, 5)
+	var visible_area: Rect2 = viewport_bounds().grow(-6.0)
+	var groups: Array[Vector2] = []
+	var counts: Array[int] = []
+	groups.resize(8)
+	counts.resize(8)
+	groups.fill(Vector2.ZERO)
+	counts.fill(0)
+	var best: int = 0
+	var in_view: int = 0
+	for actor: Node2D in actors:
+		var point: Vector2 = to_local(CONTACTS.damage_center(actor))
+		var offset: Vector2 = point - subject
+		var distance_squared: float = offset.length_squared()
+		if distance_squared < 24.0 * 24.0:
+			continue
+		var approaching: bool = visible_area.has_point(point) and distance_squared <= MINIBOSS_COVER_DISTANCE * MINIBOSS_COVER_DISTANCE
+		if approaching:
+			in_view += 1
+		elif not force_entry or distance_squared > 320.0 * 320.0:
+			continue
+		var sector: int = posmod(roundi(offset.angle() / (TAU / 8.0)), 8)
+		groups[sector] += offset.normalized()
+		counts[sector] += 1
+		if counts[sector] > counts[best]:
+			best = sector
+	if in_view < 2 and not force_entry:
+		return false
+	var outside: Vector2 = groups[best].normalized() if counts[best] > 0 else Vector2.from_angle(_random.randf_range(-PI, PI))
+	_spawn_miniboss(subject, outside)
+	return true
+
+
+func _spawn_miniboss(subject: Vector2, outside: Vector2) -> void:
+	_miniboss_pending = false
+	var view: Rect2 = viewport_bounds().grow(18.0)
+	var border_x: float = view.end.x if outside.x > 0.0 else view.position.x
+	var border_y: float = view.end.y if outside.y > 0.0 else view.position.y
+	var distance_x: float = (border_x - subject.x) / outside.x if absf(outside.x) > 0.001 else INF
+	var distance_y: float = (border_y - subject.y) / outside.y if absf(outside.y) > 0.001 else INF
+	var distance: float = maxf(145.0, minf(distance_x, distance_y))
+	if int(profile.get("miniboss_kind")) == PROFILE.MinibossKind.CENTIPEDE:
+		var centipede: CENTIPEDE = CENTIPEDE.new()
+		centipede.name = "FlyingCentipede"
+		centipede.player = player
+		centipede.horde_members = actors
+		centipede.entry_heading = -outside
+		centipede.entry_distance = distance
+		centipede.arena_origin = to_global(arena_center)
+		miniboss = centipede
+	else:
+		var bell: BONE_BELL = BONE_BELL.new()
+		bell.name = "BoneBell"
+		bell.player = player
+		bell.position = subject + outside * distance
+		miniboss = bell
+	miniboss.connect(&"defeated", _on_miniboss_defeated)
+	add_child(miniboss)
+
+
+func _on_miniboss_defeated() -> void:
+	miniboss = null
+	_check_completion()
+
+
 func viewport_bounds() -> Rect2:
 	var inverse: Transform2D = get_viewport().get_canvas_transform().affine_inverse()
 	var view: Rect2 = get_viewport_rect()
@@ -156,9 +300,8 @@ func viewport_bounds() -> Rect2:
 
 
 func _spawn_one() -> Node2D:
-	if _mixed and _spawn_deck.is_empty():
-		return null
-	if actors.size() >= int(profile.get("maximum_alive")) or phase != Phase.ACTIVE:
+	var limit: int = int(profile.get("open_world_maximum_alive" if _mixed else "maximum_alive"))
+	if phase != Phase.ACTIVE or actors.size() >= limit:
 		return null
 	var view: Rect2 = viewport_bounds()
 	var outer: Rect2 = trigger_bounds.merge(view).grow(float(profile.get("spawn_margin")))
@@ -212,11 +355,14 @@ func _spawn_arena_spirit(view: Rect2, side: int) -> Node2D:
 		var angle: float = float(side) * PI * 0.5 + _random.randf_range(-0.7, 0.7)
 		var distance: float = arena_radius + float(profile.get("spawn_margin")) + floorf(float(attempt) / 8.0) * 16.0
 		var point: Vector2 = center + Vector2.from_angle(angle) * distance
+		if _mixed:
+			point = ground_navigation.center(ground_navigation.cell(point))
 		if view.grow(20.0).has_point(point):
 			continue
 		var occupied: bool = false
 		for other: Node2D in actors:
-			if other.position.distance_squared_to(point) < SPACING * SPACING:
+			var spacing: float = 32.0 if _mixed else SPACING
+			if other.position.distance_squared_to(point) < spacing * spacing:
 				occupied = true
 				break
 		if not occupied and (not _mixed or bool(navigation.call("can_enter", point, center))):
@@ -224,27 +370,11 @@ func _spawn_arena_spirit(view: Rect2, side: int) -> Node2D:
 	return null
 
 
-func _prepare_spawn_deck() -> void:
-	var mix: Dictionary = HORDE_CATALOG.MIX[encounter_id]
-	while _spawn_deck.size() < kill_target:
-		var batch: Array[String] = []
-		var opening: Array[String] = []
-		for kind: String in mix:
-			opening.append(kind)
-			for index: int in range(1, int(mix[kind])):
-				batch.append(kind)
-		batch.shuffle()
-		opening.shuffle()
-		_spawn_deck.append_array(batch)
-		_spawn_deck.append_array(opening)
-	_spawn_deck.resize(kill_target)
-
-
 func _create_spirit(point: Vector2, view: Rect2, side: int) -> Node2D:
 	var ghost: Node2D
 	if _mixed:
 		var fighter: HORDE_ENEMY = HORDE_ENEMY.new()
-		fighter.configure(_spawn_deck.pop_back(), player, _height_query)
+		fighter.configure(HORDE_CATALOG.pick(encounter_id, _elapsed, _random), player, _height_query)
 		ghost = fighter
 	else:
 		ghost = GHOST.new() as Node2D
@@ -259,10 +389,34 @@ func _create_spirit(point: Vector2, view: Rect2, side: int) -> Node2D:
 	add_child(ghost)
 	ghost.reset_physics_interpolation()
 	actors.append(ghost)
+	if _first_mob_at < 0.0:
+		_first_mob_at = _elapsed
 	ghost.connect("died", _on_killed)
 	ghost.connect("consumed", _on_consumed)
 	_route_deadlines[ghost.get_instance_id()] = _elapsed + _random.randf_range(0.0, 0.3)
 	return ghost
+
+
+func spawn_horde_projectile(shot: Node2D) -> void:
+	var shooter: Node2D = shot.get("shooter") as Node2D
+	var id: int = shooter.get_instance_id()
+	if phase != Phase.ACTIVE or projectiles.size() >= int(profile.get("open_world_maximum_projectiles")) \
+			or int(_projectiles_by_shooter.get(id, 0)) >= int(profile.get("open_world_projectiles_per_enemy")):
+		shot.free()
+		return
+	projectiles.append(shot)
+	_projectiles_by_shooter[id] = int(_projectiles_by_shooter.get(id, 0)) + 1
+	shot.tree_exiting.connect(_on_projectile_exiting.bind(shot, id), CONNECT_ONE_SHOT)
+	add_child(shot)
+
+
+func _on_projectile_exiting(shot: Node2D, shooter_id: int) -> void:
+	projectiles.erase(shot)
+	var remaining: int = int(_projectiles_by_shooter.get(shooter_id, 1)) - 1
+	if remaining <= 0:
+		_projectiles_by_shooter.erase(shooter_id)
+	else:
+		_projectiles_by_shooter[shooter_id] = remaining
 
 
 func _rebuild_buckets() -> void:
@@ -284,14 +438,21 @@ func _separation(actor: Node2D) -> Vector2:
 					continue
 				var away: Vector2 = actor.position - other.position
 				var distance: float = away.length()
-				if distance < BUCKET and distance > 0.001:
-					correction += away / distance * (1.0 - distance / BUCKET)
+				var clearance: float = float(actor.call("get_separation_radius")) + float(other.call("get_separation_radius")) if _mixed else BUCKET
+				if distance < 0.001:
+					away = Vector2.RIGHT.rotated(float(mini(actor.get_instance_id(), other.get_instance_id()) % 628) * 0.01)
+					away *= 1.0 if actor.get_instance_id() > other.get_instance_id() else -1.0
+					distance = 0.01
+				if distance < clearance:
+					correction += away.normalized() * (1.0 - distance / clearance)
 	return correction.limit_length(1.6)
 
 
 func _move_actor(actor: CharacterBody2D, subject: Vector2, delta: float) -> void:
+	if actor.has_meta(&"card_control"):
+		return
 	var identifier: int = actor.get_instance_id()
-	if _elapsed >= float(_route_deadlines.get(identifier, 0.0)) or not _waypoints.has(identifier):
+	if _mixed or _elapsed >= float(_route_deadlines.get(identifier, 0.0)) or not _waypoints.has(identifier):
 		_waypoints[identifier] = navigation.call("waypoint", actor.position, subject)
 		_route_deadlines[identifier] = _elapsed + 0.32
 	var waypoint: Vector2 = _waypoints[identifier] as Vector2
@@ -308,15 +469,21 @@ func _move_actor(actor: CharacterBody2D, subject: Vector2, delta: float) -> void
 	var speed: float = float(actor.get("movement_speed"))
 	var impulse: Vector2 = actor.get("hit_velocity") as Vector2
 	actor.set("hit_velocity", impulse * exp(-12.0 * delta))
-	actor.velocity = (direction + _separation(actor) * 1.35).limit_length(1.0) * speed + impulse
+	var steering: Vector2 = (direction + _separation(actor) * (2.0 if _mixed else 1.35)).limit_length(1.0)
+	if _mixed:
+		steering = ground_navigation.steer(actor.position, steering)
+	actor.velocity = steering * speed + impulse
 	var previous: Vector2 = actor.position
 	actor.move_and_slide()
-	if _mixed and not _walkable.is_empty() and not _walkable.has(Vector2i((actor.position / 16.0).floor())):
+	if _mixed:
+		_resolve_crowd_contacts(actor)
+	if _mixed and not ground_navigation.has_floor(actor.position):
 		actor.position = previous
+	if actor is HORDE_ENEMY:
+		(actor as HORDE_ENEMY).sync_floor_height()
+		return
 	if arena_radius > 0.0 and _height_query.is_valid():
 		(actor.get_node("Sprite") as Sprite2D).position.y = -7.0 - roundf(float(_height_query.call(actor.global_position)))
-	if actor is HORDE_ENEMY:
-		return
 	# Swept relative motion also catches a moving player between physics frames.
 	var relative_start: Vector2 = previous - (_previous_player + Vector2(0, 3))
 	var relative_end: Vector2 = actor.position - (subject + Vector2(0, 3))
@@ -326,10 +493,30 @@ func _move_actor(actor: CharacterBody2D, subject: Vector2, delta: float) -> void
 	if player.try_parry_enemy_attack(actor, player.global_position):
 		return
 	var health_before: float = player.health
-	player.receive_contact_damage(int(actor.get("contact_damage")), actor.global_position.direction_to(player.global_position), 35.0)
+	player.receive_contact_damage(int(actor.get("contact_damage")), actor.global_position.direction_to(player.global_position), 35.0, actor)
 	if player.health < health_before and not player.dead:
 		player.apply_contact_slow(float(profile.get("contact_slow_factor")), float(profile.get("contact_slow_duration")), float(profile.get("post_slow_invulnerability")))
 	actor.call("consume_on_contact")
+
+
+func _resolve_crowd_contacts(actor: Node2D) -> void:
+	# Relax penetrating pairs locally without forcing either body into scenery.
+	var bucket: Vector2i = Vector2i((actor.position / BUCKET).floor())
+	for y: int in range(-1, 2):
+		for x: int in range(-1, 2):
+			for other: Node2D in _buckets.get(bucket + Vector2i(x, y), []):
+				if other.get_instance_id() <= actor.get_instance_id() or not bool(other.call("is_alive")):
+					continue
+				var away: Vector2 = actor.position - other.position
+				var distance: float = away.length()
+				if distance >= 15.0:
+					continue
+				var normal: Vector2 = away / distance if distance > 0.001 else Vector2.RIGHT.rotated(float(actor.get_instance_id() % 628) * 0.01)
+				var correction: Vector2 = normal * (15.0 - distance) * 0.5
+				if ground_navigation.can_move(actor.position, correction):
+					actor.position += correction
+				if ground_navigation.can_move(other.position, -correction):
+					other.position -= correction
 
 
 func _forget(actor: Node2D) -> void:
@@ -348,15 +535,45 @@ func _on_killed(actor: Node2D) -> void:
 		return
 	defeated_count += 1
 	progress_changed.emit(defeated_count, kill_target)
-	if defeated_count >= kill_target:
-		_complete()
+	if _check_completion():
 		return
-	var next_stage: int = mini(int(defeated_count / 10.0), 3)
+	_update_stage()
+
+
+func _update_stage() -> void:
+	var progress: float = float(defeated_count) / float(kill_target) if _mixed else float(defeated_count) / 40.0
+	if _mixed:
+		progress = maxf(progress, _elapsed / float(profile.get("open_world_time_limit")))
+	var next_stage: int = mini(int(progress * 4.0), 3)
 	if next_stage != difficulty_stage:
 		difficulty_stage = next_stage
 		for survivor: Node2D in actors:
 			survivor.call("apply_profile", profile, difficulty_stage)
 		stage_changed.emit(difficulty_stage)
+
+
+func _check_completion() -> bool:
+	# Independent completion rules allow future experimental criteria here.
+	if phase != Phase.ACTIVE:
+		return false
+	if completion_reason.is_empty():
+		if defeated_count >= kill_target:
+			completion_reason = &"kills"
+		elif _mixed and _elapsed >= float(profile.get("open_world_time_limit")):
+			completion_reason = &"time"
+	if completion_reason.is_empty() or _miniboss_pending or is_instance_valid(miniboss):
+		return false
+	_complete()
+	return true
+
+
+func completion_progress() -> float:
+	if phase == Phase.CLEARED:
+		return 1.0
+	var result: float = float(defeated_count) / maxf(float(kill_target), 1.0)
+	if _mixed:
+		result = maxf(result, _elapsed / maxf(float(profile.get("open_world_time_limit")), 0.001))
+	return clampf(result, 0.0, 1.0)
 
 
 func skip_to_completion() -> void:
@@ -381,6 +598,10 @@ func _complete() -> void:
 
 
 func _release_arena() -> void:
+	_miniboss_pending = false
+	if is_instance_valid(miniboss):
+		miniboss.call(&"dismiss")
+		miniboss = null
 	if _mixed:
 		for child: Node in get_children():
 			if child is HORDE_SHOT:

@@ -365,7 +365,7 @@ func _on_body_entered(body: Node2D) -> void:
 
 
 func _update_attached(delta: float) -> void:
-	if not _valid_enemy(target):
+	if not is_instance_valid(target) or not _valid_enemy(target):
 		queue_free()
 		return
 	global_position = target.global_position + attached_offset

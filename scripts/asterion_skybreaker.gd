@@ -545,7 +545,7 @@ func _melee_impact() -> void:
 	melee_damage_requested.emit(actor.global_position, melee_hit_range, melee_damage)
 	if actor.global_position.distance_to(player.global_position + Vector2(0, 3)) <= melee_hit_range:
 		if not player.try_parry_enemy_attack(actor, player.global_position):
-			player.receive_skybreaker_hit(melee_damage)
+			player.receive_skybreaker_hit(melee_damage, self)
 
 
 func _tick_timed_state(delta: float, duration: float, completion: Callable) -> void:
@@ -686,7 +686,7 @@ func _impact() -> void:
 	for result in get_world_2d().direct_space_state.intersect_shape(query, 64):
 		if result.collider == player:
 			if not player.try_parry_enemy_attack(actor, player.global_position):
-				player.receive_skybreaker_hit(preview_damage)
+				player.receive_skybreaker_hit(preview_damage, self)
 			break
 
 

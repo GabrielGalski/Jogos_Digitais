@@ -78,7 +78,7 @@ func _hit_player() -> void:
 		queue_free()
 		return
 	if target.has_method(&"receive_contact_damage"):
-		target.receive_contact_damage(contact_damage, attack_direction, knockback_force)
+		target.receive_contact_damage(contact_damage, attack_direction, knockback_force, get_parent() as Node2D)
 	set_physics_process(false)
 	queue_free()
 

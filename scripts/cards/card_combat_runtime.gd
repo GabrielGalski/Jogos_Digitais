@@ -5,23 +5,36 @@ extends RefCounted
 var _loadout: CardLoadout
 var _generation: int = 0
 var mutation_remaining: float = 0.0
+var effect_host: WeakRef
+var infusion_generation: int = 0
+var chimera_phase: int = 0
+var cooldowns: Dictionary[StringName, float] = {}
 
 func equip(loadout: CardLoadout) -> bool:
 	if loadout == null or not loadout.validation_errors().is_empty():
 		return false
+	var old_infusion: StringName = _loadout.infusion.card_id if _loadout != null and _loadout.infusion != null else &""
+	var old_mutation: StringName = _loadout.mutation.card_id if _loadout != null and _loadout.mutation != null else &""
 	_loadout = loadout.duplicate(true) as CardLoadout
-	reset_effects()
+	if old_infusion != (_loadout.infusion.card_id if _loadout.infusion != null else &""):
+		infusion_generation += 1
+	if old_mutation != (_loadout.mutation.card_id if _loadout.mutation != null else &""):
+		_generation += 1
+		mutation_remaining = 0.0
 	return true
 
 func reset_effects() -> void:
 	_generation += 1
 	mutation_remaining = 0.0
+	cooldowns.clear()
 
 func tick(delta: float) -> void:
 	mutation_remaining = maxf(0.0, mutation_remaining - maxf(0.0, delta))
+	for id: StringName in cooldowns:
+		cooldowns[id] = maxf(0.0, cooldowns[id] - maxf(0.0, delta))
 
 func movement_multiplier() -> float:
-	if _loadout == null or _loadout.mutation == null or mutation_remaining <= 0.0:
+	if _loadout == null or _loadout.mutation == null or _loadout.mutation.effect != 0 or mutation_remaining <= 0.0:
 		return 1.0
 	return 1.0 + _loadout.mutation.movement_bonus
 
@@ -37,10 +50,27 @@ func create_attack() -> CardAttack:
 	attack.projectile_lifetime = card.projectile_lifetime
 	attack.impact_impulse = card.impact_impulse
 	attack.on_weapon_kill = _on_weapon_kill.bind(_generation)
+	attack.runtime = self
+	attack.infusion_generation = infusion_generation
+	attack.mutation_generation = _generation
 	if _loadout.infusion != null:
-		attack.explosion_damage = _loadout.infusion.explosion_damage
+		attack.infusion_effect = _loadout.infusion.effect
 		attack.explosion_radius = _loadout.infusion.explosion_radius
+		if attack.infusion_effect == 3 and float(cooldowns.get(&"I04", 0.0)) <= 0.0:
+			attack.slaad_carrier = true
+			cooldowns[&"I04"] = _loadout.infusion.cooldown
+		if attack.infusion_effect == 4:
+			attack.element = chimera_phase
+			chimera_phase = (chimera_phase + 1) % 3
 	return attack
+
+
+func host() -> Node:
+	return effect_host.get_ref() as Node if effect_host != null else null
+
+
+func mutation_effect() -> int:
+	return _loadout.mutation.effect if _loadout != null and _loadout.mutation != null else -1
 
 
 func manifestation_id() -> StringName:
@@ -52,5 +82,5 @@ func copy_loadout() -> CardLoadout:
 
 func _on_weapon_kill(generation: int) -> void:
 	# A projectile from an earlier loadout cannot activate the newly equipped mutation.
-	if generation == _generation and _loadout != null and _loadout.mutation != null:
+	if generation == _generation and _loadout != null and _loadout.mutation != null and _loadout.mutation.effect == 0:
 		mutation_remaining = _loadout.mutation.duration

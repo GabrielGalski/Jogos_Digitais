@@ -47,17 +47,25 @@ func _physics_process(delta: float) -> void:
 		query.exclude.append((shooter as CollisionObject2D).get_rid())
 	var hit: Dictionary = space.intersect_ray(query)
 	var wall_fraction: float = global_position.distance_to(hit.get("position", endpoint) as Vector2) / maxf(global_position.distance_to(endpoint), 0.001) if not hit.is_empty() else 1.01
+	var special: Dictionary = _special_contact(endpoint) if not reflected else {}
 	if not reflected and not target.is_dashing():
 		var capsule: CapsuleShape2D = (target.get_node("CollisionShape2D") as CollisionShape2D).shape as CapsuleShape2D
 		var offset: Vector2 = (target.get_node("CollisionShape2D") as CollisionShape2D).position
 		var contact: Dictionary = CONTACTS.capsule_hit(global_position - _previous_target, endpoint - target.global_position,
 			offset, capsule.radius + radius, capsule.height * 0.5 - capsule.radius)
-		if not contact.is_empty() and float(contact.fraction) <= wall_fraction:
+		if not contact.is_empty() and float(contact.fraction) <= wall_fraction and (special.is_empty() or float(contact.fraction) < float(special.fraction)):
 			global_position = global_position.lerp(endpoint, float(contact.fraction))
 			if target.try_parry_projectile(self): return
-			if AFFILIATION.can_damage(faction, target): target.receive_projectile_damage(damage)
+			if AFFILIATION.can_damage(faction, target): target.receive_projectile_damage(damage, shooter if is_instance_valid(shooter) else null)
 			_impact()
 			return
+	if not special.is_empty() and float(special.fraction) <= wall_fraction:
+		var receiver: Node2D = special.collider as Node2D
+		global_position = global_position.lerp(endpoint, float(special.fraction))
+		if receiver.has_method("take_damage"):
+			receiver.call("take_damage", float(damage))
+		_impact()
+		return
 	if not hit.is_empty():
 		global_position = hit.position as Vector2
 		var body: Node = hit.get("collider") as Node
@@ -69,6 +77,22 @@ func _physics_process(delta: float) -> void:
 	_previous_target = target.global_position
 	_visual_height = float(height_query.call(global_position)) if height_query.is_valid() else _visual_height
 	queue_redraw()
+
+
+func _special_contact(endpoint: Vector2) -> Dictionary:
+	var result: Dictionary = {}
+	for group: StringName in [&"controlled_monsters", &"combat_decoys"]:
+		for node: Node in get_tree().get_nodes_in_group(group):
+			var receiver: Node2D = node as Node2D
+			if receiver == shooter or receiver.is_queued_for_deletion():
+				continue
+			if receiver.has_method("is_alive") and not bool(receiver.call("is_alive")):
+				continue
+			var contact: Dictionary = CONTACTS.capsule_hit(global_position - receiver.global_position,
+				endpoint - receiver.global_position, Vector2.ZERO, 8.0 + radius, 3.0)
+			if not contact.is_empty() and (result.is_empty() or float(contact.fraction) < float(result.fraction)):
+				result = {"fraction": contact.fraction, "collider": receiver}
+	return result
 
 
 func parry(reflector: Player) -> bool:

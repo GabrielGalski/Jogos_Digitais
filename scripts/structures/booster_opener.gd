@@ -1,7 +1,8 @@
 extends Node2D
-## Proximity opens the lid; E emits visual feedback, never rewards.
+## Proximity opens the lid and reveals the cards above the machine.
 
 signal interacted
+signal opened
 
 const CLOSED: Texture2D = preload("res://assets/tiles/structures/booster_opener/closed1.png")
 const OPENED: Texture2D = preload("res://assets/tiles/structures/booster_opener/opened.png")
@@ -10,6 +11,7 @@ const LIGHT_TEXTURE: Texture2D = preload("res://resources/visual/booster_opener_
 @export var player_path: NodePath
 @export var interaction_enabled: bool = true
 @export var action_prompt_enabled: bool = true
+@export var click_interaction_enabled: bool = false
 @export_range(32.0, 128.0, 1.0) var activation_radius: float = 68.0
 @export_range(0.0, 32.0, 1.0) var proximity_hysteresis: float = 14.0
 @export_range(0.3, 2.0, 0.05) var opening_duration: float = 1.05
@@ -35,6 +37,7 @@ var _awaiting_clearance: bool = false
 var _appearance: Tween = null
 var _core_light: PointLight2D = null
 var _rim_light: PointLight2D = null
+static var _open_sprite_bounds: Rect2
 
 @onready var _visuals: Node2D = $Visuals
 @onready var _surface: AnimatedSprite2D = $Visuals/Surface
@@ -141,7 +144,7 @@ func _physics_process(_delta: float) -> void:
 	if inside != _nearby:
 		_nearby = inside
 		_transition_to(inside)
-	_action.call("set_available", inside and action_prompt_enabled)
+	_action.call("set_available", inside and action_prompt_enabled and state == &"opened")
 
 
 func _update_platform_collision_and_depth() -> void:
@@ -172,16 +175,43 @@ func _player_available() -> bool:
 
 
 func can_interact() -> bool:
-	return action_prompt_enabled and interaction_enabled and _nearby and state == &"opened" and _player_available()
+	return (action_prompt_enabled or click_interaction_enabled) and interaction_enabled and _nearby and state == &"opened" and _player_available()
 
 
 func _unhandled_key_input(event: InputEvent) -> void:
 	var key: InputEventKey = event as InputEventKey
 	if key == null or not key.pressed or key.echo or (key.physical_keycode != KEY_E and key.keycode != KEY_E):
 		return
-	if can_interact():
+	if action_prompt_enabled and can_interact():
 		get_viewport().set_input_as_handled()
 		interact()
+
+
+func _unhandled_input(event: InputEvent) -> void:
+	var click: InputEventMouseButton = event as InputEventMouseButton
+	if not click_interaction_enabled or click == null or not click.pressed or click.button_index != MOUSE_BUTTON_LEFT:
+		return
+	if can_interact() and _is_over_open_sprite(click.position):
+		get_viewport().set_input_as_handled()
+		interact()
+
+
+func _is_over_open_sprite(viewport_point: Vector2) -> bool:
+	if not _open_sprite_bounds.has_area():
+		var image: Image = OPENED.get_image()
+		if image.is_compressed():
+			image.decompress()
+		_open_sprite_bounds = Rect2(image.get_used_rect())
+	var surface_bounds: Rect2 = _open_sprite_bounds
+	surface_bounds.position += _surface.offset
+	if _surface.centered:
+		surface_bounds.position -= OPENED.get_size() * 0.5
+	if surface_bounds.has_point(_surface.get_global_transform_with_canvas().affine_inverse() * viewport_point):
+		return true
+	for card: Sprite2D in _cards:
+		if card.is_visible_in_tree() and card.get_rect().has_point(card.get_global_transform_with_canvas().affine_inverse() * viewport_point):
+			return true
+	return false
 
 
 func interact() -> void:
@@ -225,11 +255,13 @@ func _transition_to(should_open: bool) -> void:
 	_transition.chain().tween_callback(_finish_transition.bind(should_open))
 
 
-func _finish_transition(opened: bool) -> void:
-	state = &"opened" if opened else &"closed"
-	open_amount = 1.0 if opened else 0.0
+func _finish_transition(is_open: bool) -> void:
+	state = &"opened" if is_open else &"closed"
+	open_amount = 1.0 if is_open else 0.0
 	_lid_amount = open_amount
 	_apply_visuals()
+	if is_open:
+		opened.emit()
 
 
 func _apply_visuals() -> void:

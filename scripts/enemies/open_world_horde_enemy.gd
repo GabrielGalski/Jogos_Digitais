@@ -16,6 +16,11 @@ var burst_delay: float = 0.0
 var aim: Vector2
 var spark: Sprite2D
 var hit_time: float = 0.0
+static var _body_bounds: Dictionary[Texture2D, Rect2] = {}
+var floor_height: float = 0.0
+var _hurt_center: Vector2 = Vector2.ZERO
+var _hurt_radius: float = 6.0
+var _hurt_height: float = 18.0
 
 
 func configure(kind: String, subject: Player, height_query: Callable) -> void:
@@ -30,12 +35,30 @@ func configure(kind: String, subject: Player, height_query: Callable) -> void:
 
 func _ready() -> void:
 	super()
-	collision_mask = 5
+	# Ground collisions remain physical. Crowd spacing is handled by steering.
+	collision_mask = 1
 	hit_pose_hold = 0.12
 	remove_from_group(&"spirit_ghosts")
 	add_to_group(&"open_world_horde_enemies")
 	_sprite.texture = variant[0] as Texture2D
 	_sprite.hframes = 4
+	var texture: Texture2D = _sprite.texture
+	if not _body_bounds.has(texture):
+		var source: Image = texture.get_image()
+		if source.is_compressed():
+			source.decompress()
+		var frame_width: int = int(float(source.get_width()) / 4.0)
+		var accumulated_bounds: Rect2 = Rect2()
+		for index: int in range(4):
+			var frame: Image = source.get_region(Rect2i(index * frame_width, 0, frame_width, source.get_height()))
+			var frame_bounds: Rect2 = Rect2(frame.get_used_rect())
+			accumulated_bounds = frame_bounds if accumulated_bounds.size.is_zero_approx() else accumulated_bounds.merge(frame_bounds)
+		_body_bounds[texture] = accumulated_bounds
+	var bounds: Rect2 = _body_bounds[texture]
+	_hurt_center = bounds.get_center() - Vector2(texture.get_width() / 4.0, texture.get_height()) * 0.5
+	_hurt_radius = clampf(bounds.size.x * 0.45, 6.0, 12.0)
+	_hurt_height = maxf(bounds.size.y, _hurt_radius * 2.0)
+	sync_floor_height()
 	if species == "lizard_monk":
 		spark = Sprite2D.new()
 		spark.texture = SPARK
@@ -76,6 +99,19 @@ func get_visual_center_of_mass() -> Vector2:
 	return _sprite.to_global(_sprite.offset)
 
 
+func sync_floor_height() -> void:
+	floor_height = float(heights.call(global_position)) if heights.is_valid() else 0.0
+	_sprite.position = Vector2(0.0, -7.0 - roundf(floor_height))
+
+
+func get_projectile_hurt_capsule() -> Dictionary:
+	return {"center": _sprite.position + _hurt_center, "radius": _hurt_radius, "height": _hurt_height}
+
+
+func get_separation_radius() -> float:
+	return 17.0 if species == "bogslium" else 12.0
+
+
 func _emit_remains() -> void:
 	remains_system.call("emit_spirit", get_visual_center_of_mass(), global_position,
 		last_hit_direction, velocity + hit_velocity, variant[1], variant[2])
@@ -104,7 +140,8 @@ func combat_direction(forward: Vector2, distance: float, delta: float) -> Vector
 		aim = global_position.direction_to(target.global_position)
 		windup = 0.15 if melee else 0.25
 		cooldown = float(stats.interval)
-	if distance > reach or not sight_clear or (windup <= 0.0 and not melee and distance > reach * 0.8):
+	var preferred_distance: float = reach * (0.64 + 0.16 * (0.5 + 0.5 * sin(phase)))
+	if distance > reach or not sight_clear or (windup <= 0.0 and not melee and distance > preferred_distance):
 		return forward
 	if melee:
 		return forward * clampf((distance - 13.0) / 16.0, 0.0, 1.0)
@@ -132,4 +169,7 @@ func _fire() -> void:
 	shot._visual_height = float(heights.call(global_position)) if heights.is_valid() else 0.0
 	shot.fire_impact = species == "batilisk"
 	shot.position = position
-	get_parent().add_child(shot)
+	if get_parent().has_method("spawn_horde_projectile"):
+		get_parent().call("spawn_horde_projectile", shot)
+	else:
+		get_parent().add_child(shot)

@@ -73,7 +73,7 @@ func _physics_process(delta: float) -> void:
 			global_position = origin.lerp(endpoint, float(hit.fraction))
 			if target.try_parry_projectile(self): return
 			var before: float = target.health
-			target.receive_projectile_damage(maxi(1, roundi(target.max_health * 0.05)))
+			target.receive_projectile_damage(maxi(1, roundi(target.max_health * 0.05)), caster if is_instance_valid(caster) else null)
 			var dealt: float = before - target.health
 			if dealt > 0.0: damage_dealt.emit(dealt)
 			dismiss()

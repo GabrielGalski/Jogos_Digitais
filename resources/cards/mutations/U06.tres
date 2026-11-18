@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="MutationCard" format=3]
+
+[ext_resource type="Script" path="res://scripts/cards/mutation_card.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+card_id = &"CARD_MUT_006"
+display_name = "Doppelgänger"
+description = "F deixa uma cópia e oculta Nox por 1,5 s. Recarga de 30 s. Evita um golpe letal recuperando 10% da vida."
+effect = 5
+cooldown = 30

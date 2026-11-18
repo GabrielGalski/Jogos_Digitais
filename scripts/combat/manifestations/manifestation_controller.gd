@@ -7,14 +7,8 @@ const FACTORY: Script = preload("res://scripts/combat/manifestations/manifestati
 const IMPACT: Script = preload("res://scripts/visual/weapons/procedural_impact.gd")
 const LIGHTING: Script = preload("res://scripts/visual/weapons/procedural_weapon_lighting.gd")
 const EQUIPMENT: PackedScene = preload("res://scenes/cards/equipment_menu.tscn")
-const MODELS: Array[ProceduralManifestationModel] = [
-	preload("res://resources/weapons/procedural/M01.tres"),
-	preload("res://resources/weapons/procedural/M02.tres"),
-	preload("res://resources/weapons/procedural/M04.tres"),
-	preload("res://resources/weapons/procedural/M06.tres"),
-	preload("res://resources/weapons/procedural/M07.tres"),
-	preload("res://resources/weapons/procedural/M08.tres"),
-]
+const CATALOG: Script = preload("res://scripts/cards/card_effect_catalog.gd")
+const MODELS: Array[ProceduralManifestationModel] = CATALOG.MANIFESTATIONS
 
 var player: Player = null
 var gun: Node2D = null
@@ -57,6 +51,26 @@ func selected_model() -> ProceduralManifestationModel:
 
 func available_models() -> Array[ProceduralManifestationModel]:
 	return MODELS
+
+
+func select_infusion(index: int) -> bool:
+	if index < -1 or index >= CATALOG.INFUSIONS.size():
+		return false
+	var runtime: CardCombatRuntime = gun.get("card_runtime") as CardCombatRuntime
+	var loadout: CardLoadout = runtime.copy_loadout()
+	loadout.infusion = CATALOG.INFUSIONS[index] if index >= 0 else null
+	suspend_trigger()
+	return bool(gun.call("equip_cards", loadout))
+
+
+func select_mutation(index: int) -> bool:
+	if index < -1 or index >= CATALOG.MUTATIONS.size():
+		return false
+	var runtime: CardCombatRuntime = gun.get("card_runtime") as CardCombatRuntime
+	var loadout: CardLoadout = runtime.copy_loadout()
+	loadout.mutation = CATALOG.MUTATIONS[index] if index >= 0 else null
+	suspend_trigger()
+	return bool(gun.call("equip_cards", loadout))
 
 
 func select_model(index: int) -> bool:
@@ -109,7 +123,7 @@ func set_trigger(requested: bool) -> void:
 
 
 func _can_attack() -> bool:
-	return is_instance_valid(player) and not player.dead and not player.intro_locked and not player.is_parry_feedback_active() and bool(gun.get("equipped")) and bool(gun.get("combat_enabled")) and bool(gun.call("is_aim_allowed"))
+	return is_instance_valid(player) and not player.dead and not player.intro_locked and not player.mutation_invisible and not player.is_parry_feedback_active() and bool(gun.get("equipped")) and bool(gun.get("combat_enabled")) and bool(gun.call("is_aim_allowed"))
 
 
 func _physics_process(delta: float) -> void:
@@ -172,6 +186,7 @@ func _apply_channel_tick(model: ProceduralManifestationModel) -> void:
 	var attack: CardAttack = runtime.create_attack()
 	if attack == null:
 		return
+	channel.call("set_element", attack.element)
 	_tick_remaining[code] = attack.fire_interval
 	var infusion_available: bool = float(_infusion_remaining.get(code, 0.0)) <= 0.0 and attack.explosion_damage > 0.0
 	if not infusion_available:
@@ -181,7 +196,7 @@ func _apply_channel_tick(model: ProceduralManifestationModel) -> void:
 	var direction: Vector2 = channel.get("direction") as Vector2
 	var contact: Vector2 = channel.global_position + (channel.get("endpoint") as Vector2)
 	for enemy: Node2D in targets:
-		attack.apply_primary_hit(enemy, contact if model.family == ProceduralManifestationModel.Family.BEAM else enemy.global_position, direction, effects)
+		attack.apply_primary_hit(enemy, contact if model.family == ProceduralManifestationModel.Family.BEAM else effects.CONTACTS.damage_center(enemy), direction, effects)
 	if not targets.is_empty():
 		if infusion_available:
 			_infusion_remaining[code] = model.infusion_interval

@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="InfusionCard" format=3]
+
+[ext_resource type="Script" path="res://scripts/cards/infusion_card.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+card_id = &"CARD_INF_004"
+display_name = "Ovo de Slaad"
+description = "A cada 6 segundos um tiro carrega um Slaad que controla um inimigo simples."
+effect = 3
+cooldown = 6

@@ -1,10 +1,11 @@
 class_name InfusionCard
 extends CardDefinition
-## Initial infusion: one explosion on the primary projectile's first enemy hit.
-## Secondary damage never emits another infusion.
+## One equipped weapon modifier. Execution and kill chains live in CardEffectController.
 
 @export_range(0.01, 1000.0) var explosion_damage: float = 3.0
 @export_range(0.01, 1000.0) var explosion_radius: float = 18.0
+@export_enum("Golem", "Shards", "Odopi", "Slaad", "Chimera") var effect: int = 0
+@export var cooldown: float = 0.0
 
 func get_kind() -> Kind:
 	return Kind.INFUSION

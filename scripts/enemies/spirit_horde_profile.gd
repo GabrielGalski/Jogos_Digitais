@@ -5,6 +5,19 @@ extends Resource
 @export var stage_speeds: PackedFloat32Array = PackedFloat32Array([48.0, 60.0, 72.0, 84.0])
 @export var stage_damage_units: PackedInt32Array = PackedInt32Array([1, 2, 3, 4])
 @export var stage_sway: PackedFloat32Array = PackedFloat32Array([0.0, 0.22, 0.38, 0.55])
+@export var open_world_kill_limit: int = 120
+@export var open_world_time_limit: float = 40.0
+@export var open_world_maximum_alive: int = 48
+@export var open_world_maximum_projectiles: int = 96
+@export var open_world_projectiles_per_enemy: int = 3
+@export var open_world_initial_pack: int = 12
+@export var open_world_spawn_interval: float = 0.6
+@export var open_world_reinforcements: int = 2
+enum MinibossKind { BONE_BELL, CENTIPEDE }
+@export var miniboss_kind: MinibossKind = MinibossKind.CENTIPEDE
+@export_range(0.0, 1.0, 0.01) var miniboss_spawn_chance: float = 1.0
+@export_range(0.0, 12.0, 0.1) var miniboss_entry_delay: float = 2.8
+
 @export_range(4, 100, 1) var maximum_alive: int = 36
 @export_range(1, 30, 1) var initial_pack: int = 12
 @export_range(0.1, 3.0, 0.05) var spawn_interval: float = 0.4 / 0.75

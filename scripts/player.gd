@@ -44,11 +44,15 @@ var impact_control_lock: float = 0.0
 var contact_slow_remaining: float = 0.0
 var contact_slow_factor: float = 1.0
 var fall_recovery_remaining: float = 0.0
+var card_effects: Node
+var mutation_invisible: bool = false
+var last_damage_source: Node2D
+var last_damage_enemy: bool = false
 
-func receive_skybreaker_hit(amount: float) -> void:
+func receive_skybreaker_hit(amount: float, source: Node2D = null) -> void:
 	if is_fall_recovery_invulnerable():
 		return
-	_apply_health_damage(ceilf(amount / 3.0) * 3.0)
+	_apply_health_damage(ceilf(amount / 3.0) * 3.0, source, true)
 
 
 func receive_fall_damage() -> void:
@@ -65,12 +69,20 @@ func grant_fall_recovery(duration: float) -> void:
 	contact_invulnerability = maxf(contact_invulnerability,duration)
 
 
-func _apply_health_damage(amount: float) -> void:
-	if dead or intro_locked or amount <= 0.0:
+func _apply_health_damage(amount: float, source: Node2D = null, enemy_attack: bool = false) -> void:
+	if dead or intro_locked or mutation_invisible or amount <= 0.0:
+		return
+	last_damage_source = source
+	last_damage_enemy = enemy_attack
+	var before: float = health
+	if health - amount <= 0.0 and is_instance_valid(card_effects) and bool(card_effects.call("prevent_death")):
+		health = max_health * 0.1
+		health_changed.emit(health, max_health)
+		damage_received.emit(maxf(0.0, before - health))
 		return
 	health = maxf(0.0, health - amount)
 	health_changed.emit(health, max_health)
-	damage_received.emit(amount)
+	damage_received.emit(before - health)
 	if health <= 0.0:
 		fall_recovery_remaining = 0.0
 		dead = true
@@ -83,6 +95,13 @@ func _apply_health_damage(amount: float) -> void:
 	body.modulate = Color(2.8, 1.2, 1.2)
 	hit_flash = create_tween()
 	hit_flash.tween_property(body, "modulate", Color.WHITE, 0.25)
+
+
+func heal_fraction(fraction: float) -> void:
+	if dead or fraction <= 0.0:
+		return
+	health = minf(max_health, health + max_health * fraction)
+	health_changed.emit(health, max_health)
 
 @export var movement_speed := 82.0
 var card_movement_multiplier: float = 1.0
@@ -217,13 +236,22 @@ func _recover_dash_charges(delta: float) -> void:
 func try_dash(direction: Vector2 = Vector2.ZERO) -> bool:
 	if dead or intro_locked or is_parry_feedback_active() or is_dashing() or dash_charges <= 0 or impact_control_lock > 0.0:
 		return false
-	dash_direction = direction.normalized()
-	if dash_direction.is_zero_approx():
-		dash_direction = body.facing.normalized()
 	# Spending the second charge must not restart the first charge's clock.
 	if dash_charges == MAX_DASH_CHARGES:
 		dash_recovery = dash_cooldown
 	dash_charges -= 1
+	_begin_dash(direction)
+	return true
+
+
+func dash_from_decoy() -> void:
+	_begin_dash(_get_movement_input())
+
+
+func _begin_dash(direction: Vector2) -> void:
+	dash_direction = direction.normalized()
+	if dash_direction.is_zero_approx():
+		dash_direction = body.facing.normalized()
 	dash_remaining = dash_duration
 	# The first frame is spawned here; wait before creating the next one.
 	dash_trail_timer = 0.05
@@ -238,7 +266,6 @@ func try_dash(direction: Vector2 = Vector2.ZERO) -> bool:
 	_update_animation(dash_direction)
 	_spawn_dash_trail()
 	dash_started.emit()
-	return true
 
 
 func _process(delta: float) -> void:
@@ -350,23 +377,23 @@ func try_parry_projectile(projectile: Node2D) -> bool:
 	return is_instance_valid(parry) and bool(parry.call("try_projectile", projectile))
 
 
-func receive_contact_damage(amount: int, direction: Vector2 = Vector2.ZERO, knockback: float = 0.0) -> void:
-	if intro_locked or contact_invulnerability > 0.0 or is_fall_recovery_invulnerable():
+func receive_contact_damage(amount: int, direction: Vector2 = Vector2.ZERO, knockback: float = 0.0, source: Node2D = null) -> void:
+	if intro_locked or mutation_invisible or contact_invulnerability > 0.0 or is_fall_recovery_invulnerable():
 		return
 	contact_invulnerability = 0.65
 	if knockback > 0.0 and not direction.is_zero_approx():
 		knockback_velocity = direction.normalized() * knockback
 		impact_control_lock = 0.20
-	receive_skybreaker_hit(float(amount))
+	receive_skybreaker_hit(float(amount), source)
 
 
-func receive_projectile_damage(amount: int) -> bool:
-	if dead or intro_locked or is_dashing() or contact_invulnerability > 0.0 or is_fall_recovery_invulnerable() or amount <= 0:
+func receive_projectile_damage(amount: int, source: Node2D = null) -> bool:
+	if dead or intro_locked or mutation_invisible or is_dashing() or contact_invulnerability > 0.0 or is_fall_recovery_invulnerable() or amount <= 0:
 		return false
 	# Brief projectile protection accepts distinct shots in a three-orb volley.
 	# Existing contact/slow/parry protection is checked before this short window.
 	contact_invulnerability = 0.14
-	receive_skybreaker_hit(float(amount))
+	receive_skybreaker_hit(float(amount), source)
 	return true
 
 

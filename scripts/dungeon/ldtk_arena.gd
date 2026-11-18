@@ -28,6 +28,7 @@ const ROOM_LIGHTING: Script = preload("res://scripts/visual/room_lighting.gd")
 const WARPS: Script = preload("res://scripts/dungeon/ldtk_warps.gd")
 const WARP_TRANSITION: Script = preload("res://scripts/visual/warp_transition.gd")
 const SPIRIT_HORDES: Script = preload("res://scripts/dungeon/ldtk_spirit_hordes.gd")
+const HORDE_ENCOUNTER: Script = preload("res://scripts/dungeon/spirit_horde_encounter.gd")
 const INSECT_ZONES: Script = preload("res://scripts/dungeon/insect_zones.gd")
 const FLYING_EYE_ZONES: Script = preload("res://scripts/dungeon/flying_eye_zones.gd")
 const BIOME_HABITATS: Script = preload("res://scripts/dungeon/ldtk_enemy_habitats.gd")
@@ -139,6 +140,11 @@ func request_scene_jump() -> void:
 	if player != null and player.dead:
 		get_node("/root/SceneJumper").call("travel_to_scene", self, JUMPER.ASTERION_SCENE if level_name == "Room_1" else JUMPER.SPIRIT_SCENE)
 		return
+	if entry_complete:
+		for encounter: Node2D in get_node("SpiritHordes").get("encounters"):
+			if int(encounter.get("phase")) == HORDE_ENCOUNTER.Phase.ACTIVE:
+				encounter.call("skip_to_completion")
+				return
 	_completion_skip_requested = true
 
 

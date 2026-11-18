@@ -8,6 +8,7 @@ const ELECTRIC_EXPLOSION_SCENE := preload(
 	"res://scenes/combat/effects/electric_explosion.tscn"
 )
 const DEFAULT_RANDOM_SEED := 2667
+const CONTACTS: Script = preload("res://scripts/combat/projectile_enemy_contacts.gd")
 const CHAIN_RANGE := 84.0
 const MAX_CHAIN_JUMPS := 6
 const CHAIN_STEP_DELAY := 0.04
@@ -49,14 +50,15 @@ func _exit_tree() -> void:
 func apply_hit(enemy: Node2D, damage: float, direction: Vector2, impulse: float, on_kill: Callable = Callable()) -> void:
 	if damage <= 0.0 or not _is_valid_enemy(enemy):
 		return
-	var hit_position: Vector2 = enemy.global_position
+	var hit_position: Vector2 = CONTACTS.damage_center(enemy)
 	var health_before: float = float(enemy.call("get_current_health")) if enemy.has_method("get_current_health") else -1.0
 	if enemy.has_method(&"receive_impact"):
 		enemy.call(&"receive_impact", direction, impulse)
 	enemy.call(&"take_damage", damage)
-	if (not is_instance_valid(enemy) or not bool(enemy.call(&"is_alive"))) and on_kill.is_valid():
-		on_kill.call()
 	var killed: bool = not is_instance_valid(enemy) or not bool(enemy.call(&"is_alive"))
+	if killed and on_kill.is_valid():
+		if not is_instance_valid(enemy) or not enemy.has_method(&"counts_as_kill") or bool(enemy.call(&"counts_as_kill")):
+			on_kill.call()
 	var damage_confirmed: bool = health_before < 0.0 or killed
 	if is_instance_valid(enemy) and health_before >= 0.0:
 		damage_confirmed = float(enemy.call("get_current_health")) < health_before
@@ -121,16 +123,17 @@ func trigger_explosion(
 	for enemy_node in get_tree().get_nodes_in_group(&"enemy_bodies"):
 		if not _is_valid_enemy(enemy_node):
 			continue
-		var enemy := enemy_node as Node2D
+		var enemy: Node2D = enemy_node as Node2D
 		var enemy_id := enemy.get_instance_id()
-		if hit_ids.has(enemy_id) or enemy.global_position.distance_to(center) > radius:
+		var target_center: Vector2 = CONTACTS.damage_center(enemy)
+		if hit_ids.has(enemy_id) or target_center.distance_to(center) > radius:
 			continue
 		hit_ids[enemy_id] = true
-		var outward := (enemy.global_position - center).normalized()
+		var outward: Vector2 = (target_center - center).normalized()
 		# O alvo central preserva a direção do acerto principal.
 		if outward.is_zero_approx():
 			outward = enemy.get(&"last_hit_direction")
-		var falloff := 1.0 - 0.45 * clampf(enemy.global_position.distance_to(center) / radius, 0.0, 1.0)
+		var falloff: float = 1.0 - 0.45 * clampf(target_center.distance_to(center) / radius, 0.0, 1.0)
 		apply_hit(enemy, damage, outward, radius * 3.0 * falloff, on_kill)
 
 
@@ -157,7 +160,7 @@ func _run_electric_chain(
 		var next_target := _find_nearest_enemy(current_position, visited)
 		if not is_instance_valid(next_target):
 			break
-		var target_position := next_target.global_position
+		var target_position: Vector2 = CONTACTS.damage_center(next_target)
 		visited[next_target.get_instance_id()] = true
 		_spawn_arc_visual(current_position, target_position, jump_index)
 		apply_hit(next_target, jump_damage, (target_position - current_position).normalized(), 28.0)
@@ -180,7 +183,7 @@ func _find_nearest_enemy(origin: Vector2, visited: Dictionary) -> Node2D:
 		var enemy := enemy_node as Node2D
 		if visited.has(enemy.get_instance_id()):
 			continue
-		var distance_squared := origin.distance_squared_to(enemy.global_position)
+		var distance_squared: float = origin.distance_squared_to(CONTACTS.damage_center(enemy))
 		if distance_squared <= nearest_distance_squared:
 			nearest = enemy
 			nearest_distance_squared = distance_squared

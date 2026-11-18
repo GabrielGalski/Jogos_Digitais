@@ -180,7 +180,7 @@ func _physics_process(delta: float) -> void:
 	if empowered and ram_cooldown <= 0.0 and to_target.length() <= 24.0 and sensor._has_line_of_sight(self, target, target.global_position):
 		var direction: Vector2 = to_target.normalized()
 		if not target.try_parry_enemy_attack(self, target.global_position):
-			target.receive_contact_damage(6, direction, empowered_knockback)
+			target.receive_contact_damage(6, direction, empowered_knockback, self)
 		ram_cooldown = 0.48
 		receive_impact(-direction, 115.0, 0.20)
 		brain.reset_decision_timer()
