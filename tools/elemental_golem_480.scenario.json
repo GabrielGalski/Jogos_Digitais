@@ -1,0 +1,16 @@
+{
+  "scene_path": "res://scenes/bosses/elemental_golem_arena.tscn",
+  "viewport_size": {"width":480,"height":270},
+  "steps": [
+    {"type":"set_property","node_path":"..","property":"content_scale_size","value":{"__type":"Vector2i","x":480,"y":270}},
+    {"type":"wait_until","node_path":".","property":"entry_complete","expected":true},
+    {"type":"ui_report","label":"entrance","fail_on":["any"]},
+    {"type":"set_property","node_path":"Nox","property":"position","value":{"__type":"Vector2","x":0,"y":60}},
+    {"type":"wait_until","node_path":".","property":"battle_started","expected":true},
+    {"type":"ui_report","label":"boss-hud","fail_on":["any"]},
+    {"type":"set_property","node_path":"Nox","property":"health","value":9.0},
+    {"type":"set_property","node_path":"Nox","property":"position","value":{"__type":"Vector2","x":-108,"y":60}},
+    {"type":"wait_until","node_path":"PlayerDefeat","property":"menu_ready","expected":true},
+    {"type":"ui_report","node_path":"PlayerDefeat/RetryMenu","label":"retry-and-exit","fail_on":["any"]}
+  ]
+}

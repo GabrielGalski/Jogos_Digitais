@@ -1,0 +1,43 @@
+[gd_resource type="SpriteFrames" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/characters/nox/attack/front1.png" id="1_tuggj"]
+[ext_resource type="Texture2D" path="res://assets/characters/nox/attack/front2.png" id="2_vdjfh"]
+[ext_resource type="Texture2D" path="res://assets/characters/nox/attack/front3.png" id="3_mj5fq"]
+[ext_resource type="Texture2D" path="res://assets/characters/nox/attack/front4.png" id="4_dpedc"]
+[ext_resource type="Texture2D" path="res://assets/characters/nox/attack/front5.png" id="5_bs1r3"]
+[ext_resource type="Texture2D" path="res://assets/characters/nox/attack/front6.png" id="6_q2css"]
+[ext_resource type="Texture2D" path="res://assets/characters/nox/attack/front7.png" id="7_xba4s"]
+[ext_resource type="Texture2D" path="res://assets/characters/nox/attack/front8.png" id="8_qbmms"]
+
+[resource]
+resource_name = "Nox Front Melee"
+animations = [{
+"frames": [{
+"duration": 0.7,
+"texture": ExtResource("1_tuggj")
+}, {
+"duration": 0.7,
+"texture": ExtResource("2_vdjfh")
+}, {
+"duration": 0.8,
+"texture": ExtResource("3_mj5fq")
+}, {
+"duration": 1.0,
+"texture": ExtResource("4_dpedc")
+}, {
+"duration": 0.8,
+"texture": ExtResource("5_bs1r3")
+}, {
+"duration": 0.8,
+"texture": ExtResource("6_q2css")
+}, {
+"duration": 1.0,
+"texture": ExtResource("7_xba4s")
+}, {
+"duration": 1.0,
+"texture": ExtResource("8_qbmms")
+}],
+"loop": 0,
+"name": &"attack_front",
+"speed": 32.0
+}]

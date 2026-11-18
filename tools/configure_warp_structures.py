@@ -132,7 +132,8 @@ def convert(data: dict) -> dict:
     if cells - floor:
         raise ValueError('A praca saiu do terreno existente.')
     atlas = next(t for t in data['defs']['tilesets'] if t['uid'] == paths['__tilesetDefUid'])
-    plaza['gridTiles'] = [dict(px=[x, y], src=[128, 32], f=0, t=2 * atlas['__cWid'] + 8,
+    other_plazas = [t for t in plaza['gridTiles'] if tuple(t['px']) not in cells]
+    plaza['gridTiles'] = other_plazas + [dict(px=[x, y], src=[128, 32], f=0, t=2 * atlas['__cWid'] + 8,
                                d=[y // GRID * plaza['__cWid'] + x // GRID], a=1)
                           for x, y in sorted(cells, key=lambda p: (p[1], p[0]))]
     # Paths enter the plaza on their existing axes; preserve all distant roads/bridges.

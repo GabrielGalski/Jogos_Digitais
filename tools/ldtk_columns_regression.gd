@@ -19,7 +19,7 @@ func _run() -> void:
 		definitions[int(definition.uid)] = definition
 	var layers: Array = []
 	for layer: Dictionary in level.layerInstances:
-		if str(layer.__identifier) == "WallsBack" or str(layer.__identifier).begins_with("ObjectsBack"):
+		if str(layer.__identifier) == "WallsBack" or str(layer.__identifier).begins_with("Objects"):
 			layers.append(layer)
 	var world: Node2D = Node2D.new()
 	world.y_sort_enabled = true

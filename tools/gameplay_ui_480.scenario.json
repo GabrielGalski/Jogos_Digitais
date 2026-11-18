@@ -1,0 +1,110 @@
+{
+  "scene_path": "res://scenes/tutorial_arena.tscn",
+  "viewport_size": {
+    "width": 480,
+    "height": 270
+  },
+  "settle_frames": 4,
+  "log_assertions": [
+    {
+      "regex": "^(?:SCRIPT ERROR:|ERROR:)",
+      "min_count": 0,
+      "max_count": 0
+    }
+  ],
+  "steps": [
+    {
+      "type": "wait_until",
+      "node_path": ".",
+      "property": "entrance_complete",
+      "expected": true,
+      "timeout_seconds": 5
+    },
+    {
+      "type": "set_property",
+      "node_path": "MinotaurChair/TutorialEncounter",
+      "property": "phase",
+      "value": 7
+    },
+    {
+      "type": "ui_report",
+      "node_path": "MinotaurChair/TutorialEncounter/Completion/Nox",
+      "label": "nox-hud",
+      "fail_on": [
+        "any"
+      ]
+    },
+    {
+      "type": "ui_report",
+      "node_path": "MinotaurChair/TutorialEncounter/Completion/Boss",
+      "label": "boss-hud",
+      "fail_on": [
+        "any"
+      ]
+    },
+    {
+      "type": "set_property",
+      "node_path": "MinotaurChair/TutorialEncounter/Completion/EliteLesson/Panel/Content/Margin/Text",
+      "property": "text",
+      "value": "COMANDOS\n\nWASD · Mover\nShift · Rolagem dupla\nMouse · Mirar / Clique esquerdo · Disparar\nBotão direito · Parry"
+    },
+    {
+      "type": "set_property",
+      "node_path": "MinotaurChair/TutorialEncounter/Completion/EliteLesson",
+      "property": "visible",
+      "value": true
+    },
+    {
+      "type": "ui_report",
+      "node_path": "MinotaurChair/TutorialEncounter/Completion/EliteLesson",
+      "label": "controls-lesson",
+      "fail_on": [
+        "any"
+      ]
+    },
+    {
+      "type": "key",
+      "physical_keycode": 69,
+      "pressed": true,
+      "release_after": true
+    },
+    {
+      "type": "assert",
+      "assertion": "visible",
+      "node_path": "MinotaurChair/TutorialEncounter/Completion/EliteLesson",
+      "expected": false
+    },
+    {
+      "type": "set_property",
+      "node_path": "MinotaurChair/TutorialEncounter/Completion/EliteLesson/Panel/Content/Margin/Text",
+      "property": "text",
+      "value": "PARRY\n\nBotão direito · Defender no momento certo\n\nAcertar devolve o golpe e cria um corte branco."
+    },
+    {
+      "type": "set_property",
+      "node_path": "MinotaurChair/TutorialEncounter/Completion/EliteLesson",
+      "property": "visible",
+      "value": true
+    },
+    {
+      "type": "ui_report",
+      "node_path": "MinotaurChair/TutorialEncounter/Completion/EliteLesson",
+      "label": "parry-lesson",
+      "fail_on": [
+        "any"
+      ]
+    },
+    {
+      "type": "key",
+      "physical_keycode": 69,
+      "pressed": true,
+      "release_after": true
+    },
+    {
+      "type": "assert",
+      "assertion": "visible",
+      "node_path": "MinotaurChair/TutorialEncounter/Completion/EliteLesson",
+      "expected": false
+    }
+  ]
+}

@@ -45,7 +45,7 @@ def test() -> None:
     pngs = {path: digest(folder / path) for path in (t["relPath"] for t in before["defs"]["tilesets"])}
     original = project.read_bytes()
     dry = run(project, "--dry-run")
-    assert dry["pngsRead"] == 17 and project.read_bytes() == original
+    assert dry["pngsRead"] == len(before["defs"]["tilesets"]) and project.read_bytes() == original
     refreshed = run(project)
     assert Path(refreshed["backup"]).read_bytes() == original
     after = json.loads(project.read_bytes())

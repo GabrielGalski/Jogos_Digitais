@@ -3,7 +3,7 @@ extends SceneTree
 
 const OUTPUT: String = "res://assets/tiles/editor/ldtk_entities.png"
 const SOURCES: PackedStringArray = [
-	"res://assets/characters/player/idle/player_idle_01.png",
+	"res://assets/characters/nox/front_idle.png",
 	"res://assets/merchant/character/merchant_idle1.png",
 	"res://assets/enemies/minotaur/walk/minotaur_walk_01.png",
 ]

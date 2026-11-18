@@ -1,0 +1,61 @@
+[gd_resource type="SpriteFrames" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/characters/nox/sword/sword_spin2.png" id="spin2"]
+[ext_resource type="Texture2D" path="res://assets/characters/nox/sword/sword_spin3.png" id="spin3"]
+[ext_resource type="Texture2D" path="res://assets/characters/nox/sword/sword_spin4.png" id="spin4"]
+[ext_resource type="Texture2D" path="res://assets/characters/nox/sword/sword_spin5.png" id="spin5"]
+[ext_resource type="Texture2D" path="res://assets/characters/nox/sword/sword_spin6.png" id="spin6"]
+[ext_resource type="Texture2D" path="res://assets/characters/nox/sword/sword_spin7.png" id="spin7"]
+[ext_resource type="Texture2D" path="res://assets/characters/nox/sword/sword_spin8.png" id="spin8"]
+[ext_resource type="Texture2D" path="res://assets/characters/nox/sword/sword_spin9.png" id="spin9"]
+[ext_resource type="Texture2D" path="res://assets/characters/nox/sword/sword_spin10.png" id="spin10"]
+[ext_resource type="Texture2D" path="res://assets/characters/nox/sword/sword_spin11.png" id="spin11"]
+[ext_resource type="Texture2D" path="res://assets/characters/nox/sword/sword_spin12.png" id="spin12"]
+[ext_resource type="Texture2D" path="res://assets/characters/nox/sword/sword_spin13.png" id="spin13"]
+[ext_resource type="Texture2D" path="res://assets/characters/nox/sword/sword_spin14.png" id="spin14"]
+[ext_resource type="Texture2D" path="res://assets/characters/nox/sword/sword_spin15.png" id="spin15"]
+[ext_resource type="Texture2D" path="res://assets/characters/nox/sword/sword_spin16.png" id="spin16"]
+[ext_resource type="Texture2D" path="res://assets/characters/nox/sword/sword_spin17.png" id="spin17"]
+[ext_resource type="Texture2D" path="res://assets/characters/nox/sword/sword_spin1.png" id="ready"]
+[ext_resource type="Texture2D" path="res://assets/characters/nox/sword/sword_19.png" id="settle"]
+[ext_resource type="Texture2D" path="res://assets/characters/nox/sword/sword_embedded.png" id="embedded"]
+
+[resource]
+animations = [{
+"frames": [{"duration": 1.0, "texture": ExtResource("ready")}],
+"loop": false,
+"name": &"ready",
+"speed": 1.0
+}, {
+"frames": [
+{"duration": 1.0, "texture": ExtResource("spin2")},
+{"duration": 1.0, "texture": ExtResource("spin3")},
+{"duration": 1.0, "texture": ExtResource("spin4")},
+{"duration": 1.0, "texture": ExtResource("spin5")},
+{"duration": 1.0, "texture": ExtResource("spin6")},
+{"duration": 1.0, "texture": ExtResource("spin7")},
+{"duration": 1.0, "texture": ExtResource("spin8")},
+{"duration": 1.0, "texture": ExtResource("spin9")},
+{"duration": 1.0, "texture": ExtResource("spin10")},
+{"duration": 1.0, "texture": ExtResource("spin11")},
+{"duration": 1.0, "texture": ExtResource("spin12")},
+{"duration": 1.0, "texture": ExtResource("spin13")},
+{"duration": 1.0, "texture": ExtResource("spin14")},
+{"duration": 1.0, "texture": ExtResource("spin15")},
+{"duration": 1.0, "texture": ExtResource("spin16")},
+{"duration": 1.0, "texture": ExtResource("spin17")}
+],
+"loop": true,
+"name": &"spin",
+"speed": 54.4
+}, {
+"frames": [{"duration": 1.0, "texture": ExtResource("settle")}],
+"loop": false,
+"name": &"settle",
+"speed": 8.0
+}, {
+"frames": [{"duration": 1.0, "texture": ExtResource("embedded")}],
+"loop": false,
+"name": &"embedded",
+"speed": 1.0
+}]

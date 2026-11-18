@@ -1,0 +1,190 @@
+[gd_scene load_steps=30 format=3 uid="uid://drh4erh5hbg50"]
+
+[ext_resource type="Shader" uid="uid://calhil7boydje" path="res://cardHolo.res" id="1_0xm2m"]
+[ext_resource type="Texture2D" uid="uid://p4n0hbfi26ai" path="res://textures/rainbow.png" id="2_7mycd"]
+[ext_resource type="Texture2D" uid="uid://bd72uaeaspxo0" path="res://card/card.png" id="2_h2yge"]
+[ext_resource type="Texture2D" uid="uid://dkms5glxk6q66" path="res://textures/holo.jpg" id="3_1bvp3"]
+[ext_resource type="Texture2D" uid="uid://c3877mi2eng1n" path="res://textures/stars.png" id="3_lquwl"]
+[ext_resource type="Texture2D" uid="uid://d413o6phnqbm" path="res://card/Dark-Magician-nobg.png" id="4_1bvp3"]
+[ext_resource type="Texture2D" uid="uid://h4sf88tyhhfb" path="res://textures/water2.png" id="9_vivmo"]
+[ext_resource type="Shader" uid="uid://c7wkiinnu8ppt" path="res://cardHolo2.res" id="10_4c57u"]
+[ext_resource type="Texture2D" uid="uid://2aq6nkwgwsmv" path="res://card/basic-water.png" id="11_dg77c"]
+[ext_resource type="Shader" uid="uid://civ83mwo5akpe" path="res://cardHolo3.res" id="11_efxa6"]
+[ext_resource type="Texture2D" uid="uid://byntfwxleot3w" path="res://card/mg.png" id="12_dg77c"]
+[ext_resource type="Texture2D" uid="uid://du13qx5yusr8t" path="res://textures/noise.png" id="12_w48qg"]
+[ext_resource type="Texture2D" uid="uid://2p81w3a8ylec" path="res://card/squirtle.png" id="12_ycdy4"]
+[ext_resource type="Texture2D" uid="uid://c5dmur68xoh07" path="res://textures/holo3.png" id="13_w48qg"]
+[ext_resource type="Texture2D" uid="uid://cxrq43ff8mbud" path="res://card/bolas.png" id="13_ycdy4"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_kek77"]
+render_priority = 0
+shader = ExtResource("1_0xm2m")
+shader_parameter/border_speed = 0.5
+shader_parameter/border_rotated = true
+shader_parameter/border_texture = ExtResource("2_7mycd")
+shader_parameter/card_texture = ExtResource("2_h2yge")
+shader_parameter/holo_color = Color(1, 1, 1, 1)
+shader_parameter/twirl_force = 10.0
+shader_parameter/holo_texture = ExtResource("3_1bvp3")
+shader_parameter/intensity = 2.0
+shader_parameter/opacity = 0.5
+shader_parameter/monster_texture = ExtResource("4_1bvp3")
+shader_parameter/In_front_or_mix = false
+shader_parameter/stars_scale = 1.5
+shader_parameter/stars_speed = 0.1
+shader_parameter/stars_direction = Vector2(0.5, 0.1)
+shader_parameter/stars_texture = ExtResource("3_lquwl")
+shader_parameter/front_color = Color(1, 1, 1, 1)
+shader_parameter/front_opacity = 0.15
+shader_parameter/stars_active = true
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_lquwl"]
+size = Vector2(1.5, 2)
+
+[sub_resource type="Animation" id="Animation_272bh"]
+length = 6.0
+loop_mode = 1
+tracks/0/type = "rotation_3d"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("../pokemon card")
+tracks/0/interp = 2
+tracks/0/loop_wrap = true
+tracks/0/keys = PackedFloat32Array(0, 1, 0.707107, -6.53684e-09, 1.71708e-08, 0.707107, 1.3, 1, 0.592904, 0.169757, -0.16588, 0.769501, 1.53333, 1, 0.701057, 0.0922959, -0.0922959, 0.701057, 2.53333, 1, 0.707107, -2.63418e-08, 2.63418e-08, 0.707107, 3.3, 1, 0.483474, -0.15798, 0.143581, 0.848929, 3.86667, 1, 0.701057, -0.092296, 0.092296, 0.701057, 4.53333, 1, 0.786566, -0.103553, 0.0794594, 0.603553, 5.33333, 1, 0.486065, 0.141606, -0.117064, 0.854391, 6.53333, 1, 0.707107, -2.63418e-08, 2.63418e-08, 0.707107)
+
+[sub_resource type="Animation" id="Animation_7mycd"]
+resource_name = "idle"
+length = 6.0
+loop_mode = 1
+tracks/0/type = "rotation_3d"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".")
+tracks/0/interp = 2
+tracks/0/loop_wrap = true
+tracks/0/keys = PackedFloat32Array(0, 1, 0.707107, -6.53684e-09, 1.71708e-08, 0.707107, 0.766667, 1, 0.592904, 0.169757, -0.16588, 0.769501, 1, 1, 0.701057, 0.0922959, -0.0922959, 0.701057, 2, 1, 0.707107, -2.63418e-08, 2.63418e-08, 0.707107, 2.76667, 1, 0.483474, -0.15798, 0.143581, 0.848929, 3.33333, 1, 0.701057, -0.092296, 0.092296, 0.701057, 4, 1, 0.786566, -0.103553, 0.0794594, 0.603553, 4.8, 1, 0.486065, 0.141606, -0.117064, 0.854391, 6, 1, 0.707107, -2.63418e-08, 2.63418e-08, 0.707107)
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_5vw27"]
+_data = {
+&"RESET": SubResource("Animation_272bh"),
+&"idle": SubResource("Animation_7mycd")
+}
+
+[sub_resource type="Environment" id="Environment_7mycd"]
+background_mode = 1
+background_color = Color(0.152941, 0, 0.243137, 1)
+
+[sub_resource type="Gradient" id="Gradient_ycdy4"]
+offsets = PackedFloat32Array(0, 0.117949, 0.266667, 0.4, 0.512821, 0.666667, 0.8, 0.958974)
+colors = PackedColorArray(0.288518, 0.288518, 0.288518, 1, 1, 1, 1, 1, 0.462291, 0.462291, 0.462291, 1, 1, 1, 1, 1, 0.277528, 0.277528, 0.277528, 1, 0.881936, 0.881937, 0.881936, 1, 0.400698, 0.400698, 0.400698, 1, 0.899258, 0.899258, 0.899258, 1)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_w48qg"]
+gradient = SubResource("Gradient_ycdy4")
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_dg77c"]
+render_priority = 0
+shader = ExtResource("10_4c57u")
+shader_parameter/border_speed = 0.0
+shader_parameter/border_rotated = false
+shader_parameter/border_texture = SubResource("GradientTexture2D_w48qg")
+shader_parameter/card_texture = ExtResource("11_dg77c")
+shader_parameter/monster_texture = ExtResource("12_ycdy4")
+shader_parameter/holo_color = Color(0.769472, 0.825318, 0.999998, 1)
+shader_parameter/twirl_force = 0.0
+shader_parameter/holo_speed = 0.1
+shader_parameter/holo_direction = Vector2(0.5, -0.5)
+shader_parameter/holo_texture = ExtResource("9_vivmo")
+shader_parameter/intensity_holo = 2.0
+shader_parameter/opacity_holo = 0.25
+shader_parameter/In_front_or_mix = true
+shader_parameter/stars_scale = 1.0
+shader_parameter/stars_speed = 0.0
+shader_parameter/stars_direction = Vector2(0.5, 0.1)
+shader_parameter/stars_texture = ExtResource("12_w48qg")
+shader_parameter/front_color = Color(0.996527, 0.873986, 0.882409, 1)
+shader_parameter/front_opacity = 0.109
+shader_parameter/stars_active = true
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_kek77"]
+size = Vector2(1.5, 2)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_ycdy4"]
+render_priority = 0
+shader = ExtResource("11_efxa6")
+shader_parameter/card_texture = ExtResource("12_dg77c")
+shader_parameter/holo_color = Color(1, 1, 1, 1)
+shader_parameter/twirl_force = 0.0
+shader_parameter/holo_texture = ExtResource("13_w48qg")
+shader_parameter/intensity_holo = 2.0
+shader_parameter/opacity_holo = 0.5
+shader_parameter/monster_texture = ExtResource("13_ycdy4")
+shader_parameter/In_front_or_mix = false
+shader_parameter/stars_scale = 1.5
+shader_parameter/stars_speed = 0.2
+shader_parameter/stars_direction = Vector2(0.5, 0.1)
+shader_parameter/stars_texture = ExtResource("2_7mycd")
+shader_parameter/stars_opacity = 0.2
+shader_parameter/stars_active = true
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_4c57u"]
+size = Vector2(1.5, 2)
+
+[sub_resource type="Animation" id="Animation_w48qg"]
+resource_name = "new_animation"
+length = 6.0
+loop_mode = 1
+tracks/0/type = "rotation_3d"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".")
+tracks/0/interp = 2
+tracks/0/loop_wrap = true
+tracks/0/keys = PackedFloat32Array(0.0333333, 1, 0.707107, -6.53684e-09, 1.71708e-08, 0.707107, 0.76666, 1, 0.592904, 0.169757, -0.16588, 0.769501, 1, 1, 0.701057, 0.0922959, -0.0922959, 0.701057, 2, 1, 0.707107, -2.63418e-08, 2.63418e-08, 0.707107, 2.76666, 1, 0.483474, -0.15798, 0.143581, 0.848929, 3.33333, 1, 0.701057, -0.092296, 0.092296, 0.701057, 4, 1, 0.786566, -0.103553, 0.0794594, 0.603553, 4.8, 1, 0.486065, 0.141606, -0.117064, 0.854391, 6, 1, 0.707107, -2.63418e-08, 2.63418e-08, 0.707107)
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_vivmo"]
+_data = {
+&"new_animation": SubResource("Animation_w48qg")
+}
+
+[node name="main" type="Node3D"]
+
+[node name="yugioh card" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, -3.35277e-08, 1.46554e-15, 0, -4.37114e-08, -1, 3.35277e-08, 1, -4.37114e-08, 0, 0.982679, 0.982625)
+material_override = SubResource("ShaderMaterial_kek77")
+mesh = SubResource("PlaneMesh_lquwl")
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="yugioh card"]
+libraries = {
+&"": SubResource("AnimationLibrary_5vw27")
+}
+autoplay = "idle"
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_7mycd")
+
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, -5.96046e-08, 0, 5.96046e-08, 1, 0.0251997, 1.13835, 3.2017)
+visible = false
+
+[node name="pokemon card" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, -3.35277e-08, 1.46554e-15, 0, -4.37114e-08, -1, 3.35277e-08, 1, -4.37114e-08, 1.70189, 0.967451, 0.947241)
+material_override = SubResource("ShaderMaterial_dg77c")
+mesh = SubResource("PlaneMesh_kek77")
+
+[node name="AnimationPlayer2" type="AnimationPlayer" parent="pokemon card"]
+root_node = NodePath("../../yugioh card")
+libraries = {
+&"": SubResource("AnimationLibrary_5vw27")
+}
+autoplay = "RESET"
+
+[node name="magic card" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, -7.45058e-08, 3.25675e-15, 0, -4.37114e-08, -1, 7.45058e-08, 1, -4.37114e-08, -1.71781, 1.01378, 1.0051)
+material_override = SubResource("ShaderMaterial_ycdy4")
+mesh = SubResource("PlaneMesh_4c57u")
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="magic card"]
+libraries = {
+&"": SubResource("AnimationLibrary_vivmo")
+}
+autoplay = "new_animation"

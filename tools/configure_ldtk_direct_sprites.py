@@ -83,7 +83,7 @@ def configure(apply: bool, clear_maps: bool) -> None:
         tile["savedSelections"] = [{"ids": [0, 1, 2, 3], "mode": "Stamp"}]
     thrones = [copy.deepcopy(t) for t in templates["tilesets"] if t["uid"] in (106, 107, 108)]
     icons = {
-        "NoxStart": atlas("NoxMarker", "assets/characters/player/idle/player_idle_01.png", grid=1, fixed_uid=109),
+        "NoxStart": atlas("NoxMarker", "assets/characters/nox/front_idle.png", grid=1, fixed_uid=109),
         "Tin": atlas("TinMarker", "assets/merchant/character/merchant_idle1.png", grid=1),
         "MinotaurSpawn": atlas("MinotaurMarker", "assets/enemies/minotaur/walk/minotaur_walk_01.png", grid=1),
     }

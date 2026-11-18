@@ -1,0 +1,22 @@
+{
+  "scene_path": "res://scenes/dungeon/ldtk_arena.tscn",
+  "viewport_size": {"width": 480, "height": 270},
+  "settle_frames": 4,
+  "log_assertions": [
+    {"regex": "^(?:SCRIPT ERROR:|ERROR:)", "min_count": 0, "max_count": 0}
+  ],
+  "steps": [
+    {"type": "wait_until", "node_path": "Nox", "property": "intro_locked", "expected": false},
+    {"type": "ui_report", "label": "clean-ldtk-hud", "fail_on": ["any"]},
+    {"type": "assert", "assertion": "property", "node_path": "Nox/Camera2D", "property": "zoom", "expected": {"__type": "Vector2", "x": 2, "y": 2}},
+    {"type": "mouse_motion", "position": {"x": 140, "y": 110}},
+    {"type": "mouse_button", "button_index": 1, "pressed": true, "position": {"x": 140, "y": 110}},
+    {"type": "assert", "assertion": "property", "node_path": "Nox/Melee", "property": "attacking", "expected": true},
+    {"type": "wait_seconds", "seconds": 0.55},
+    {"type": "mouse_button", "button_index": 1, "pressed": false, "position": {"x": 140, "y": 110}},
+    {"type": "wait_seconds", "seconds": 0.35},
+    {"type": "assert", "assertion": "property", "node_path": "Nox/Melee", "property": "attacking", "expected": false},
+    {"type": "assert", "assertion": "property", "node_path": "Nox/Body", "property": "visible", "expected": true},
+    {"type": "ui_report", "label": "after-melee", "fail_on": ["any"]}
+  ]
+}

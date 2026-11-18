@@ -67,6 +67,7 @@ func _run() -> void:
 
 	var scene: PackedScene = load("res://scenes/dungeon/manifestation_projectile.tscn") as PackedScene
 	var shot: Node2D = scene.instantiate() as Node2D
+	shot.set(&"max_ricochets", 1) # The mechanic remains available, but gameplay defaults to zero.
 	world.add_child(shot)
 	shot.set_physics_process(false)
 	shot.position = Vector2.ZERO
@@ -77,7 +78,7 @@ func _run() -> void:
 	check(reflected.x > 0.69 and reflected.y > 0.69, "M01 did not reflect on top wall")
 	check(int(shot.get(&"remaining_ricochets")) == 0, "M01 did not consume its only bounce")
 	check(is_equal_approx(float(shot.get(&"speed")), 315.0), "M01 did not gain 75% speed after wall contact")
-	check(visual.texture.resource_path.contains("impact_updown"), "M01 did not display its impact frame")
+	check(visual.texture.resource_path.ends_with("bullet5.png"), "M01 did not display bullet5 on impact")
 	check(shot.physics_interpolation_mode == Node.PHYSICS_INTERPOLATION_MODE_OFF, "M01 retained interpolation ghosting")
 	check(world.get_node_or_null("SlimeImpact") == null, "M01 created a duplicate impact sprite")
 	shot.call(&"_ricochet_at", wall, shot.global_position, Vector2.LEFT)
@@ -86,6 +87,7 @@ func _run() -> void:
 	shot.free()
 
 	var enemy_shot: Node2D = scene.instantiate() as Node2D
+	enemy_shot.set(&"max_ricochets", 1)
 	world.add_child(enemy_shot)
 	enemy_shot.set_physics_process(false)
 	enemy_shot.position = Vector2.ZERO
@@ -107,6 +109,16 @@ func _run() -> void:
 		custom_shot.call(&"_ricochet_at", wall, Vector2.ZERO, Vector2.LEFT)
 		check(bool(custom_shot.get(&"consumed")) == (index == 4), "custom budget ended at wrong contact")
 	custom_shot.free()
+
+	var default_shot: Node2D = scene.instantiate() as Node2D
+	world.add_child(default_shot)
+	default_shot.set_physics_process(false)
+	default_shot.call(&"configure", &"M01", Vector2.RIGHT, _make_attack(), effects)
+	check(int(default_shot.get(&"max_ricochets")) == 0 and int(default_shot.get(&"remaining_ricochets")) == 0, "gameplay entity must default to zero bounces")
+	default_shot.call(&"_ricochet_at", wall, Vector2.ZERO, Vector2.LEFT)
+	check(bool(default_shot.get(&"consumed")) and default_shot.get(&"phase") == &"impact_ending", "default shot ends on first contact")
+	check((default_shot.get(&"direction") as Vector2) == Vector2.RIGHT and is_equal_approx(float(default_shot.get(&"speed")), 180.0), "zero budget must not reflect or gain bounce speed")
+	default_shot.free()
 
 	var nearby: DummyEnemy = DummyEnemy.new()
 	nearby.collision_layer = 4

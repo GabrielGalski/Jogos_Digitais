@@ -30,7 +30,7 @@ internal static class AtualizarLDtk
         {106, "assets/tiles/decor/minotaur_chair.png"},
         {107, "assets/tiles/decor/minotaur_chair_back.png"},
         {108, "assets/tiles/decor/minotaur_chair_seat.png"},
-        {109, "assets/characters/player/idle/player_idle_01.png"},
+        {109, "assets/characters/nox/front_idle.png"},
         {507, "assets/merchant/character/merchant_idle1.png"},
         {508, "assets/enemies/minotaur/walk/minotaur_walk_01.png"},
         {518, "assets/tiles/wall/leaves.png"}

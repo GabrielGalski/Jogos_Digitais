@@ -51,7 +51,7 @@ def register(project=ROOT / "monster_booster.ldtk"):
     entity = next((e for e in definitions["entities"] if e["identifier"] == "AmbientArea"), None)
     if entity is None:
         uid = data["nextUid"]
-        entity = deepcopy(next(e for e in definitions["entities"] if e["identifier"] == "DoorDash"))
+        entity = deepcopy(next(e for e in definitions["entities"] if e["identifier"] in ("DashGapArea", "DoorDash")))
         entity.update(identifier="AmbientArea", uid=uid, tags=["ambient"],
                       allowOutOfBounds=True, width=48, height=48, minWidth=16, minHeight=16,
                       resizableX=True, resizableY=True, pivotX=0, pivotY=0,

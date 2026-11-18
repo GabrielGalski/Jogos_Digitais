@@ -63,6 +63,10 @@ func _run() -> void:
 		if active:
 			await wait_entry(arena)
 			horde.call("begin")
+			for frame: int in range(90):
+				if int(horde.get("_opening_remaining")) == 0:
+					break
+				await ticks(1)
 			check((horde.get("actors") as Array).size() >= 12, "Active-case test contains real enemies")
 		else:
 			check(int(horde.get("phase")) == 0, "Waiting-case pedestal has never been activated")
