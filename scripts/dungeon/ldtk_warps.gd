@@ -3,6 +3,7 @@ extends Node2D
 
 signal travel_requested(gate: Node2D)
 const GATE: Script = preload("res://scripts/dungeon/warp_gate.gd")
+const VISUAL: Script = preload("res://scripts/visual/warp_visual.gd")
 const LEVEL_COMPOSITION: Script = preload("res://scripts/dungeon/ldtk_level_composition.gd")
 var gates: Array[Node2D] = []
 
@@ -32,7 +33,7 @@ static func descriptions(layers: Array) -> Array[Dictionary]:
 			var pixel: Array = entity.get("px",[0,0])
 			config["Central"] = str(entity.get("__identifier", "")) == "CentralWarp"
 			# Keep source art intact; the authored entity dimensions control its display size.
-			var source_size: Vector2 = Vector2(192, 256) if bool(config.Central) else Vector2(96, 96)
+			var source_size: Vector2 = VISUAL.CENTRAL_TEXTURE.get_size() if bool(config.Central) else VISUAL.SOURCE_SIZE
 			config["DisplayScale"] = minf(float(entity.get("width", source_size.x)) / source_size.x, float(entity.get("height", source_size.y)) / source_size.y)
 			# LDtk pivots are authored at the usable centre, not the image rectangle centre.
 			config["position"] = Vector2(float(pixel[0]),float(pixel[1])) + offset
@@ -40,14 +41,12 @@ static func descriptions(layers: Array) -> Array[Dictionary]:
 	return result
 
 
-func build(layers: Array, textures: RefCounted) -> void:
+func build(layers: Array) -> void:
 	y_sort_enabled = true
 	for config: Dictionary in descriptions(layers):
-		var path: String = "assets/tiles/structures/central_warp.png" if bool(config.get("Central", false)) else "assets/tiles/structures/warp.png"
-		var texture: Texture2D = textures.call("get_texture", path) as Texture2D
 		var gate: Node2D = GATE.new() as Node2D
 		gate.name = "Warp_" + str(gates.size())
-		gate.call("configure",config,texture)
+		gate.call("configure",config)
 		add_child(gate)
 		gate.connect("travel_requested",func(point: Node2D) -> void: travel_requested.emit(point))
 		gates.append(gate)

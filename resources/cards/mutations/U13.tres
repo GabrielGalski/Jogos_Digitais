@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="MutationCard" format=3]
+
+[ext_resource type="Script" path="res://scripts/cards/mutation_card.gd" id="card"]
+
+[resource]
+script = ExtResource("card")
+card_id = &"CARD_MUT_013"
+display_name = "Ganância da Fera"
+description = "A cada 100 eliminações, ganhe um booster aleatório. Pressione B para abrir."
+rarity = 3
+effect = 12

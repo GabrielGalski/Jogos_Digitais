@@ -6,6 +6,6 @@
 script = ExtResource("1")
 card_id = &"CARD_MUT_002"
 display_name = "Pele de Medusa"
-description = "Receber dano de inimigo cria uma cobra, com recarga de 1,5 s. Após três ataques ela se desfaz."
+description = "Receber dano invoca uma cobra que morde e envenena inimigos próximos."
 effect = 1
 cooldown = 1.5

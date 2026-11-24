@@ -19,6 +19,7 @@ const PACKS: Array[Texture2D] = [
 	preload("res://assets/boosters/base/booster_base_vol1.png"),
 	preload("res://assets/boosters/base/booster_base_vol3.png"),
 	preload("res://assets/boosters/base/booster_base_vol2.png"),
+	preload("res://assets/boosters/sets/dragon/base.png"),
 ]
 
 enum BoosterState {

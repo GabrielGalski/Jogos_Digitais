@@ -99,13 +99,20 @@ func _shade(shape: int, point: Vector2, frame: int) -> int:
 			if head > 1.0 and not tail: return 0
 			if _ellipse(point, Vector2(2.5, -0.5), Vector2(2.7, 1.8)) < 1.0: return 3
 			return 2 if head < 0.85 or tail else 1
-		ProceduralManifestationModel.Shape.FLAME:
-			if point.x < -10.0 or point.x > 10.0: return 0
-			var progress: float = (point.x + 10.0) / 20.0
-			var center: float = sin(progress * PI + phase) * sin(progress * PI) * 1.2
-			var width: float = sin(progress * PI) * 3.2 * (1.3 - progress)
-			var offset: float = absf(point.y - center)
-			if offset > width: return 0
-			if progress > 0.3 and progress < 0.7 and offset < width * 0.28: return 3
-			return 2 if offset < width * 0.82 else 1
+		ProceduralManifestationModel.Shape.PRISM:
+			var half_width: float = minf((point.x + 8.0) * 0.64, (10.0 - point.x) * 0.58)
+			if absf(point.y) >= half_width: return 0
+			if point.x > -4.0 and point.x < 7.0 and absf(point.y + half_width * 0.27) < half_width * 0.31: return 3
+			return 2 if point.y < half_width - 1.1 else 1
+		ProceduralManifestationModel.Shape.LIGHT_PULSE:
+			var length: float = absf(point.x)
+			var width: float = 2.65 - maxf(0.0, length - 7.0) * 0.62
+			if length > 11.0 or absf(point.y) > width: return 0
+			if point.x > -7.0 and point.x < 4.5 and absf(point.y + 0.55) < 0.6: return 3
+			return 2 if absf(point.y) < width - 0.45 else 1
+		ProceduralManifestationModel.Shape.FANG:
+			var sine: float = absf(point.y + point.x * point.x * 0.032 - 0.55)
+			if point.x < -7.0 or point.x > 8.0 or sine > (9.0 - point.x) * 0.16: return 0
+			if sine < 0.55 and point.x > -4.0: return 3
+			return 2 if sine < 1.7 else 1
 	return 0

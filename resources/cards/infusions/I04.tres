@@ -4,8 +4,9 @@
 
 [resource]
 script = ExtResource("1")
+effect = 3
+cooldown = 3.0
 card_id = &"CARD_INF_004"
 display_name = "Ovo de Slaad"
-description = "A cada 6 segundos um tiro carrega um Slaad que controla um inimigo simples."
-effect = 3
-cooldown = 6
+description = "Carrega um disparo que faz um inimigo comum lutar ao seu lado. O hospedeiro morre ao fim do efeito."
+rarity = 2

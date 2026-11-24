@@ -92,7 +92,9 @@ const PREPARE_FRAME_DURATION := 0.12
 const LAUNCH_DURATION := 0.45
 const OFFSCREEN_DURATION := 2.25
 const TARGET_LOCK_TIME := 2.05
+const WARNING: Script = preload("res://scripts/visual/booster_exclamation.gd")
 const DESCENT_DURATION := 0.65
+const LANDING_WARNING_LEAD: float = 0.30
 const HIT_1_DURATION := 0.12
 const HIT_2_DURATION := 0.18
 const RECOVERY_DURATION: float = 0.90
@@ -158,6 +160,8 @@ var _decision: EnemyAIDecision
 @onready var visual: Sprite2D = $Actor/Visual
 @onready var field_skybreaker_visual: Sprite2D = $Actor/FieldSkybreakerVisual
 @onready var body_shape: CollisionShape2D = $Actor/BodyCollision
+var _landing_warning: AnimatedSprite2D
+
 @onready var shadow: Node2D = $Actor/GroundShadow
 @onready var effect: Node2D = $ImpactEffect
 @onready var ai: AsterionAI = $AI
@@ -167,6 +171,10 @@ var _decision: EnemyAIDecision
 
 
 func _ready() -> void:
+	_landing_warning = WARNING.warning_sprite(get_tree())
+	_landing_warning.z_index = ACTOR_DRAW_LAYER + 1
+	_landing_warning.hide()
+	add_child(_landing_warning)
 	health = max_resistance
 	dialogue_box.dialogue_finished.connect(_on_intro_dialogue_finished)
 	# Arena composition installs the shared melee/sword kit in its parent's _ready.
@@ -207,6 +215,9 @@ func _physics_process(delta: float) -> void:
 	if actor.visible:
 		actor.z_index = 1 if actor.global_position.y < global_position.y else ACTOR_DRAW_LAYER
 	_update_shake(delta)
+	if can_receive_damage() and actor.is_in_group(&"immobilized_enemies"):
+		actor.velocity = Vector2.ZERO
+		return
 	match state:
 		State.SITTING:
 			if auto_start_encounter and not intro_started and arena.entrance_complete and _throne_is_visible():
@@ -423,6 +434,10 @@ func _update_descent(delta: float) -> void:
 	var t := clampf(state_time / DESCENT_DURATION, 0.0, 1.0)
 	actor.global_position = descent_position.lerp(impact_position, t * t)
 	_update_air_shadow(0.70 + t * 0.30)
+	if state_time >= DESCENT_DURATION - LANDING_WARNING_LEAD and not _landing_warning.visible:
+		_landing_warning.global_position = impact_position - Vector2(0.0, 8.0)
+		_landing_warning.show()
+		_landing_warning.play(&"idle")
 	if state_time >= DESCENT_DURATION:
 		actor.global_position = impact_position
 		shadow.hide()
@@ -556,6 +571,9 @@ func _tick_timed_state(delta: float, duration: float, completion: Callable) -> v
 
 
 func _enter(next_state: State) -> void:
+	if state == State.DESCENDING and next_state != State.DESCENDING:
+		_landing_warning.hide()
+		_landing_warning.stop()
 	actor.set_meta(&"enemy_ai_is_attacking", next_state in [State.MELEE_PREPARE, State.MELEE_ATTACK])
 	state = next_state
 	state_time = 0.0

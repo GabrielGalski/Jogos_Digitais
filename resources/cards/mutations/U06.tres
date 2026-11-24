@@ -6,6 +6,7 @@
 script = ExtResource("1")
 card_id = &"CARD_MUT_006"
 display_name = "Doppelgänger"
-description = "F deixa uma cópia e oculta Nox por 1,5 s. Recarga de 30 s. Evita um golpe letal recuperando 10% da vida."
+description = "Com F, Nox avança, fica oculto e deixa uma cópia. Quando pronta, a mutação evita a morte e restaura parte da vida."
+rarity = 3
 effect = 5
 cooldown = 30

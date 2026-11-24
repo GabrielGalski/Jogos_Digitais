@@ -1,61 +1,46 @@
 extends Node2D
-## One authored frame, mapped rune inlays and local six-altar progress; no travel route.
+## The six cleared altars unlock the route to the Dragon's clearing.
 
 signal progress_changed(completed: int, active_runes: int, charged: bool)
 
-const SOURCE: Texture2D = preload("res://assets/tiles/structures/final portal/portal1.png")
-const MASK: Texture2D = preload("res://assets/visual/structures/final_portal_map.png")
-const STONE: Shader = preload("res://shaders/castle_structure_palette.gdshader")
-const RUNES: Shader = preload("res://shaders/final_portal_runes.gdshader")
-const STATIC: Shader = preload("res://shaders/final_portal_static.gdshader")
+const GATE: Script = preload("res://scripts/dungeon/warp_gate.gd")
 const ENTITIES: Script = preload("res://scripts/dungeon/ldtk_door_blocks.gd")
 const REQUIRED_ALTARS: int = 6
 const RUNES_PER_ALTAR: int = 4
-const SOURCE_PIVOT: Vector2 = Vector2(96, 104)
+const WARP_SCALE: float = 0.9375
 
 var completed_altars: int = 0
 var active_runes: int = 0
 var ready_for_final_battle: bool = false
 var ground_height: float = 0.0
-var _world: Node2D = null
+var _world: Node2D
+var _gate: Node2D
+var _landing: Vector2 = Vector2.INF
 var _tracked: Dictionary[String, Node2D] = {}
 var _completed: Dictionary[String, bool] = {}
-var _rune_material: ShaderMaterial = null
-var _static_material: ShaderMaterial = null
-var _static_sprite: Sprite2D = null
-var _elapsed: float = 0.0
-var _frame: int = -1
-
-
-func _ready() -> void:
-	set_physics_process(ready_for_final_battle)
 
 
 func configure(world: Node2D, layers: Array, encounters: Array) -> void:
 	_world = world
 	position = castle_position(layers)
 	ground_height = float(world.call("_terrain_and_warp_height", world.to_global(position)))
-	z_index = 2
-	texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	_landing = _find_dragon_landing()
 	add_to_group(&"final_portals")
-	var presentation: Node2D = Node2D.new()
-	presentation.name = "Presentation"
-	presentation.position.y = -ground_height
-	add_child(presentation)
-	var body: Sprite2D = _sprite("Stone", SOURCE, presentation)
-	var stone_material: ShaderMaterial = ShaderMaterial.new()
-	stone_material.shader = STONE
-	body.material = stone_material
-	_static_sprite = _sprite("WhiteStatic", MASK, presentation)
-	_static_material = ShaderMaterial.new()
-	_static_material.shader = STATIC
-	_static_sprite.material = _static_material
-	var inscriptions: Sprite2D = _sprite("Runes", MASK, presentation)
-	_rune_material = ShaderMaterial.new()
-	_rune_material.shader = RUNES
-	_rune_material.set_shader_parameter(&"rune_map", MASK)
-	_rune_material.set_shader_parameter(&"idle_color", Color("#3e3546"))
-	inscriptions.material = _rune_material
+
+	_gate = GATE.new()
+	_gate.name = "FinalWarp"
+	_gate.call("configure", {
+		"position": Vector2.ZERO, "WarpId": "final", "Interact": true,
+		"ShowActivation": true, "DisplayScale": WARP_SCALE, "GroundHeight": ground_height,
+		"RequiredCondition": "all_six_altars_clear",
+	})
+	_gate.z_index = 1
+	_gate.set("actor", world.get_node("Nox"))
+	_gate.set("gameplay", world.get_node("Gameplay"))
+	_gate.set("travel_available", _route_available)
+	_gate.connect("travel_requested", _on_travel_requested)
+	add_child(_gate)
+
 	for encounter: Node2D in encounters:
 		var id: String = str(encounter.get("encounter_id"))
 		if id.is_empty() or _tracked.has(id):
@@ -82,14 +67,24 @@ static func castle_position(layers: Array) -> Vector2:
 	return Vector2(castle.get_center().x, castle.position.y + 288.0)
 
 
-func _sprite(label: String, texture: Texture2D, parent: Node2D) -> Sprite2D:
-	var sprite: Sprite2D = Sprite2D.new()
-	sprite.name = label
-	sprite.texture = texture
-	sprite.centered = false
-	sprite.position = -SOURCE_PIVOT
-	parent.add_child(sprite)
-	return sprite
+func _find_dragon_landing() -> Vector2:
+	var dragon: Node2D = _world.get_node_or_null("DragonEncounter") as Node2D
+	if dragon == null:
+		return Vector2.INF
+	var arena: Rect2 = dragon.get("arena_bounds") as Rect2
+	for offset: Vector2 in [Vector2(64, 68), Vector2(-64, 68), Vector2(64, -68), Vector2(-64, -68)]:
+		var candidate: Vector2 = dragon.global_position + offset
+		if arena.grow(-12.0).has_point(candidate) and bool(_world.call("is_ground_surface_point", candidate)):
+			return candidate
+	return Vector2.INF
+
+
+func _route_available() -> bool:
+	return _landing.is_finite() and bool(_world.get("entry_complete"))
+
+
+func _on_travel_requested(gate: Node2D) -> void:
+	_world.call_deferred("travel_inside_room", gate, _landing)
 
 
 func _on_altar_cleared(id: String) -> void:
@@ -103,17 +98,5 @@ func _refresh_progress() -> void:
 	completed_altars = mini(_completed.size(), REQUIRED_ALTARS)
 	active_runes = completed_altars * RUNES_PER_ALTAR
 	ready_for_final_battle = _tracked.size() == REQUIRED_ALTARS and completed_altars == REQUIRED_ALTARS
-	_rune_material.set_shader_parameter(&"active_runes", active_runes)
-	_static_sprite.visible = ready_for_final_battle
-	set_physics_process(ready_for_final_battle)
-	var gameplay: Node = _world.get_node("Gameplay")
-	gameplay.call("set_condition", "all_six_altars_clear", ready_for_final_battle)
+	_world.get_node("Gameplay").call("set_condition", "all_six_altars_clear", ready_for_final_battle)
 	progress_changed.emit(completed_altars, active_runes, ready_for_final_battle)
-
-
-func _physics_process(delta: float) -> void:
-	_elapsed += delta
-	var frame: int = floori(_elapsed * 12.0)
-	if frame != _frame:
-		_frame = frame
-		_static_material.set_shader_parameter(&"elapsed", _elapsed)

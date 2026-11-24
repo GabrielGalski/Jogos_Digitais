@@ -5,6 +5,7 @@ signal damage_received(amount: float)
 signal health_changed(current: float, maximum: float)
 signal defeated
 signal dash_started
+signal dash_moved(from: Vector2, to: Vector2)
 signal parry_succeeded(source: Node2D)
 var parry: Node2D = null
 
@@ -74,6 +75,8 @@ func _apply_health_damage(amount: float, source: Node2D = null, enemy_attack: bo
 		return
 	last_damage_source = source
 	last_damage_enemy = enemy_attack
+	if is_instance_valid(card_effects):
+		amount = float(card_effects.call("adjust_incoming_damage", amount, source, enemy_attack))
 	var before: float = health
 	if health - amount <= 0.0 and is_instance_valid(card_effects) and bool(card_effects.call("prevent_death")):
 		health = max_health * 0.1
@@ -160,11 +163,14 @@ func _physics_process(_delta: float) -> void:
 	if Input.is_action_just_pressed(&"dash"):
 		try_dash(input_direction)
 	if is_dashing():
+		var dash_origin: Vector2 = global_position
 		var step_time: float = minf(_delta, dash_remaining)
 		velocity = dash_direction * dash_speed * step_time / maxf(_delta, 0.0001)
 		move_and_slide()
 		position = position.clamp(movement_bounds.position, movement_bounds.end)
 		_update_floor_height(_delta)
+		if not dash_origin.is_equal_approx(global_position):
+			dash_moved.emit(dash_origin, global_position)
 		dash_remaining = maxf(0.0, dash_remaining - _delta)
 		dash_trail_timer -= _delta
 		if dash_trail_timer <= 0.0:
@@ -375,6 +381,17 @@ func try_parry_enemy_attack(attacker: Node2D, contact_point: Vector2) -> bool:
 
 func try_parry_projectile(projectile: Node2D) -> bool:
 	return is_instance_valid(parry) and bool(parry.call("try_projectile", projectile))
+
+
+func apply_reflected_damage(enemy: Node2D, amount: float, direction: Vector2) -> void:
+	if not is_instance_valid(enemy) or not enemy.has_method("take_damage"):
+		return
+	if is_instance_valid(card_effects) and enemy.has_method("is_alive"):
+		var combat: CombatEffects = card_effects.call("effects") as CombatEffects
+		if is_instance_valid(combat):
+			combat.apply_hit(enemy, amount, direction, 0.0)
+			return
+	enemy.call("take_damage", amount)
 
 
 func receive_contact_damage(amount: int, direction: Vector2 = Vector2.ZERO, knockback: float = 0.0, source: Node2D = null) -> void:

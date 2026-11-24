@@ -13,6 +13,7 @@ const BONE_BELL: Script = preload("res://scripts/enemies/bone_bell.gd")
 const CONTACTS: Script = preload("res://scripts/combat/projectile_enemy_contacts.gd")
 const HORDE_CATALOG: Script = preload("res://scripts/enemies/open_world_horde_catalog.gd")
 const HORDE_SHOT: Script = preload("res://scripts/combat/projectiles/open_world_horde_shot.gd")
+const SFX: Script = preload("res://scripts/audio/horde_audio.gd")
 const PROFILE: Script = preload("res://scripts/enemies/spirit_horde_profile.gd")
 const GROUND_NAVIGATION: Script = preload("res://scripts/enemies/ground_horde_navigation.gd")
 const NAVIGATION: Script = preload("res://scripts/enemies/spirit_horde_navigation.gd")
@@ -71,6 +72,7 @@ var _route_deadlines: Dictionary = {}
 var _previous_player: Vector2 = Vector2.ZERO
 var projectiles: Array[Node2D] = []
 var _projectiles_by_shooter: Dictionary[int, int] = {}
+var _sfx: SFX
 
 
 func configure(config: Dictionary, area: Rect2, subject: Player, rules: Node2D, query: Callable, remains: Node2D = null, height_query: Callable = Callable()) -> void:
@@ -120,6 +122,11 @@ func begin() -> void:
 	if not can_begin():
 		return
 	phase = Phase.ACTIVE
+	if _has_pedestal:
+		_sfx = SFX.new()
+		_sfx.name = "HordeAudio"
+		_sfx.listener = player
+		add_child(_sfx)
 	if _mixed:
 		_init_ground_navigation()
 	if arena_boundary != null:
@@ -270,6 +277,7 @@ func _spawn_miniboss(subject: Vector2, outside: Vector2) -> void:
 		var centipede: CENTIPEDE = CENTIPEDE.new()
 		centipede.name = "FlyingCentipede"
 		centipede.player = player
+		centipede.sfx = _sfx
 		centipede.horde_members = actors
 		centipede.entry_heading = -outside
 		centipede.entry_distance = distance
@@ -279,6 +287,8 @@ func _spawn_miniboss(subject: Vector2, outside: Vector2) -> void:
 		var bell: BONE_BELL = BONE_BELL.new()
 		bell.name = "BoneBell"
 		bell.player = player
+		bell.sfx = _sfx
+		bell.horde_members = actors
 		bell.position = subject + outside * distance
 		miniboss = bell
 	miniboss.connect(&"defeated", _on_miniboss_defeated)
@@ -408,6 +418,10 @@ func spawn_horde_projectile(shot: Node2D) -> void:
 	_projectiles_by_shooter[id] = int(_projectiles_by_shooter.get(id, 0)) + 1
 	shot.tree_exiting.connect(_on_projectile_exiting.bind(shot, id), CONNECT_ONE_SHOT)
 	add_child(shot)
+	if _sfx != null and shooter is HORDE_ENEMY and shot is HORDE_SHOT:
+		var species: StringName = StringName((shooter as HORDE_ENEMY).species)
+		_sfx.queue_horde(species, SFX.Event.ATTACK, CONTACTS.damage_center(shooter))
+		(shot as HORDE_SHOT).player_hit.connect(_sfx.player_hit.bind(species))
 
 
 func _on_projectile_exiting(shot: Node2D, shooter_id: int) -> void:
@@ -451,6 +465,10 @@ func _separation(actor: Node2D) -> Vector2:
 func _move_actor(actor: CharacterBody2D, subject: Vector2, delta: float) -> void:
 	if actor.has_meta(&"card_control"):
 		return
+	if actor.is_in_group(&"immobilized_enemies"):
+		actor.velocity = Vector2.ZERO
+		actor.set("hit_velocity", Vector2.ZERO)
+		return
 	var identifier: int = actor.get_instance_id()
 	if _mixed or _elapsed >= float(_route_deadlines.get(identifier, 0.0)) or not _waypoints.has(identifier):
 		_waypoints[identifier] = navigation.call("waypoint", actor.position, subject)
@@ -484,6 +502,12 @@ func _move_actor(actor: CharacterBody2D, subject: Vector2, delta: float) -> void
 		return
 	if arena_radius > 0.0 and _height_query.is_valid():
 		(actor.get_node("Sprite") as Sprite2D).position.y = -7.0 - roundf(float(_height_query.call(actor.global_position)))
+	if _sfx != null:
+		if distance <= 28.0 and not actor.has_meta(&"played_approach"):
+			actor.set_meta(&"played_approach", true)
+			_sfx.queue_horde(&"spirit_ghost", SFX.Event.ATTACK, CONTACTS.damage_center(actor))
+		elif distance > 36.0 and actor.has_meta(&"played_approach"):
+			actor.remove_meta(&"played_approach")
 	# Swept relative motion also catches a moving player between physics frames.
 	var relative_start: Vector2 = previous - (_previous_player + Vector2(0, 3))
 	var relative_end: Vector2 = actor.position - (subject + Vector2(0, 3))
@@ -494,8 +518,11 @@ func _move_actor(actor: CharacterBody2D, subject: Vector2, delta: float) -> void
 		return
 	var health_before: float = player.health
 	player.receive_contact_damage(int(actor.get("contact_damage")), actor.global_position.direction_to(player.global_position), 35.0, actor)
-	if player.health < health_before and not player.dead:
-		player.apply_contact_slow(float(profile.get("contact_slow_factor")), float(profile.get("contact_slow_duration")), float(profile.get("post_slow_invulnerability")))
+	if player.health < health_before:
+		if _sfx != null:
+			_sfx.player_hit(player.surface_world_position(), health_before - player.health, &"spirit_ghost")
+		if not player.dead:
+			player.apply_contact_slow(float(profile.get("contact_slow_factor")), float(profile.get("contact_slow_duration")), float(profile.get("post_slow_invulnerability")))
 	actor.call("consume_on_contact")
 
 
@@ -533,6 +560,9 @@ func _on_killed(actor: Node2D) -> void:
 	_forget(actor)
 	if phase != Phase.ACTIVE:
 		return
+	if _sfx != null:
+		var species: StringName = StringName((actor as HORDE_ENEMY).species) if actor is HORDE_ENEMY else &"spirit_ghost"
+		_sfx.queue_horde(species, SFX.Event.DEATH, CONTACTS.damage_center(actor))
 	defeated_count += 1
 	progress_changed.emit(defeated_count, kill_target)
 	if _check_completion():
@@ -616,6 +646,8 @@ func _on_player_defeated() -> void:
 	if phase != Phase.ACTIVE:
 		return
 	phase = Phase.ABORTED
+	if _sfx != null:
+		_sfx.cancel()
 	_release_arena()
 	for actor: Node2D in actors.duplicate():
 		actor.call("dismiss")

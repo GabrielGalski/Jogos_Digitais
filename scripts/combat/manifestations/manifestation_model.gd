@@ -3,7 +3,7 @@ extends Resource
 ## Immutable authored behavior and three-color appearance; timers belong to the caster.
 
 enum Family { PROJECTILE, BEAM, STREAM }
-enum Shape { DROP, MASS, LASER, SPIKE, FIREBALL, FLAME }
+enum Shape { DROP, MASS, LASER, SPIKE, FIREBALL, PRISM, LIGHT_PULSE, FANG }
 
 @export var card: ManifestationCard
 @export var family: Family = Family.PROJECTILE
@@ -13,12 +13,22 @@ enum Shape { DROP, MASS, LASER, SPIKE, FIREBALL, FLAME }
 @export var core_color: Color = Color("#f6ede5")
 ## Presentation scale, independent of damage, travel and collision geometry.
 @export_range(0.3, 1.0) var visual_scale: float = 0.6
+@export var projectile_texture: Texture2D
 @export_range(0.5, 12.0) var hit_radius: float = 3.0
 @export_range(0.0, 64.0) var trail_length: float = 17.0
 @export_range(0.0, 0.4) var halo_opacity: float = 0.18
 @export_range(8.0, 48.0) var halo_size: float = 22.0
 @export var blast_radius: float = 0.0
+@export var pierces_enemies: bool = false
 @export var spread_degrees: float = 0.0
+@export var randomize_spread: bool = false
+@export var spiral_turn_rate: float = 0.0
+@export_range(1, 9, 1) var projectile_count: int = 1
+@export_range(0.0, 8.0, 0.1) var muzzle_spread: float = 0.0
+@export var cross_distance: float = 0.0
+@export var homing_range: float = 0.0
+@export_range(0.0, 300.0) var split_distance: float = 0.0
+@export_range(0.0, 45.0) var split_half_angle_degrees: float = 0.0
 @export var attached_duration: float = 0.0
 @export var dot_interval: float = 0.32
 @export var dot_damage: float = 1.0

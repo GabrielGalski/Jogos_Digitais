@@ -6,4 +6,4 @@
 script = ExtResource("1_ox1tg")
 card_id = &"CARD_INF_001"
 display_name = "Núcleo de Golem"
-description = "Abates geram explosões de raio 18. Dano em cascata: 18, 9 e 3 até os abates cessarem."
+description = "Inimigos derrotados explodem. Cada abate causado pela explosão prolonga a reação em cadeia."

@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="InfusionCard" format=3]
+
+[ext_resource type="Script" path="res://scripts/cards/infusion_card.gd" id="card"]
+
+[resource]
+script = ExtResource("card")
+card_id = &"CARD_INF_013"
+display_name = "Acúmulo Ígneo"
+description = "Acertos sucessivos no mesmo inimigo acumulam calor até liberar dano extra."
+rarity = 2
+effect = 12

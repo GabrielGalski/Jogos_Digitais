@@ -2,6 +2,8 @@ extends Node2D
 class_name CombatEffects
 signal hit_confirmed(at: Vector2, direction: Vector2, killed: bool)
 signal surface_hit(at: Vector2, direction: Vector2)
+signal enemy_eliminated(at: Vector2)
+signal enemy_defeated(id: int, at: Vector2)
 
 const ELECTRIC_ARC_SCENE := preload("res://scenes/combat/effects/electric_arc.tscn")
 const ELECTRIC_EXPLOSION_SCENE := preload(
@@ -47,23 +49,34 @@ func _exit_tree() -> void:
 		feedback_offset = Vector2.ZERO
 
 
-func apply_hit(enemy: Node2D, damage: float, direction: Vector2, impulse: float, on_kill: Callable = Callable()) -> void:
+static func damage_after_freeze(enemy: Node2D, damage: float) -> float:
+	return damage * 1.0133 if enemy.is_in_group(&"frozen_enemies") else damage
+
+
+func apply_hit(enemy: Node2D, damage: float, direction: Vector2, impulse: float, on_kill: Callable = Callable()) -> bool:
 	if damage <= 0.0 or not _is_valid_enemy(enemy):
-		return
+		return false
+	var enemy_id: int = enemy.get_instance_id()
 	var hit_position: Vector2 = CONTACTS.damage_center(enemy)
 	var health_before: float = float(enemy.call("get_current_health")) if enemy.has_method("get_current_health") else -1.0
 	if enemy.has_method(&"receive_impact"):
 		enemy.call(&"receive_impact", direction, impulse)
-	enemy.call(&"take_damage", damage)
+	enemy.call(&"take_damage", damage_after_freeze(enemy, damage))
 	var killed: bool = not is_instance_valid(enemy) or not bool(enemy.call(&"is_alive"))
-	if killed and on_kill.is_valid():
-		if not is_instance_valid(enemy) or not enemy.has_method(&"counts_as_kill") or bool(enemy.call(&"counts_as_kill")):
+	if killed:
+		enemy_defeated.emit(enemy_id, hit_position)
+	if killed and (not is_instance_valid(enemy) or not enemy.has_method(&"counts_as_kill") or bool(enemy.call(&"counts_as_kill"))):
+		# Card attacks dispatch the originating snapshot through their callback.
+		if on_kill.is_valid():
 			on_kill.call()
+		else:
+			enemy_eliminated.emit(hit_position)
 	var damage_confirmed: bool = health_before < 0.0 or killed
 	if is_instance_valid(enemy) and health_before >= 0.0:
 		damage_confirmed = float(enemy.call("get_current_health")) < health_before
 	if damage_confirmed:
 		hit_confirmed.emit(hit_position, direction, killed)
+	return damage_confirmed
 
 
 func _ready() -> void:
@@ -194,6 +207,7 @@ func _is_valid_enemy(enemy_node: Node) -> bool:
 	return (
 		is_instance_valid(enemy_node)
 		and not enemy_node.is_queued_for_deletion()
+		and not enemy_node.is_in_group(&"controlled_monsters")
 		and enemy_node.has_method(&"take_damage")
 		and enemy_node.has_method(&"is_alive")
 		and bool(enemy_node.call(&"is_alive"))

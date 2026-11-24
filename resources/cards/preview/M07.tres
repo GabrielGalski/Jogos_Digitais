@@ -4,10 +4,11 @@
 
 [resource]
 script = ExtResource("1_6auc0")
-damage = 4.0
+damage = 1.2
 fire_interval = 0.25
 projectile_speed = 360.0
 projectile_lifetime = 0.25
-impact_impulse = 35.0
+impact_impulse = 7.0
 card_id = &"M07"
 display_name = "Coração de Efreeti"
+description = "Dispara brasas em leque. Várias podem atingir o mesmo inimigo."

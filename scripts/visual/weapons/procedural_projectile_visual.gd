@@ -35,7 +35,12 @@ func configure(definition: ProceduralManifestationModel, sprites: ProceduralWeap
 	core = Sprite2D.new()
 	core.name = "Core32"
 	core.material = opaque
-	core.scale = Vector2.ONE * model.visual_scale * float(factory.SIZE) / float(factory.RENDER_SIZE)
+	if model.projectile_texture != null:
+		core.texture = model.projectile_texture
+		core.scale = Vector2.ONE * model.visual_scale
+		core.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	else:
+		core.scale = Vector2.ONE * model.visual_scale * float(factory.SIZE) / float(factory.RENDER_SIZE)
 	add_child(core)
 	_refresh()
 
@@ -51,12 +56,14 @@ func set_element(phase: int) -> void:
 	var shader: ShaderMaterial = ShaderMaterial.new()
 	shader.shader = preload("res://shaders/chimera_projectile.gdshader")
 	shader.set_shader_parameter(&"element_color", colors[phase])
+	if model.projectile_texture != null:
+		shader.set_shader_parameter(&"outline_pixels", 1.0)
 	core.material = shader
 	halo.modulate = Color(colors[phase], 0.3)
 
 
 func _refresh() -> void:
-	if core == null:
+	if core == null or model.projectile_texture != null:
 		return
 	var frame: int = int(age * (10.0 if model.shape == ProceduralManifestationModel.Shape.MASS else 16.0)) % 4
 	if frame != _last_frame or direction != _last_direction:

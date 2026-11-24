@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="InfusionCard" format=3]
+
+[ext_resource type="Script" path="res://scripts/cards/infusion_card.gd" id="card"]
+
+[resource]
+script = ExtResource("card")
+card_id = &"CARD_INF_012"
+display_name = "Meteoro de Dragão"
+description = "Após uma eliminação, um meteoro cai sobre um inimigo próximo escolhido ao acaso. O efeito tem recarga."
+rarity = 2
+effect = 11
+cooldown = 6.0

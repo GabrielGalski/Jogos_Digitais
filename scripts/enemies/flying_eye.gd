@@ -58,6 +58,10 @@ func _ready() -> void:
 
 func _physics_process(delta: float) -> void:
 	if dying: return
+	if is_in_group(&"immobilized_enemies"):
+		velocity = Vector2.ZERO
+		hit_velocity = Vector2.ZERO
+		return
 	hit_velocity = hit_velocity.move_toward(Vector2.ZERO, 340.0 * delta)
 	_movement_velocity = _movement_velocity.move_toward(desired_velocity, profile.acceleration * delta)
 	velocity = _movement_velocity + hit_velocity

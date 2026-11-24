@@ -26,15 +26,15 @@ O equipamento combina uma Manifestação, uma Infusão e uma Mutação. O conjun
 
 Efeitos precisam respeitar autoria do dano, cadências e limites de ativação. Dano secundário não deve iniciar uma cadeia infinita de Infusões. As regras particulares de cada carta precisam ser explícitas antes de entrar no catálogo aprovado.
 
-As cinco Infusões e seis Mutações funcionam com cada Manifestação ativa, em qualquer combinação de uma carta de cada tipo. Efeitos já emitidos conservam sua origem após a troca. **F** é o botão de ação das Mutações; passivas não ganham uma ação adicional. Os valores de teste e os limites atuais estão no TDD.
+Qualquer Manifestação pode ser combinada com uma Infusão e uma Mutação. Efeitos já emitidos conservam sua origem após a troca. **F** é o botão de ação das Mutações ativas. Os valores de teste estão no TDD.
 
-Regras específicas aprovadas para esta implementação: I01 começa somente após um abate e encadeia explosões de raio fixo de 18 px, com danos 18 → 9 → 3 → 3, até não haver novo abate. I02 lança fragmentos com 15% do dano final do golpe que matou; I03 recupera 3% da vida máxima por abate creditado à arma. I04 equipa um disparo com Slaad a cada 6 s, controla temporariamente inimigos simples e exclui bosses. I05 alterna fogo, veneno e empurrão, com contornos vermelho, verde e amarelo.
+I01 reage às eliminações creditadas ao jogador. Cada uma dispara uma explosão de raio 18 px. Os abates da explosão continuam a cascata com danos 18 → 9 → 3 → 3. I02 lança flechas de luz a partir do impacto letal, com 15% do dano do golpe que matou. I03 recupera 3% da vida máxima por abate creditado à arma. I04 carrega um Slaad a cada 3 s. O primeiro acerto válido de um disparo carregado transforma um inimigo comum em aliado por 12 s, ao fim dos quais o hospedeiro morre. Várias possessões podem coexistir. I05 alterna fogo, veneno e empurrão, com contornos vermelho, verde e amarelo.
 
-U01 renova a velocidade em abates. U02 gera uma cobra ao receber dano de inimigo, com intervalo de 1,5 s e derrota após três ataques. U03 marca um alvo próximo com um círculo e causa dano em área após 0,25 s. U04 mostra a mandrágora sobre Nox e afasta inimigos ao pressionar F. U05 deixa fumaça venenosa roxa e verde durante o movimento. U06 deixa uma cópia ao pressionar F, torna Nox invisível por 1,5 s e bloqueia seus disparos; sua recarga de 30 s também governa a proteção automática contra dano letal, que restaura 10% da vida máxima quando disponível.
+U01 renova a velocidade em abates. U02 gera uma cobra ao receber dano de inimigo, com intervalo de 1,5 s e derrota após três ataques. U03 marca um alvo próximo com um círculo e causa dano em área após 0,25 s. U04 mostra a mandrágora sobre Nox e afasta inimigos ao pressionar F. U05 é a Espada do Herói, uma mutação lendária. Possuída após a morte de um herói da região, a espada paira ao lado de Nox, sai à caça de monstros próximos e retorna quando perde o alvo. U06 deixa uma cópia ao pressionar F, torna Nox invisível por 1,5 s e bloqueia seus disparos; sua recarga de 30 s também governa a proteção automática contra dano letal, que restaura 10% da vida máxima quando disponível.
 
 ### Catálogo de estudo
 
-Os identificadores abaixo organizam os conceitos; não indicam implementação completa, raridade definitiva ou aprovação de balanceamento.
+A coleção inicial reúne 18 cartas nos três primeiros volumes. Elementais de Calimshan acrescenta seis cartas ao catálogo. A tabela inclui também a M03, que tem prévia na mesa. [Catálogo de cartas](CARTAS.md)
 
 | Manifestação | Infusão | Mutação |
 | --- | --- | --- |
@@ -42,13 +42,15 @@ Os identificadores abaixo organizam os conceitos; não indicam implementação c
 | M02 — Massa de Slime | I02 — Casca Estilhaçante | U02 — Pele de Medusa |
 | M03 — Grito de Banshee | I03 — Fragmento de Odopi | U03 — Chão Carnívoro |
 | M04 — Olho de Beholder | I04 — Ovo de Slaad | U04 — Mandrágora de Bolso |
-| M05 — Brotos de Fungoide | I05 — Essência de Quimera | U05 — Glândulas de Lesma |
+| M05 — Fragmentos de Basilisco | I05 — Essência de Quimera | U05 — Espada do Herói |
 | M06 — Cauda de Manticora | — | U06 — Doppelganger |
 | M07 — Coração de Efreeti | — | — |
+| M08 — Garganta de Dragão | — | — |
+| M09 — Prisma Fendido | I06 — Núcleo de Eletricidade | U07 — Passo de Cinza |
+| — | I07 — Núcleo de Fogo | U08 — Convergência Primordial |
+| — | I08 — Núcleo de Gelo | — |
 
-M08, o lança-chamas de teste, usa temporariamente uma carta-base vazia para seleção ingame, além das 18 cartas do catálogo de estudo. Probabilidades dos boosters, raridades individuais e economia precisam de definição própria; não deduzir essas regras dos placeholders.
-
-Para a prévia de acabamentos na mesa, o estudo arquivado em `docs/old/documentacao/CARTAS.md` indica Mandrágora de Bolso, Ovo de Slaad e Olho de Beholder como candidatas a destaque de coleção. Elas recebem bordas holográficas experimentais dourada, verde e roxa, respectivamente. A comparação visual permite avaliar essa direção enquanto a raridade definitiva permanece em estudo.
+Na mesa, Mandrágora de Bolso, Ovo de Slaad e Olho de Beholder recebem bordas holográficas experimentais dourada, verde e roxa, respectivamente.
 
 ## Tutorial e Asterion
 

@@ -1,0 +1,70 @@
+[gd_resource type="SpriteFrames" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/cards/mutacao/chao_carnivoro U03/sprite/bite/bite_01.png" id="1_uet0x"]
+[ext_resource type="Texture2D" path="res://assets/cards/mutacao/chao_carnivoro U03/sprite/bite/bite_02.png" id="2_ldqyy"]
+[ext_resource type="Texture2D" path="res://assets/cards/mutacao/chao_carnivoro U03/sprite/bite/bite_03.png" id="3_sn4sv"]
+[ext_resource type="Texture2D" path="res://assets/cards/mutacao/chao_carnivoro U03/sprite/bite/bite_04.png" id="4_uyyfh"]
+[ext_resource type="Texture2D" path="res://assets/cards/mutacao/chao_carnivoro U03/sprite/bite/bite_05.png" id="5_2buqn"]
+[ext_resource type="Texture2D" path="res://assets/cards/mutacao/chao_carnivoro U03/sprite/bite/bite_06.png" id="6_v4dqe"]
+[ext_resource type="Texture2D" path="res://assets/cards/mutacao/chao_carnivoro U03/sprite/bite/bite_07.png" id="7_0m8ap"]
+[ext_resource type="Texture2D" path="res://assets/cards/mutacao/chao_carnivoro U03/sprite/bite/bite_08.png" id="8_6fkvn"]
+[ext_resource type="Texture2D" path="res://assets/cards/mutacao/chao_carnivoro U03/sprite/bite/bite_09.png" id="9_ohfbv"]
+[ext_resource type="Texture2D" path="res://assets/cards/mutacao/chao_carnivoro U03/sprite/bite/bite_10.png" id="10_b0da8"]
+[ext_resource type="Texture2D" path="res://assets/cards/mutacao/chao_carnivoro U03/sprite/bite/bite_11.png" id="11_fsh8h"]
+[ext_resource type="Texture2D" path="res://assets/cards/mutacao/chao_carnivoro U03/sprite/bite/bite_12.png" id="12_xjtd8"]
+[ext_resource type="Texture2D" path="res://assets/cards/mutacao/chao_carnivoro U03/sprite/bite/bite_13.png" id="13_3wcge"]
+[ext_resource type="Texture2D" path="res://assets/cards/mutacao/chao_carnivoro U03/sprite/bite/bite_14.png" id="14_sfjtk"]
+[ext_resource type="Texture2D" path="res://assets/cards/mutacao/chao_carnivoro U03/sprite/bite/bite_15.png" id="15_o8lyw"]
+
+[resource]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("1_uet0x")
+}, {
+"duration": 1.0,
+"texture": ExtResource("2_ldqyy")
+}, {
+"duration": 1.0,
+"texture": ExtResource("3_sn4sv")
+}, {
+"duration": 1.0,
+"texture": ExtResource("4_uyyfh")
+}, {
+"duration": 1.0,
+"texture": ExtResource("5_2buqn")
+}, {
+"duration": 1.0,
+"texture": ExtResource("6_v4dqe")
+}, {
+"duration": 1.0,
+"texture": ExtResource("7_0m8ap")
+}, {
+"duration": 1.0,
+"texture": ExtResource("8_6fkvn")
+}, {
+"duration": 1.0,
+"texture": ExtResource("9_ohfbv")
+}, {
+"duration": 1.0,
+"texture": ExtResource("10_b0da8")
+}, {
+"duration": 1.0,
+"texture": ExtResource("11_fsh8h")
+}, {
+"duration": 1.0,
+"texture": ExtResource("12_xjtd8")
+}, {
+"duration": 1.0,
+"texture": ExtResource("13_3wcge")
+}, {
+"duration": 1.0,
+"texture": ExtResource("14_sfjtk")
+}, {
+"duration": 1.0,
+"texture": ExtResource("15_o8lyw")
+}],
+"loop": 0,
+"name": &"bite",
+"speed": 20.0
+}]

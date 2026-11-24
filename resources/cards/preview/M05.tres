@@ -4,11 +4,11 @@
 
 [resource]
 script = ExtResource("1")
+damage = 1.0
+fire_interval = 0.2789582652282881
+projectile_speed = 360.0
+projectile_lifetime = 5.0
+impact_impulse = 7.0
 card_id = &"M05"
-display_name = "Brotos de Fungoide"
-damage = 3.0
-fire_interval = 0.82
-projectile_speed = 108.0
-projectile_lifetime = 4
-impact_impulse = 15.0
-
+display_name = "Fragmentos de Basilisco"
+description = "Dispara fragmentos de pedra que se espalham em direções variadas à frente de Nox."

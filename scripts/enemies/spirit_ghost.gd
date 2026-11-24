@@ -66,7 +66,8 @@ func apply_profile(profile: Resource, stage: int, initialize_health: bool = fals
 
 
 func _process(delta: float) -> void:
-	_age += delta
+	if not is_in_group(&"immobilized_enemies"):
+		_age += delta
 	_flash = maxf(0.0, _flash - delta * 9.0)
 	(_sprite.material as ShaderMaterial).set_shader_parameter(&"flash_amount", _flash)
 	_sprite.texture = FRAMES[posmod(int((_age + phase) * (8.0 + difficulty_stage)), FRAMES.size())]

@@ -3,8 +3,8 @@ extends Node2D
 
 signal damage_dealt(amount: float)
 const CONTACTS: Script = preload("res://scripts/combat/projectile_enemy_contacts.gd")
-const STYLE: Script = preload("res://scripts/bosses/elemental_golem/elemental_style.gd")
-const COLORS: Array[Color] = STYLE.COLORS
+const HORDE: Script = preload("res://scripts/enemies/open_world_horde_catalog.gd")
+const LIGHTNING_BOLT: Texture2D = preload("res://assets/enemies/golem/effects/lightning_bolt.png")
 
 var target: Player = null
 var caster: Node2D = null
@@ -18,8 +18,7 @@ var consumed: bool = false
 var remaining: float = 7.0
 var _age: float = 0.0
 var _previous_target: Vector2 = Vector2.ZERO
-var _trail: Array[Vector2] = []
-var _halo: Sprite2D = null
+var _art: Sprite2D
 
 
 func _ready() -> void:
@@ -28,13 +27,18 @@ func _ready() -> void:
 	add_to_group(&"elemental_golem_orbs")
 	z_index = 8
 	physics_interpolation_mode = Node.PHYSICS_INTERPOLATION_MODE_OFF
-	var unlit: CanvasItemMaterial = CanvasItemMaterial.new()
-	unlit.light_mode = CanvasItemMaterial.LIGHT_MODE_UNSHADED
-	material = unlit
-	texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
-	_halo = STYLE.glow(self,Vector2(24,24),Color(COLORS[element],0.18))
-	_halo.position = Vector2(0,-9)
-	_halo.z_index = -1
+	_art = Sprite2D.new()
+	_art.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	_art.position = Vector2(0, -9)
+	if element == 2:
+		_art.texture = LIGHTNING_BOLT
+		_art.hframes = 4
+	else:
+		var shot: Dictionary = HORDE.TYPES["batilisk" if element == 1 else "lizard_monk"]
+		_art.texture = shot["shot"] as Texture2D
+		_art.hframes = int(shot["frames"])
+	add_child(_art)
+	_update_art()
 	if is_instance_valid(target): _previous_target = target.global_position
 
 
@@ -64,7 +68,7 @@ func _physics_process(delta: float) -> void:
 		var stem: float = maxf(0.0,float(return_capsule.get("height",52.0))*0.5-body_radius)
 		var hit: Dictionary = CONTACTS.capsule_hit(origin, endpoint, return_capsule.center as Vector2, body_radius+radius, stem)
 		if not hit.is_empty() and float(hit.fraction) <= wall_fraction:
-			caster.call("take_damage", reflected_damage)
+			target.apply_reflected_damage(caster, reflected_damage, direction)
 			dismiss()
 			return
 	elif not target.is_dashing():
@@ -81,11 +85,9 @@ func _physics_process(delta: float) -> void:
 	if not wall.is_empty():
 		dismiss()
 		return
-	_trail.push_front(origin)
-	if _trail.size() > 5: _trail.pop_back()
 	global_position = endpoint
 	_previous_target = target.global_position
-	queue_redraw()
+	_update_art()
 
 
 func parry(reflector: Player) -> bool:
@@ -96,7 +98,9 @@ func parry(reflector: Player) -> bool:
 	direction = global_position.direction_to(caster.global_position) if is_instance_valid(caster) else -direction
 	remove_from_group(&"enemy_projectiles")
 	remove_from_group(&"parryable_projectiles")
-	queue_redraw()
+	if is_instance_valid(_art):
+		_art.self_modulate = Color(1.2, 1.2, 1.2)
+		_update_art()
 	return true
 
 
@@ -107,19 +111,7 @@ func dismiss() -> void:
 	queue_free()
 
 
-func _draw() -> void:
-	var tint: Color = COLORS[clampi(element,0,2)]
-	var center: Vector2 = Vector2(0,-9)
-	var previous: Vector2 = center
-	for index: int in range(_trail.size()):
-		var point: Vector2 = to_local(_trail[index])+center
-		var weight: float = 1.0-float(index)/float(_trail.size())
-		draw_line(previous,point,Color(tint,weight*0.5),weight*2.0,true)
-		previous = point
-	var style: Dictionary = STYLE.data()
-	var factory: ProceduralWeaponSpriteFactory = style.factory as ProceduralWeaponSpriteFactory
-	var model: ProceduralManifestationModel = style.models[element] as ProceduralManifestationModel
-	var texture: Texture2D = factory.texture_for(model,int(_age*16.0)%4,Vector2.RIGHT)
-	draw_set_transform(center,direction.angle(),Vector2.ONE)
-	draw_texture_rect(texture,Rect2(-16,-16,32,32),false,Color(1.2,1.2,1.2) if reflected else Color.WHITE)
-	draw_set_transform(Vector2.ZERO)
+func _update_art() -> void:
+	var fps: float = 24.0 if reflected else 16.0
+	_art.frame = int(_age * fps) % _art.hframes
+	_art.rotation = direction.angle()

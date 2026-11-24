@@ -7,7 +7,6 @@ const ARENA_PATH: String = "res://scenes/bosses/elemental_golem_arena.tscn"
 const GATE: Script = preload("res://scripts/dungeon/warp_gate.gd")
 const TRANSITION: Script = preload("res://scripts/visual/warp_transition.gd")
 const STATE: Script = preload("res://scripts/bosses/elemental_golem/player_state.gd")
-const ART: Texture2D = preload("res://assets/tiles/structures/warp.png")
 var world: Node2D = null
 var subject: Player = null
 var encounter: Node2D = null
@@ -48,7 +47,7 @@ func unlock() -> void:
 	gate = GATE.new() as Node2D
 	gate.name = "ElementalBossWarp"
 	gate.call("configure",{"position":point,"WarpId":"elemental_golem","Interact":true,
-		"TargetScene":ARENA_PATH,"DisplayScale":0.5},ART)
+		"TargetScene":ARENA_PATH})
 	world.add_child(gate)
 	gate.set("actor",subject)
 	gate.set("gameplay",world.get("_gameplay"))

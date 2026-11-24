@@ -3,12 +3,14 @@ extends RefCounted
 ## Per-caster state. Loading a resource never shares timers between players.
 
 var _loadout: CardLoadout
-var _generation: int = 0
+var mutation_generation: int = 0
 var mutation_remaining: float = 0.0
 var effect_host: WeakRef
 var infusion_generation: int = 0
 var chimera_phase: int = 0
 var cooldowns: Dictionary[StringName, float] = {}
+var crimson_charge: int = 0
+var dragon_kills: int = 0
 
 func equip(loadout: CardLoadout) -> bool:
 	if loadout == null or not loadout.validation_errors().is_empty():
@@ -19,13 +21,14 @@ func equip(loadout: CardLoadout) -> bool:
 	if old_infusion != (_loadout.infusion.card_id if _loadout.infusion != null else &""):
 		infusion_generation += 1
 	if old_mutation != (_loadout.mutation.card_id if _loadout.mutation != null else &""):
-		_generation += 1
+		mutation_generation += 1
 		mutation_remaining = 0.0
 	return true
 
 func reset_effects() -> void:
-	_generation += 1
+	mutation_generation += 1
 	mutation_remaining = 0.0
+	crimson_charge = 0
 	cooldowns.clear()
 
 func tick(delta: float) -> void:
@@ -49,12 +52,13 @@ func create_attack() -> CardAttack:
 	attack.projectile_speed = card.projectile_speed
 	attack.projectile_lifetime = card.projectile_lifetime
 	attack.impact_impulse = card.impact_impulse
-	attack.on_weapon_kill = _on_weapon_kill.bind(_generation)
+	attack.on_weapon_kill = _on_weapon_kill.bind(mutation_generation)
 	attack.runtime = self
 	attack.infusion_generation = infusion_generation
-	attack.mutation_generation = _generation
+	attack.mutation_generation = mutation_generation
 	if _loadout.infusion != null:
 		attack.infusion_effect = _loadout.infusion.effect
+		attack.infusion_cooldown = _loadout.infusion.cooldown
 		attack.explosion_radius = _loadout.infusion.explosion_radius
 		if attack.infusion_effect == 3 and float(cooldowns.get(&"I04", 0.0)) <= 0.0:
 			attack.slaad_carrier = true
@@ -73,6 +77,14 @@ func mutation_effect() -> int:
 	return _loadout.mutation.effect if _loadout != null and _loadout.mutation != null else -1
 
 
+func infusion_effect() -> int:
+	return _loadout.infusion.effect if _loadout != null and _loadout.infusion != null else -1
+
+
+func infusion_cooldown() -> float:
+	return _loadout.infusion.cooldown if _loadout != null and _loadout.infusion != null else 0.0
+
+
 func manifestation_id() -> StringName:
 	return _loadout.manifestation.card_id if _loadout != null and _loadout.manifestation != null else &""
 
@@ -82,5 +94,5 @@ func copy_loadout() -> CardLoadout:
 
 func _on_weapon_kill(generation: int) -> void:
 	# A projectile from an earlier loadout cannot activate the newly equipped mutation.
-	if generation == _generation and _loadout != null and _loadout.mutation != null and _loadout.mutation.effect == 0:
+	if generation == mutation_generation and _loadout != null and _loadout.mutation != null and _loadout.mutation.effect == 0:
 		mutation_remaining = _loadout.mutation.duration

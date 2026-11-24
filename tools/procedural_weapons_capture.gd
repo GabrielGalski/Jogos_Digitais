@@ -48,7 +48,8 @@ func _run() -> void:
 	spirit.set("resistance", 1000.0)
 	spirit.set("max_resistance", 1000.0)
 	spirit.global_position = player.surface_world_position() + aim * 165.0
-	for index: int in range(6):
+	var models: Array[ProceduralManifestationModel] = controller.call("available_models")
+	for index: int in range(models.size()):
 		controller.call("cancel_attacks")
 		controller.call("select_model", index)
 		gun.set("aim_screen_override", root.get_canvas_transform() * (player.surface_world_position() + aim * 240.0))
@@ -95,9 +96,14 @@ func _gallery() -> void:
 	camera.force_update_scroll()
 	var factory: ProceduralWeaponSpriteFactory = controller.get("sprites") as ProceduralWeaponSpriteFactory
 	label("PROJETEIS  |  COMPACTOS + LUMINOSOS", Vector2(845, 1400), Color("#f6ede5"), 13)
-	for index: int in range(6):
-		var model: ProceduralManifestationModel = controller.get("MODELS")[index] as ProceduralManifestationModel
-		var point: Vector2 = Vector2(922 + (index % 3) * 212, 1510 + floori(float(index) / 3.0) * 132)
+	var models: Array[ProceduralManifestationModel] = controller.call("available_models")
+	var sprite_models: Array[ProceduralManifestationModel] = models.filter(
+		func(model: ProceduralManifestationModel) -> bool: return model.family != ProceduralManifestationModel.Family.STREAM)
+	var first_row: float = 1480.0 if sprite_models.size() > 6 else 1510.0
+	var row_spacing: float = 101.0 if sprite_models.size() > 6 else 132.0
+	for index: int in range(sprite_models.size()):
+		var model: ProceduralManifestationModel = sprite_models[index]
+		var point: Vector2 = Vector2(922 + (index % 3) * 212, first_row + floori(float(index) / 3.0) * row_spacing)
 		label(String(model.code()) + "  " + model.card.display_name, point + Vector2(-76, -48), model.body_color)
 		for zoom: int in [1, 3]:
 			var sprite: Node2D = VISUAL.new() as Node2D

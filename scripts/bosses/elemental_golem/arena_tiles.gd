@@ -57,6 +57,7 @@ func build(parent: Node2D, layers: Array, definitions: Dictionary, origin: Vecto
 
 
 func _depth(layer_name: String) -> int:
+	if layer_name == "GolemArenaGray": return -10
 	if layer_name == "TerrainCliffRim": return -19
 	if layer_name.begins_with("Floor"): return -20
 	if layer_name == "WallsFront": return -12

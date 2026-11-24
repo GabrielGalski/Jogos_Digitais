@@ -5,7 +5,9 @@
 [resource]
 script = ExtResource("1")
 card_id = &"M04"
+rarity = 2
 display_name = "Olho de Beholder"
+description = "Mantém um feixe de energia no primeiro alvo enquanto você segura o disparo."
 damage = 1.0
 fire_interval = 0.12
 projectile_speed = 240.0

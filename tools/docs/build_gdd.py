@@ -281,7 +281,7 @@ def controls():
 def combat():
     new_page("Combate", "Sair do perigo deve criar a próxima oportunidade de atacar.")
     picture("output/procedural_weapons/gallery.png", M, 188, CW, 245,
-            "Estudo de apresentação dos ataques no projeto. O lança-chamas M08 é experimental.")
+            "Estudo de apresentação dos ataques no projeto.")
     w = (CW - 24)/3
     for i,(title,body,tint) in enumerate([
         ("LER", "Sinais de chão, preparação do inimigo e trajetória dos projéteis comunicam o risco.", PLUM),
@@ -309,15 +309,15 @@ def cards():
         txt(role,x,372,w,12,font="Display",color=PLUM)
         txt(body,x,400,w,10,max_h=77)
     note("CONJUNTO INICIAL", "Gotas de Slime (M01) + Núcleo de Golem (I01), com o slot de Mutação vazio. A Mutação ilustrada acima é um exemplo do catálogo, não parte do equipamento inicial.", 489, height=76)
-    heading("Catálogo de estudo",M,588)
+    heading("Coleção inicial",M,588)
     lists=[
-        "M01 Gotas de Slime<br/>M02 Massa de Slime<br/>M03 Grito de Banshee<br/>M04 Olho de Beholder<br/>M05 Brotos de Fungoide<br/>M06 Cauda de Manticora<br/>M07 Coração de Efreeti",
+        "M01 Gotas de Slime<br/>M02 Massa de Slime<br/>M04 Olho de Beholder<br/>M05 Fragmentos de Basilisco<br/>M06 Cauda de Manticora<br/>M07 Coração de Efreeti<br/>M08 Garganta de Dragão",
         "I01 Núcleo de Golem<br/>I02 Casca Estilhaçante<br/>I03 Fragmento de Odopi<br/>I04 Ovo de Slaad<br/>I05 Essência de Quimera",
-        "U01 Coração da Fúria<br/>U02 Pele de Medusa<br/>U03 Chão Carnívoro<br/>U04 Mandrágora de Bolso<br/>U05 Glândulas de Lesma<br/>U06 Doppelganger",
+        "U01 Coração da Fúria<br/>U02 Pele de Medusa<br/>U03 Chão Carnívoro<br/>U04 Mandrágora de Bolso<br/>U05 Espada do Herói<br/>U06 Doppelganger",
     ]
     for i,text in enumerate(lists):
         txt(text,M+i*(w+12),619,w,8.8,leading=15)
-    txt("Os conceitos do catálogo não indicam aprovação de raridade ou balanceamento. Efeitos secundários precisam de limites para evitar cadeias infinitas.",M,747,CW,9,color=MUTED)
+    txt("A divisão da coleção inicial em pacotes e raridades está em docs/CARTAS.md.",M,747,CW,9,color=MUTED)
 
 
 def boosters():

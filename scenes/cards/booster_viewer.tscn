@@ -4,6 +4,7 @@
 [ext_resource type="Script" path="res://scripts/pack_opening/booster_viewer.gd" id="1_viewer"]
 [ext_resource type="Shader" path="res://shaders/pack_opening_background.gdshader" id="3_ooflc"]
 [ext_resource type="Script" path="res://scripts/pack_opening/booster_card_stack.gd" id="4_cards"]
+[ext_resource type="Script" path="res://scripts/cards/card_face.gd" id="5_face"]
 [ext_resource type="Script" path="res://scripts/pack_opening/pack_opening_fx.gd" id="10_48abt"]
 [ext_resource type="Script" path="res://scripts/pack_opening/pack_opening_pointer.gd" id="11_djxnk"]
 
@@ -49,29 +50,17 @@ script = ExtResource("4_cards")
 [node name="Card3" type="Sprite2D" parent="CardsAnchor" unique_id=491878559]
 z_index = 1
 texture_filter = 1
-
-[node name="Shadow" type="Sprite2D" parent="CardsAnchor/Card3" unique_id=2453164]
-modulate = Color(0.05, 0.025, 0.065, 0.36)
-show_behind_parent = true
-position = Vector2(3, 4)
+script = ExtResource("5_face")
 
 [node name="Card2" type="Sprite2D" parent="CardsAnchor" unique_id=1822589022]
 z_index = 2
 texture_filter = 1
-
-[node name="Shadow" type="Sprite2D" parent="CardsAnchor/Card2" unique_id=786213907]
-modulate = Color(0.05, 0.025, 0.065, 0.36)
-show_behind_parent = true
-position = Vector2(3, 4)
+script = ExtResource("5_face")
 
 [node name="Card1" type="Sprite2D" parent="CardsAnchor" unique_id=2021772670]
 z_index = 3
 texture_filter = 1
-
-[node name="Shadow" type="Sprite2D" parent="CardsAnchor/Card1" unique_id=141264316]
-modulate = Color(0.05, 0.025, 0.065, 0.36)
-show_behind_parent = true
-position = Vector2(3, 4)
+script = ExtResource("5_face")
 
 [node name="BoosterAnchor" type="Node2D" parent="." unique_id=115538144]
 z_index = 12

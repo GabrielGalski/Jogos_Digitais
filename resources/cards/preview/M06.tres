@@ -5,10 +5,12 @@
 [resource]
 script = ExtResource("1")
 card_id = &"M06"
-display_name = "Cauda de Mantícora"
-damage = 3.0
+rarity = 2
+display_name = "Caçaluz"
+description = "Dispara um clarão perseguidor de curto alcance que se curva em direção ao inimigo visível mais próximo."
+damage = 4.0
 fire_interval = 0.28
-projectile_speed = 210.0
-projectile_lifetime = 1.25
+projectile_speed = 265.0
+projectile_lifetime = 0.48
 impact_impulse = 25.0
 

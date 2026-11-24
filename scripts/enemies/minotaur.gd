@@ -154,6 +154,10 @@ func _die() -> void:
 	death.chain().tween_callback(queue_free)
 
 func _physics_process(delta: float) -> void:
+	if is_in_group(&"immobilized_enemies"):
+		velocity = Vector2.ZERO
+		hit_velocity = Vector2.ZERO
+		return
 	if training_dummy:
 		# The infinite-health preview target reacts to impact without starting its AI.
 		velocity = hit_velocity + (training_home_position - global_position) * 2.5

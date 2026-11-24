@@ -10,3 +10,4 @@ projectile_lifetime = 5.0
 impact_impulse = 45.0
 card_id = &"M01"
 display_name = "Gotas de Slime"
+description = "Dispara uma gota de slime que causa dano ao atingir um inimigo."

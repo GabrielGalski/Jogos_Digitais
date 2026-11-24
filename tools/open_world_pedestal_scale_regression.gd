@@ -75,7 +75,7 @@ func _run() -> void:
 		var image: Image = body.sprite_frames.get_frame_texture(&"closed", 0).get_image()
 		if image.is_compressed():
 			image.decompress()
-		check(is_equal_approx(float(image.get_used_rect().size.x) * body.global_scale.x, 63.36), "Machine keeps its approved body width")
+		check(is_equal_approx(float(image.get_used_rect().size.x) * body.global_scale.x, 39.375), "Stone altar uses the approved body width")
 		place(player, pedestal.global_position + Vector2(88, 0))
 		await ticks(2)
 		check(not bool(pedestal.call("can_activate")), "Distant totem cannot be activated")

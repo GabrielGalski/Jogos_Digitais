@@ -1,6 +1,7 @@
 shader_type canvas_item;
 render_mode unshaded;
 uniform vec4 element_color : source_color = vec4(1.0, 0.2, 0.1, 1.0);
+uniform float outline_pixels = 4.0;
 varying vec4 modulation;
 
 void vertex() {
@@ -9,7 +10,7 @@ void vertex() {
 
 void fragment() {
 	vec4 pixel = texture(TEXTURE, UV);
-	vec2 step_uv = TEXTURE_PIXEL_SIZE * 4.0;
+	vec2 step_uv = TEXTURE_PIXEL_SIZE * outline_pixels;
 	float edge = max(max(texture(TEXTURE, UV + vec2(step_uv.x, 0.0)).a,
 		texture(TEXTURE, UV - vec2(step_uv.x, 0.0)).a),
 		max(texture(TEXTURE, UV + vec2(0.0, step_uv.y)).a,

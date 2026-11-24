@@ -6,6 +6,7 @@ signal closed
 const DESIGN_SIZE: Vector2 = Vector2(960.0, 540.0)
 const WORLD_PATH: String = "res://scenes/maps/open_world.tscn"
 const FONT: Font = preload("res://assets/font/determination.ttf")
+const CATALOG: Script = preload("res://scripts/cards/card_effect_catalog.gd")
 const GROUP_FOLDERS: Array[String] = ["manifestacao", "infusao", "mutacao"]
 const GROUP_NAMES: Array[String] = ["Manifestação", "Infusão", "Mutação"]
 const GROUP_CENTERS: Array[float] = [180.0, 480.0, 780.0]
@@ -176,23 +177,34 @@ func _load_cards() -> void:
 	var visible_rect: Rect2 = Rect2(float(bounds[0]), float(bounds[1]), float(bounds[2]), float(bounds[3]))
 	var finishes: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://resources/cards/card_table_finishes.json")) as Dictionary
 	var finish_cards: Dictionary = finishes["cards"] as Dictionary
+	var paths: Dictionary[StringName, String] = CATALOG.art_paths()
+	var definitions: Dictionary[StringName, CardDefinition] = {}
+	for definition: CardDefinition in CATALOG.implemented_cards():
+		definitions[CATALOG.alias(definition)] = definition
 	for group: int in GROUP_FOLDERS.size():
-		var folder: String = "res://assets/cards/" + GROUP_FOLDERS[group]
-		var directories: PackedStringArray = DirAccess.get_directories_at(folder)
-		directories.sort()
 		var ordered: Array[String] = []
-		for directory: String in directories:
-			if ResourceLoader.exists(folder + "/" + directory + "/" + directory + ".png"):
-				ordered.append(directory)
-		ordered.sort_custom(func(a: String, b: String) -> bool: return a.get_slice(" ", 1) < b.get_slice(" ", 1))
+		for id: StringName in paths:
+			if paths[id].begins_with("res://assets/cards/" + GROUP_FOLDERS[group] + "/"):
+				ordered.append(String(id))
+		for id: StringName in definitions:
+			if definitions[id].get_kind() == group and not paths.has(id):
+				ordered.append(String(id))
+		ordered.sort()
 		for index: int in ordered.size():
-			var directory: String = ordered[index]
+			var id: String = ordered[index]
 			var card: CardTableCard = CardTableCard.new()
-			var texture: Texture2D = load(folder + "/" + directory + "/" + directory + ".png") as Texture2D
-			var id: String = directory.get_slice(" ", 1)
+			var key: StringName = StringName(id)
+			var use_live: bool = id in ["M06", "M08", "U03", "I11"] or not paths.has(key)
+			var texture: Texture2D = null if use_live else load(paths[key]) as Texture2D
 			var finish: Dictionary = finish_cards.get(id, {}) as Dictionary
 			var tint: Color = Color(str(finish["tint"])) if finish.has("tint") else Color.TRANSPARENT
-			card.configure(texture, id, group, index, visible_rect, tint)
+			if use_live:
+				var face: CardFace = CardFace.new()
+				face.configure(definitions[key])
+				card.configure(null, id, group, index, CardFace.ART_BOUNDS)
+				card.use_live_face(face, CardFace.ART_BOUNDS.size)
+			else:
+				card.configure(texture, id, group, index, visible_rect, tint)
 			card.name = card.card_id
 			card.target_position = Vector2(GROUP_CENTERS[group], 264.0) + Vector2(-2.0, 2.0) * float(index)
 			card.position = card.target_position + Vector2(0.0, 24.0)

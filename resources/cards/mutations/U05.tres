@@ -5,7 +5,8 @@
 [resource]
 script = ExtResource("1")
 card_id = &"CARD_MUT_005"
-display_name = "Glândulas de Lesma"
-description = "Movimento deixa fumaça roxa e verde que envenena inimigos."
+display_name = "Espada do Herói"
+description = "Uma espada possuída flutua ao lado de Nox, procura monstros e ataca por conta própria."
+rarity = 3
 effect = 4
 cooldown = 0

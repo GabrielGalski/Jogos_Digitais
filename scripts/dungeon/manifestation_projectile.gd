@@ -172,7 +172,12 @@ func _physics_process(delta: float) -> void:
 		return
 	if phase == &"falling":
 		fall_time -= delta
-		global_position += Vector2(0.0, 38.0 * delta)
+		var endpoint: Vector2 = global_position + Vector2(0.0, 38.0 * delta)
+		var barrier: Dictionary = ENEMY_CONTACTS.sound_field_hit(get_tree(), global_position, endpoint, (hit_shape.shape as CircleShape2D).radius)
+		if not barrier.is_empty():
+			_stop_at_surface(barrier.position as Vector2)
+			return
+		global_position = endpoint
 		if fall_time <= 0.0:
 			phase = &"flying"
 		return
@@ -181,6 +186,10 @@ func _physics_process(delta: float) -> void:
 		if is_instance_valid(target):
 			direction = global_position.direction_to(target.global_position)
 			if global_position.distance_to(target.global_position) <= 14.0:
+				var barrier: Dictionary = ENEMY_CONTACTS.sound_field_hit(get_tree(), global_position, target.global_position, (hit_shape.shape as CircleShape2D).radius)
+				if not barrier.is_empty():
+					_stop_at_surface(barrier.position as Vector2)
+					return
 				_explode_mushroom(target)
 				return
 		rotation = 0.0
@@ -203,6 +212,9 @@ func _physics_process(delta: float) -> void:
 	var hit: Dictionary = ENEMY_CONTACTS.sweep(get_tree(), get_world_2d().direct_space_state,
 		global_position, next_position, 4, (hit_shape.shape as CircleShape2D).radius)
 	if not hit.is_empty():
+		if bool(hit.get("sound_block", false)):
+			_stop_at_surface(hit.position as Vector2)
+			return
 		_on_body_entered(hit.get("collider") as Node2D)
 	if phase == &"flying" and not is_queued_for_deletion():
 		global_position = next_position
@@ -220,13 +232,18 @@ func _advance_efreeti(delta: float) -> void:
 		return
 	global_position = hit["position"] as Vector2
 	var body: Node2D = hit["collider"] as Node2D
-	if _valid_enemy(body):
+	if not bool(hit.get("sound_block", false)) and _valid_enemy(body):
 		_on_body_entered(body)
 	else:
-		visual_impact.emit(global_position, mode)
-		consumed = true
-		hide()
-		queue_free()
+		_stop_at_surface(global_position)
+
+
+func _stop_at_surface(contact: Vector2) -> void:
+	global_position = contact
+	visual_impact.emit(contact, mode)
+	consumed = true
+	hide()
+	queue_free()
 
 
 func _advance_slime(delta: float) -> void:
@@ -244,6 +261,9 @@ func _advance_slime(delta: float) -> void:
 			global_position = endpoint
 			break
 		var contact: Vector2 = hit["position"] as Vector2
+		if bool(hit.get("sound_block", false)):
+			_stop_at_surface(contact)
+			return
 		var normal: Vector2 = (hit["normal"] as Vector2).normalized()
 		var body: Node2D = hit["collider"] as Node2D
 		travel_left -= origin.distance_to(contact)
@@ -313,7 +333,7 @@ func _explode_m02(body: Node2D, contact: Vector2, normal: Vector2) -> void:
 			primary = enemy
 			card_attack.apply_primary_hit(enemy, contact, outward, combat_effects)
 		else:
-			combat_effects.apply_hit(enemy, damage, outward, card_attack.impact_impulse, card_attack.on_weapon_kill)
+			card_attack.apply_secondary_hit(enemy, damage, outward, combat_effects, 0, card_attack.impact_impulse)
 
 
 func _show_slime_impact(normal: Vector2) -> void:
@@ -341,6 +361,9 @@ func _on_body_entered(body: Node2D) -> void:
 		return
 	if consumed or is_queued_for_deletion() or phase != &"flying" or not _valid_enemy(body):
 		return
+	if not ENEMY_CONTACTS.sound_field_hit(get_tree(), global_position, global_position, (hit_shape.shape as CircleShape2D).radius).is_empty():
+		_stop_at_surface(global_position)
+		return
 	var enemy_id: int = body.get_instance_id()
 	if hit_ids.has(enemy_id):
 		return
@@ -365,7 +388,7 @@ func _on_body_entered(body: Node2D) -> void:
 
 
 func _update_attached(delta: float) -> void:
-	if not is_instance_valid(target) or not _valid_enemy(target):
+	if not is_instance_valid(target) or not _valid_enemy(target) or target.is_in_group(&"sound_fields"):
 		queue_free()
 		return
 	global_position = target.global_position + attached_offset

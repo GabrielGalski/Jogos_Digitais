@@ -5,6 +5,7 @@ const ENEMIES: Script = preload("res://scripts/enemies/open_world_horde_catalog.
 const EFFECTS: Script = preload("res://scripts/cards/card_effect_controller.gd")
 const FACTORY: Script = preload("res://scripts/combat/manifestations/manifestation_factory.gd")
 const SNAKE: Script = preload("res://scripts/cards/medusa_snake.gd")
+const CONTACTS: Script = preload("res://scripts/combat/projectile_enemy_contacts.gd")
 var failures: Array[String] = []
 var checks: int = 0
 var world: Node2D
@@ -56,9 +57,12 @@ func clear() -> void:
 	service.poisons.clear()
 	service.blasts.clear()
 	service.mouths.clear()
-	service.clouds.clear()
 	for child: Node in service.get_children():
-		if child is Node2D:
+		if child.name == "Calimshan":
+			child.call("_clear")
+		elif child.name in ["VampireEffects", "DragonEffects"]:
+			continue
+		elif child is Node2D:
 			child.queue_free()
 	await ticks(2)
 
@@ -110,6 +114,7 @@ func _run() -> void:
 	controller.set_physics_process(false)
 	player.contact_invulnerability = 1000.0
 	await ticks(3)
+	check(runtime().copy_loadout().mutation.card_id == &"CARD_MUT_003", "Nox starts with Carnivorous Ground equipped")
 	var camera: Camera2D = player.get_node("Camera2D") as Camera2D
 	camera.reset_smoothing()
 	camera.force_update_scroll()
@@ -118,11 +123,11 @@ func _run() -> void:
 	await ticks(2)
 	var menu: Node = controller.get("_equipment_menu") as Node
 	menu.call("show_aspect", 1)
-	check((menu.get("cards") as Array).size() == 5, "Five infusion cards are selectable")
+	check((menu.get("cards") as Array).size() == CATALOG.INFUSIONS.size(), "The full infusion catalog is selectable")
 	((menu.get("model_buttons") as Dictionary)[2] as Button).pressed.emit()
 	check(runtime().copy_loadout().infusion.effect == 2, "GUI selects Odopi")
 	menu.call("show_aspect", 2)
-	check((menu.get("cards") as Array).size() == 6, "Six mutation cards are selectable")
+	check((menu.get("cards") as Array).size() == CATALOG.MUTATIONS.size(), "The full mutation catalog is selectable")
 	((menu.get("model_buttons") as Dictionary)[5] as Button).pressed.emit()
 	check(runtime().mutation_effect() == 5, "GUI selects Doppelganger")
 	check((menu.get("_title") as Label).text == "Mutação", "Picker title follows the selected aspect")
@@ -137,22 +142,52 @@ func _run() -> void:
 	var third: ENEMY = target(Vector2(64, 0), 9.0)
 	var fourth: ENEMY = target(Vector2(76, 0), 3.0)
 	var survivor: ENEMY = target(Vector2(88, 0))
+	for victim: ENEMY in [first_victim, second, third, fourth, survivor]:
+		victim.set_physics_process(false)
 	var attack: CardAttack = runtime().create_attack()
 	attack.apply_primary_hit(first_victim, first_victim.get_visual_center_of_mass(), Vector2.RIGHT, service.effects())
-	service._drain_blasts()
-	check(not second.is_alive() and not third.is_alive() and not fourth.is_alive(), "Cascade resolves successive kills")
+	check(second.is_alive() and service.blasts.size() == 1, "A weapon kill starts one explosion before its impact frame")
+	await ticks(9)
+	await capture("07-golem-cascade")
+	await ticks(10)
+	var second_defeated: bool = not is_instance_valid(second) or not second.is_alive()
+	var third_defeated: bool = not is_instance_valid(third) or not third.is_alive()
+	var fourth_defeated: bool = not is_instance_valid(fourth) or not fourth.is_alive()
+	check(second_defeated and third_defeated and fourth_defeated, "Cascade resolves successive kills")
 	check(is_equal_approx(survivor.resistance, 97.0) and service.blasts.is_empty(), "Cascade reaches the three-damage floor and ends without another kill")
 	check(runtime().mutation_remaining > 0.0, "Cascade kills refresh Fury")
 	await clear()
-	# I02: six swept rocks carry fifteen percent of the killing hit.
+	first_victim = target(Vector2(32, 0), 1.0)
+	second = target(Vector2(45, 0), 12.0)
+	second.set_physics_process(false)
+	service.mutation_hit(first_victim, 1.0)
+	await ticks(5)
+	check(not is_instance_valid(second) or not second.is_alive(), "An owned mutation kill also starts the golem cascade")
+	await clear()
+	first_victim = target(Vector2(32, 0), 1.0)
+	player.apply_reflected_damage(first_victim, 1.0, Vector2.RIGHT)
+	check(service.blasts.size() == 1, "Reflected player damage starts the golem cascade")
+	await clear()
+	first_victim = target(Vector2(32, 0), 1.0)
+	first_victim.take_damage(1.0)
+	check(service.blasts.is_empty(), "A death without player credit does not start an explosion")
+	await clear()
+	# I02: six light arrows carry fifteen percent of the killing hit.
 	equip(1, -1)
 	first_victim = target(Vector2(20, 0), 20.0)
 	attack = runtime().create_attack()
 	attack.damage = 20.0
-	attack.apply_primary_hit(first_victim, first_victim.get_visual_center_of_mass(), Vector2.RIGHT, service.effects())
+	var contact: Vector2 = first_victim.get_visual_center_of_mass() - Vector2(4.0, 2.0)
+	attack.apply_primary_hit(first_victim, contact, Vector2.RIGHT, service.effects())
 	var shards: Array[Node] = get_nodes_in_group(&"card_fragments")
-	check(shards.size() == 6, "A kill creates six stones")
-	check(is_equal_approx(float(shards[0].get("damage")), 3.0), "Stone damage is fifteen percent of final damage")
+	var directions: Dictionary = {}
+	for shard: Node2D in shards:
+		directions[shard.get("direction")] = true
+		check(shard.global_position.is_equal_approx(contact), "Light arrows depart from the killing projectile contact")
+		check(is_equal_approx(float(shard.get("damage")), 3.0), "Arrow damage is fifteen percent of final damage")
+	check(shards.size() == 6 and directions.size() == 6, "A kill creates six light arrows in distinct directions")
+	await ticks(7)
+	await capture("08-shard-arrows")
 	await clear()
 	# I03 and U01 respond to one credited death.
 	equip(2, 0)
@@ -166,7 +201,7 @@ func _run() -> void:
 	# I04 payload, real host attachment, friendly shot, cooldown and boss exclusion.
 	equip(3, -1)
 	attack = runtime().create_attack()
-	check(attack.slaad_carrier and not runtime().create_attack().slaad_carrier, "Slaad payload obeys its six-second clock")
+	check(attack.slaad_carrier and is_equal_approx(runtime().cooldowns[&"I04"], 3.0) and not runtime().create_attack().slaad_carrier, "Slaad payload obeys its three-second clock")
 	first_victim = target(Vector2(40, 0))
 	second = target(Vector2(105, 0))
 	attack.apply_primary_hit(first_victim, first_victim.get_visual_center_of_mass(), Vector2.RIGHT, service.effects())
@@ -180,13 +215,45 @@ func _run() -> void:
 	check(second.resistance < 100.0, "Controlled enemy projectiles damage monsters")
 	await ticks(2)
 	await capture("06-slaad")
+	runtime().tick(3.0)
+	attack = runtime().create_attack()
 	third = target(Vector2(90, 40))
 	third.set_meta(&"is_boss", true)
-	service.attach_slaad(third)
-	check(not third.has_meta(&"card_control"), "Boss-capable actors reject Slaad")
-	control.queue_free()
-	await ticks(2)
-	check(not first_victim.has_meta(&"card_control") and not first_victim.is_in_group(&"controlled_monsters"), "Host restores original control on expiration")
+	attack.apply_primary_hit(third, CONTACTS.damage_center(third), Vector2.RIGHT, service.effects())
+	check(not third.has_meta(&"card_control") and attack.slaad_available(), "Bosses reject Slaad without spending the carried payload")
+	var another_host: ENEMY = target(Vector2(32, 44))
+	attack.apply_primary_hit(another_host, CONTACTS.damage_center(another_host), Vector2.RIGHT, service.effects())
+	check(first_victim.is_in_group(&"controlled_monsters") and another_host.is_in_group(&"controlled_monsters"), "A second Slaad does not release the first host")
+	check(is_equal_approx(float(control.get("duration")), 12.0), "Slaad control lasts twelve seconds")
+	var health_before: float = first_victim.resistance
+	attack.apply_primary_hit(first_victim, CONTACTS.damage_center(first_victim), Vector2.RIGHT, service.effects())
+	check(is_equal_approx(first_victim.resistance, health_before), "Player projectiles do not wound controlled hosts")
+	control.set("elapsed", 11.96)
+	await ticks(1)
+	check(first_victim.is_alive(), "The first host survives until its own timer ends")
+	await ticks(5)
+	check(not is_instance_valid(first_victim) or not first_victim.is_alive(), "The host dies at the end of possession")
+	check(another_host.is_alive() and another_host.is_in_group(&"controlled_monsters"), "The other host keeps its own possession timer")
+	await clear()
+	# An actual Efreeti volley can infect with a side pellet.
+	controller.call("select_model", 4)
+	equip(3, -1)
+	gun.set("aim_screen_override", root.get_canvas_transform() * (player.surface_world_position() + Vector2(220, 0)))
+	gun.set("shot_recoil", 0.0)
+	gun.call("_update_rig", 0.0)
+	var muzzle: Vector2 = (gun.get_node("WeaponPivot/Muzzle") as Marker2D).global_position
+	var aim: Vector2 = gun.get("aim_direction") as Vector2
+	var side_contact: Vector2 = muzzle + aim * 3.0 + aim.orthogonal() * 3.6 + aim.rotated(deg_to_rad(18.0)) * 65.0
+	var side_victim: ENEMY = target(side_contact - player.global_position)
+	side_victim.global_position += side_contact - CONTACTS.damage_center(side_victim)
+	side_victim.set_physics_process(false)
+	var middle_pellet: Node2D = gun.call("fire_once") as Node2D
+	check(middle_pellet != null, "Efreeti fires the charged volley")
+	await ticks(15)
+	check(side_victim.is_in_group(&"controlled_monsters"), "An off-axis Efreeti pellet delivers Slaad")
+	await capture("10-efreeti-slaad")
+	controller.call("cancel_attacks")
+	controller.call("select_model", 0)
 	await clear()
 	# I05: each snapshot preserves its own phase.
 	equip(4, -1)
@@ -246,11 +313,16 @@ func _run() -> void:
 	# U03: harmless warning first, delayed area damage.
 	equip(-1, 2)
 	first_victim = target(Vector2(30, 0))
-	service._physics_process(0.01)
+	first_victim.reset_physics_interpolation()
+	await ticks(1)
 	check(first_victim.resistance == 100.0 and service.mouths.size() == 1, "Carnivorous circle warns before damaging")
-	service._tick_mouths(0.24)
+	check(EFFECTS.VISUAL.BITE_FRAMES.get_frame_count(&"bite") == 15 and EFFECTS.VISUAL.BITE_FRAMES.get_frame_texture(&"bite", 5).get_size() == Vector2(62, 72), "The authored bite has fifteen resized frames")
+	await ticks(13)
 	check(first_victim.resistance == 100.0, "Warning lasts at least 0.25 seconds")
-	service._tick_mouths(0.02)
+	for index: int in range(4):
+		if first_victim.resistance < 100.0:
+			break
+		await ticks(1)
 	check(first_victim.resistance == 94.0, "Mouth deals area damage after its warning")
 	await capture("02-carnivorous")
 	await clear()
@@ -267,19 +339,49 @@ func _run() -> void:
 	check((service.get("_status") as Label).text.begins_with("F  "), "Mutation hint displays the F action key")
 	await capture("03-mandrake")
 	await clear()
-	# U05: movement creates a finite poison trail, idle does not.
+	# U05: all three attacks resolve while the player is stationary.
+	player.body.facing = Vector2.RIGHT
 	equip(-1, 4)
-	for index: int in range(4):
-		player.position.x += 13.0
-		await ticks(1)
-	check(not service.clouds.is_empty(), "Movement leaves poison smoke")
-	var cloud_count: int = service.clouds.size()
-	await ticks(10)
-	check(service.clouds.size() == cloud_count, "Idle does not emit more trail")
-	first_victim = target(Vector2.ZERO)
-	await ticks(60)
-	check(first_victim.resistance < 100.0, "Poison smoke damages overlapping enemies")
-	await capture("04-poison-trail")
+	await ticks(2)
+	check(runtime().copy_loadout().mutation.rarity == CardDefinition.Rarity.LEGENDARY, "Hero Sword is a legendary mutation")
+	check(service.has_node("HeroSword") and service.get_node("HeroSword").get("_move") == &"idle", "Hero Sword floats beside an idle player")
+	var idle_sword: Node2D = service.get_node("HeroSword") as Node2D
+	check(idle_sword.global_position.distance_to(player.surface_world_position()) >= 30.0, "Idle sword leaves room beside Nox")
+	first_victim = target(Vector2(22, 0))
+	first_victim.set_physics_process(false)
+	var outside: ENEMY = target(Vector2(136, 0))
+	outside.set_physics_process(false)
+	await ticks(29)
+	check(is_equal_approx(first_victim.resistance, 96.0) and is_equal_approx(outside.resistance, 100.0), "Short cut hits exactly once without reaching outside the circle")
+	await capture("04-hero-sword")
+	equip(-1, -1)
+	await ticks(2)
+	check(not service.has_node("HeroSword"), "Unequipping removes the sword and cancels its attacks")
+	await clear()
+	equip(-1, 4)
+	first_victim = target(Vector2(90, 0))
+	first_victim.set_physics_process(false)
+	var stationary: Vector2 = player.global_position
+	await ticks(31)
+	var pursuing: Node2D = service.get_node("HeroSword") as Node2D
+	check(pursuing.get("_move") == &"stab" and is_equal_approx(first_victim.resistance, 93.0), "Stab targets a single monster farther away")
+	check(player.global_position == stationary and pursuing.global_position.distance_to(player.surface_world_position()) > 48.0, "Sword flies away to attack without player movement")
+	first_victim.queue_free()
+	await ticks(90)
+	check(pursuing.global_position.distance_to(player.surface_world_position()) < 35.0, "Sword returns to its idle position after losing the target")
+	equip(-1, -1)
+	await clear()
+	equip(-1, 4)
+	var group: Array[ENEMY] = []
+	for point: Vector2 in [Vector2(25, 0), Vector2(50, -15), Vector2(45, 20)]:
+		var victim: ENEMY = target(point)
+		victim.set_physics_process(false)
+		group.append(victim)
+	await ticks(26)
+	check(service.get_node("HeroSword").get("_move") == &"longcut", "Three nearby enemies trigger the long cut")
+	for victim: ENEMY in group:
+		check(is_equal_approx(victim.resistance, 94.0), "The long cut hits enemies around the sword")
+	equip(-1, -1)
 	await clear()
 	# U06: manual disappearance, shooting suppression, and a saved lethal hit.
 	equip(-1, 5)
@@ -304,14 +406,14 @@ func _run() -> void:
 	player.receive_projectile_damage(3, first_victim)
 	check(not player.dead and is_equal_approx(player.health, 6.0) and player.mutation_invisible, "Ready Doppelganger prevents death and restores ten percent health")
 	await clear()
-	# All six existing manifestations support each of the thirty I/U selections.
+	# Every manifestation supports each of the thirty I/U selections.
 	service.invisible_remaining = 0.0
 	player.mutation_invisible = false
 	player.health = 60.0
-	for manifest: int in range(6):
+	for manifest: int in (controller.call("available_models") as Array).size():
 		controller.call("select_model", manifest)
-		for infusion: int in range(5):
-			for mutation: int in range(6):
+		for infusion: int in range(CATALOG.INFUSIONS.size()):
+			for mutation: int in range(CATALOG.MUTATIONS.size()):
 				equip(infusion, mutation)
 				attack = runtime().create_attack()
 				check(attack != null and attack.infusion_effect == infusion and runtime().mutation_effect() == mutation, "Selected trio has its own valid combat snapshot")

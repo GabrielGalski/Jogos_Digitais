@@ -7,23 +7,18 @@ const THEME: Theme = preload("res://resources/visual/pack_opening_theme.tres")
 const DESIGN_SIZE: Vector2 = Vector2(960.0, 540.0)
 
 var _aspect: int = 0
-var _slot_images: Array[TextureRect] = []
+var _slot_faces: Array[CardFace] = []
 var _slot_names: Array[Label] = []
 var _remove: Button
 var controller: Node
-var cards: Array[CardTableCard] = []
+var cards: Array[CardFace] = []
 var model_buttons: Dictionary[int, Button] = {}
 var manifestation_slot: Button
 var _stage: Control
 var _slots: HBoxContainer
 var _picker: VBoxContainer
 var _card_row: HBoxContainer
-var _slot_image: TextureRect
-var _slot_name: Label
 var _title: Label
-var _geometry: Rect2
-var _finishes: Dictionary = {}
-var _art_paths: Dictionary[StringName, String] = {}
 var _previous_pause: bool = false
 var _previous_mouse_mode: Input.MouseMode = Input.MOUSE_MODE_HIDDEN
 var _world: CanvasItem = null
@@ -43,7 +38,6 @@ func _ready() -> void:
 	if _world != null:
 		_world_visible = _world.visible
 		_world.hide()
-	_read_art()
 	_build()
 	_refresh_slot()
 	_fit()
@@ -67,7 +61,7 @@ func _input(event: InputEvent) -> void:
 	if key == null:
 		return
 	if key.pressed and not key.echo:
-		if key.keycode == KEY_BACKSPACE or key.physical_keycode == KEY_BACKSPACE:
+		if key.keycode in [KEY_I, KEY_BACKSPACE] or key.physical_keycode in [KEY_I, KEY_BACKSPACE]:
 			queue_free()
 		elif key.keycode == KEY_ESCAPE or key.physical_keycode == KEY_ESCAPE:
 			if _picker.visible:
@@ -75,14 +69,6 @@ func _input(event: InputEvent) -> void:
 			else:
 				queue_free()
 	get_viewport().set_input_as_handled()
-
-
-func _read_art() -> void:
-	_geometry = CATALOG.art_bounds()
-	var finishes: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://resources/cards/card_table_finishes.json")) as Dictionary
-	_finishes = finishes["cards"] as Dictionary
-	_art_paths = CATALOG.art_paths()
-
 
 
 func _build() -> void:
@@ -133,25 +119,27 @@ func _build() -> void:
 		content.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		content.add_theme_constant_override("separation", 8)
 		inset.add_child(content)
-		var aspect: Label = _label(["Manifestação", "Infusão", "Mutação"][index], 20)
+		var aspect: Label = _label(CardFace.ASPECT_NAMES[index], 20)
 		aspect.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		content.add_child(aspect)
-		var image: TextureRect = TextureRect.new()
-		image.custom_minimum_size = Vector2(128.0, 198.0)
-		image.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-		image.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-		image.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
-		image.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		content.add_child(image)
-		_slot_images.append(image)
+		var center: CenterContainer = CenterContainer.new()
+		center.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		content.add_child(center)
+		var area: Control = Control.new()
+		area.custom_minimum_size = Vector2(120.0, 220.0)
+		area.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		center.add_child(area)
+		var card: CardFace = CardFace.new()
+		card.position = area.custom_minimum_size * 0.5
+		card.scale = Vector2.ONE * (area.custom_minimum_size.x / CardFace.ART_BOUNDS.size.x)
+		area.add_child(card)
+		_slot_faces.append(card)
 		var caption: Label = _label("", 15)
 		caption.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		content.add_child(caption)
 		_slot_names.append(caption)
 		if index == 0:
 			manifestation_slot = slot
-			_slot_image = image
-			_slot_name = caption
 
 	_picker = VBoxContainer.new()
 	_picker.name = "ManifestationPicker"
@@ -208,7 +196,7 @@ func show_aspect(aspect: int) -> void:
 	_remove.visible = aspect != 0
 	_slots.hide()
 	_picker.show()
-	_title.text = ["Manifestação", "Infusão", "Mutação"][aspect]
+	_title.text = CardFace.ASPECT_NAMES[aspect]
 	_build_cards()
 
 
@@ -233,41 +221,31 @@ func _build_cards() -> void:
 		definitions.assign(CATALOG.INFUSIONS)
 	else:
 		definitions.assign(CATALOG.MUTATIONS)
+	var gap: float = float(_card_row.get_theme_constant("separation"))
+	var card_width: float = minf(136.0, (_picker.custom_minimum_size.x - gap * float(definitions.size() - 1)) / float(maxi(definitions.size(), 1)))
 	var rewards: Node = get_node("/root/BoosterRewards")
 	for index: int in definitions.size():
 		var definition: CardDefinition = definitions[index]
-		var code: StringName = CATALOG.alias(definition)
 		var button: Button = _button("", _choose.bind(index))
-		button.tooltip_text = "%s · Obtidas em boosters: %d" % [definition.display_name, rewards.call("count", definition.card_id)]
-		button.custom_minimum_size = Vector2(136.0, 240.0)
+		button.tooltip_text = "%s\n%s\nObtidas em boosters: %d" % [
+			definition.display_name, definition.description, rewards.call("count", definition.card_id)]
+		button.custom_minimum_size = Vector2(card_width, 240.0)
 		button.toggle_mode = true
 		for state: String in ["normal", "hover", "pressed", "focus", "hover_pressed"]:
 			button.add_theme_stylebox_override(state, StyleBoxEmpty.new())
 		_card_row.add_child(button)
 		model_buttons[index] = button
-		var card: CardTableCard = CardTableCard.new()
-		var finish: Dictionary = _finishes.get(String(code), {}) as Dictionary
-		var tint: Color = Color(str(finish["tint"])) if finish.has("tint") else Color.TRANSPARENT
-		card.configure(load(_art_paths[code]) as Texture2D, String(code), 0, 0, _geometry, tint)
-		card.normal_size = Vector2(120.0, 120.0 * _geometry.size.y / _geometry.size.x)
-		card.target_size = card.normal_size
-		card.position = Vector2(68.0, 108.0)
-		card.target_position = card.position
+		var card: CardFace = CardFace.new()
 		button.add_child(card)
+		card.configure(definition)
 		cards.append(card)
 		var selected_marker: ColorRect = ColorRect.new()
 		selected_marker.name = "SelectedMarker"
-		selected_marker.position = Vector2(44.0, 232.0)
+		selected_marker.position = Vector2((card_width - 48.0) * 0.5, 232.0)
 		selected_marker.size = Vector2(48.0, 2.0)
 		selected_marker.color = Color("#f4dca0")
 		selected_marker.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		button.add_child(selected_marker)
-		if code == &"M08":
-			var caption: Label = _label(definition.display_name, 14)
-			caption.position = Vector2(0.0, 204.0)
-			caption.size = Vector2(136.0, 22.0)
-			caption.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-			button.add_child(caption)
 	_refresh_selection()
 
 
@@ -283,9 +261,11 @@ func _refresh_slot() -> void:
 	var definitions: Array[CardDefinition] = [loadout.manifestation, loadout.infusion, loadout.mutation]
 	for index: int in range(3):
 		var definition: CardDefinition = definitions[index]
-		var code: StringName = CATALOG.alias(definition)
-		_slot_images[index].texture = load(_art_paths[code]) as Texture2D if _art_paths.has(code) else null
-		_slot_names[index].text = "Vazio" if definition == null else definition.display_name if code == &"M08" else ""
+		var face: CardFace = _slot_faces[index]
+		face.visible = definition != null
+		if definition != null:
+			face.configure(definition)
+		_slot_names[index].text = "Vazio" if definition == null else ""
 		_slot_names[index].visible = not _slot_names[index].text.is_empty()
 
 
@@ -301,15 +281,7 @@ func _refresh_selection() -> void:
 		var button: Button = model_buttons[index]
 		button.button_pressed = chosen
 		(button.get_node("SelectedMarker") as ColorRect).visible = chosen
-		var card: CardTableCard = cards[index]
-		card.target_position = Vector2(68.0, 100.0 if chosen else 108.0)
-		card.target_size = card.normal_size * (1.035 if chosen else 1.0)
-
-
-func _process(_delta: float) -> void:
-	if not _picker.visible:
-		return
-	for card: CardTableCard in cards:
-		var button: Button = card.get_parent() as Button
-		var relative: Vector2 = (card.get_local_mouse_position() / card.normal_size * 2.0).clamp(-Vector2.ONE, Vector2.ONE)
-		card.target_tilt = Vector2(-relative.y, relative.x) * 0.045 if button.is_hovered() else Vector2.ZERO
+		var card: CardFace = cards[index]
+		var width: float = button.custom_minimum_size.x
+		card.position = Vector2(width * 0.5, 100.0 if chosen else 108.0)
+		card.scale = Vector2.ONE * ((width - 10.0) / CardFace.ART_BOUNDS.size.x) * (1.035 if chosen else 1.0)

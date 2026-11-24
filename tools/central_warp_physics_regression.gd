@@ -1,6 +1,8 @@
 extends SceneTree
 ## Real input, capsule collision, projected relief and pixel checks in the open map.
 
+const CONTACTS: Script = preload("res://scripts/combat/projectile_enemy_contacts.gd")
+const WARP_ART: Script = preload("res://scripts/visual/warp_visual.gd")
 const OUT: String = "res://output/central_warp_physics/"
 var failures: Array[String] = []
 
@@ -112,7 +114,9 @@ func _run() -> void:
 	enemy.add_child(enemy_shape)
 	arena.add_child(enemy)
 	await _ticks(2)
-	for pillar: Node2D in pillars:
+	for index: int in range(pillars.size()):
+		var pillar: Node2D = pillars[index] as Node2D
+		check((pillar.get_node("PillarSprite") as Sprite2D).texture == WARP_ART.CENTRAL_PILLARS[index], "Each pillar uses its authored cutout")
 		var solid: StaticBody2D = pillar.get_node("SolidBase") as StaticBody2D
 		var capsule: CapsuleShape2D = (solid.get_node("Footprint") as CollisionShape2D).shape as CapsuleShape2D
 		check(is_equal_approx(capsule.height, 20 * display_scale) and is_equal_approx(capsule.radius, 5 * display_scale), "Physical bases follow the artwork scale")
@@ -121,6 +125,17 @@ func _run() -> void:
 		check(enemy.test_move(Transform2D(0, foot + Vector2(-32, 0)), Vector2(64, 0)), "Enemy physics is blocked by " + str(pillar.name))
 		check(not player.test_move(Transform2D(0, foot + Vector2(-32, -19)), Vector2(64, 0)), "There is a passage behind " + str(pillar.name))
 		check(pillar.z_index == player.z_index and not pillar.z_as_relative, "Pillar participates in actor depth sorting")
+		var cover: StaticBody2D = pillar.get_node("PillarSprite/ProjectileCover") as StaticBody2D
+		var shot_start: Vector2 = foot + Vector2(-26.0, -35.0) * display_scale
+		var shot_end: Vector2 = foot + Vector2(26.0, -35.0) * display_scale
+		var space: PhysicsDirectSpaceState2D = arena.get_world_2d().direct_space_state
+		var shot: Dictionary = CONTACTS.terrain_ray(self, space, shot_start, shot_end, 1)
+		check(shot.get("collider") == cover, "A shot hits the visible shaft at " + pillar.name)
+		check(CONTACTS.wall_reflection(shot, Vector2.RIGHT).x < 0.0, "The pillar surface supports ricochet")
+		var behind: Dictionary = CONTACTS.terrain_ray(self, space, shot_start + Vector2(0, 48) * display_scale,
+			shot_end + Vector2(0, 48) * display_scale, 1)
+		check(behind.is_empty(), "The empty pixels below the pillar remain clear for shots")
+
 		enemy.position = foot + Vector2(96, 96)
 	enemy.queue_free()
 	if "--capture" in OS.get_cmdline_user_args():
@@ -148,16 +163,22 @@ func _run() -> void:
 		var plaza_pixel: Color = _pixel(image, gate.global_position + Vector2(-120, 0))
 		var path_pixel: Color = _pixel(image, gate.global_position + Vector2(-250, 0))
 		check(Vector3(plaza_pixel.r - path_pixel.r, plaza_pixel.g - path_pixel.g, plaza_pixel.b - path_pixel.b).length() < 0.012, "GPU plaza and path have matching colours")
-		var original: ShaderMaterial = (gate.get_node("Presentation").get("plate") as Sprite2D).material as ShaderMaterial
+		var plate: Sprite2D = gate.get_node("Presentation/Stone") as Sprite2D
+		var split_texture: Texture2D = plate.texture
 		player.hide()
 		var split: Image = await _frame()
 		split.save_png(OUT + "split_pillars.png")
-		original.set_shader_parameter(&"hide_pillars", false)
+		plate.texture = WARP_ART.CENTRAL_TEXTURE
 		platform.hide()
 		var whole: Image = await _frame()
 		whole.save_png(OUT + "whole_sprite.png")
-		check(split.get_data() == whole.get_data(), "Separating the pillars preserves every source pixel")
-		original.set_shader_parameter(&"hide_pillars", true)
+		var canvas_scale: Vector2 = Vector2(split.get_size()) / root.get_visible_rect().size
+		var left: Vector2 = (plate.get_global_transform_with_canvas() * Vector2.ZERO) * canvas_scale
+		var right: Vector2 = (plate.get_global_transform_with_canvas() * plate.texture.get_size()) * canvas_scale
+		var warp_pixels: Rect2i = Rect2i(Vector2i(left.floor()), Vector2i(right.ceil() - left.floor()))
+		check(split.get_region(warp_pixels).get_data() == whole.get_region(warp_pixels).get_data(),
+			"Separating the pillars preserves every pixel in the warp")
+		plate.texture = split_texture
 		platform.show()
 		player.show()
 		var first_pillar: Node2D = pillars[0] as Node2D

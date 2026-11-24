@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="ManifestationCard" format=3]
+
+[ext_resource type="Script" path="res://scripts/cards/manifestation_card.gd" id="card"]
+
+[resource]
+script = ExtResource("card")
+card_id = &"M11"
+display_name = "Brasa em Espiral"
+description = "Dispara brasas em sequência. A rajada se abre à medida que avança."
+rarity = 0
+damage = 3.0
+fire_interval = 0.19
+projectile_speed = 235.0
+projectile_lifetime = 0.72
+impact_impulse = 24.0

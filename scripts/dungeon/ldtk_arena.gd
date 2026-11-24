@@ -16,6 +16,7 @@ const BRIDGES: Script = preload("res://scripts/dungeon/ldtk_bridges.gd")
 const CLIFF_COLLISIONS: Script = preload("res://scripts/dungeon/ldtk_cliff_collisions.gd")
 const TREE_SHADOWS: Script = preload("res://scripts/visual/tree_shadows.gd")
 const BORDERS: Script = preload("res://scripts/dungeon/ldtk_borders.gd")
+const LAMPS: Script = preload("res://scripts/dungeon/ldtk_lamps.gd")
 const AMBIENT_AREAS: Script = preload("res://scripts/dungeon/ldtk_ambient_areas.gd")
 const WATER_AREAS: Script = preload("res://scripts/dungeon/ldtk_water_areas.gd")
 const WATER_SURFACE: Script = preload("res://scripts/visual/water_surface.gd")
@@ -40,6 +41,7 @@ const CARD_TRADERS: Script = preload("res://scripts/dungeon/ldtk_card_traders.gd
 const OPEN_WORLD_PEDESTAL_SCALE: float = 1.5
 const FINAL_PORTAL: Script = preload("res://scripts/dungeon/final_portal.gd")
 const ELEMENTAL_BOSS_JOURNEY: Script = preload("res://scripts/bosses/elemental_golem/boss_journey.gd")
+const DRAGON_ENCOUNTER: Script = preload("res://scripts/bosses/dragon/dragon_encounter.gd")
 const ELEVATION: Script = preload("res://scripts/dungeon/ldtk_elevation.gd")
 const PLAYER_DEFEAT: Script = preload("res://scripts/visual/player_defeat.gd")
 const TERRAIN_CLOUDS: Script = preload("res://scripts/visual/terrain_cloud_shadows.gd")
@@ -191,6 +193,7 @@ func _ready() -> void:
 	add_child(traders)
 	traders.call("build", _level_layers, get_node("Nox"), _terrain_and_warp_height)
 	if level_name == "Room_2":
+		DRAGON_ENCOUNTER.build(_level_layers, get_node("Nox") as Player, is_ground_surface_point, _terrain_and_warp_height, self)
 		var boss_journey: Node = ELEMENTAL_BOSS_JOURNEY.new()
 		boss_journey.name = "ElementalBossJourney"
 		add_child(boss_journey)
@@ -322,7 +325,8 @@ func _build_ldtk_level() -> bool:
 		if BRIDGES.is_bridge_decoration(layer_name):
 			continue
 		var is_floor: bool = layer_name == "Floor" or layer_name.begins_with("Floor_")
-		if layer_name.begins_with("Walls") or layer_name.begins_with("Objects") or layer_name in ["Borders", "Barriers"]:
+		var project_ramps: bool = layer_name not in ["Floor_Paths", "Floor_GrassBorders"]
+		if layer_name.begins_with("Walls") or layer_name.begins_with("Objects") or layer_name in ["Borders", "Barriers", "Fences"]:
 			continue
 		var source_id: int = int(layer.get("__tilesetDefUid", -1))
 		# A copied soil atlas also gives the LDtk room template the same ground effect.
@@ -365,7 +369,12 @@ func _build_ldtk_level() -> bool:
 				atlas.create_tile(atlas_cell)
 			var depth: int = int(stack_counts.get(cell, 0))
 			stack_counts[cell] = depth + 1
-			var raised: int = roundi(float(_elevation.call("height_at", to_global(Vector2(cell * TILE_SIZE) + Vector2.ONE * 8.0)))) if is_floor or layer_name == "TerrainStairs" else 0
+			var raised: int = 0
+			# The pit atlas already draws the raised ledge and its faces in place.
+			if (is_floor and layer_name != "Floor_Pit") or layer_name == "TerrainStairs":
+				var tile_center: Vector2 = to_global(Vector2(cell * TILE_SIZE) + Vector2.ONE * 8.0)
+				# Keep roads and their painted borders together at the ramp approaches.
+				raised = roundi(float(_elevation.call("height_at", tile_center, project_ramps)))
 			var render_key: String = "%d_%d" % [depth, raised]
 			if not layer_nodes.has(render_key):
 				var tile_layer: TileMapLayer = TileMapLayer.new()
@@ -426,7 +435,13 @@ func _build_ldtk_level() -> bool:
 	barriers.name = "Barriers"
 	barriers.set("layer_name", "Barriers")
 	add_child(barriers)
-	barriers.call("build", layers, tileset_defs, _textures)
+	barriers.call("build", layers, tileset_defs, _textures, Callable(_elevation, "height_at"))
+	var fences: Node2D = BORDERS.new() as Node2D
+	fences.name = "Fences"
+	fences.set("layer_name", "Fences")
+	add_child(fences)
+	fences.call("build", layers, tileset_defs, _textures)
+	LAMPS.build(self, layers, Callable(_elevation, "height_at"))
 	var leaves: Node2D = LEAVES.new() as Node2D
 	leaves.name = "ForegroundLeaves"
 	add_child(leaves)
@@ -485,7 +500,7 @@ func _build_ldtk_level() -> bool:
 	_warps = WARPS.new() as Node2D
 	_warps.name = "Warps"
 	add_child(_warps)
-	_warps.call("build",layers,_textures)
+	_warps.call("build",layers)
 	_arrival_gate = _warps.call("entrance",arrival_warp_id) as Node2D
 	_warps.connect("travel_requested",func(gate: Node2D) -> void: call_deferred("_begin_warp_travel",gate))
 	return true
@@ -557,6 +572,7 @@ func _layer_z_index(layer_name: String) -> int:
 		"Floor_StonePaths": return -17
 		"Floor_Paths": return -18
 		"Floor_WarpPlaza": return -18
+		"Floor_Pit": return -15
 		"Floor_Bridges": return -16
 		"TerrainFaces": return -17
 		"TerrainCliffRim": return -18
@@ -759,6 +775,20 @@ func _begin_warp_travel(gate: Node2D) -> void:
 		warp_travel_failed.emit(last_warp_error)
 		return
 	_pending_route["restart_game"] = bool((gate.get("data") as Dictionary).get("RestartGame", false))
+	_start_warp_departure()
+
+
+func travel_inside_room(gate: Node2D, destination: Vector2) -> void:
+	if _travel_busy or not is_instance_valid(gate) or not bool(gate.call("can_interact")):
+		return
+	if not destination.is_finite() or not is_ground_surface_point(destination):
+		return
+	_pending_route = {"map_path": map_path, "level_name": level_name,
+		"arrival_warp": arrival_warp_id, "spawn": to_local(destination) - Vector2(0, 3)}
+	_start_warp_departure()
+
+
+func _start_warp_departure() -> void:
 	_travel_busy = true
 	entry_complete = false
 	_start_warp_effect(false)

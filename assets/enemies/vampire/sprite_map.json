@@ -1,0 +1,53 @@
+{
+	"canvas_px": [
+		64,
+		64
+	],
+	"source_row_order": [
+		"down",
+		"up",
+		"left",
+		"right"
+	],
+	"frame_path": "frames/{animation}/{direction}/{frame:02d}.png",
+	"first_frame": 1,
+	"animations": {
+		"idle": {
+			"source": "Vampires3_Idle_full.png",
+			"frames_per_direction": 4,
+			"loop": true
+		},
+		"walk": {
+			"source": "Vampires3_Walk_full.png",
+			"frames_per_direction": 6,
+			"loop": true
+		},
+		"run": {
+			"source": "Vampires3_Run_full.png",
+			"frames_per_direction": 8,
+			"loop": true
+		},
+		"attack": {
+			"source": "Vampires3_Attack_full.png",
+			"frames_per_direction": 12,
+			"loop": false
+		},
+		"attack_magic": {
+			"source": "Vampires3_Attack_magic.png",
+			"frames_per_direction": 12,
+			"loop": false
+		},
+		"hurt": {
+			"source": "Vampires3_Hurt_full.png",
+			"frames_per_direction": 4,
+			"loop": false
+		},
+		"death": {
+			"source": "Vampires3_Death_full.png",
+			"frames_per_direction": 11,
+			"loop": false
+		}
+	},
+	"attack_magic_first_frame_empty": true,
+	"attack_already_contains_magic": true
+}

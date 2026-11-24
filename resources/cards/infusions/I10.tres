@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="InfusionCard" format=3]
+
+[ext_resource type="Script" path="res://scripts/cards/infusion_card.gd" id="card"]
+
+[resource]
+script = ExtResource("card")
+card_id = &"CARD_INF_010"
+display_name = "Marca do Algoz"
+description = "Marca um inimigo ao acertá-lo e reduz o dano que ele causa. Novos acertos nele renovam a marca."
+rarity = 2
+effect = 9

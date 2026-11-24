@@ -3,6 +3,9 @@ extends Node2D
 const MAP_SOURCE: Script = preload("res://scripts/bosses/elemental_golem/arena_map_source.gd")
 const PAINTED_FLOOR: Script = preload("res://scripts/bosses/elemental_golem/arena_painted_floor.gd")
 const TILES: Script = preload("res://scripts/bosses/elemental_golem/arena_tiles.gd")
+const FACADE_FADE: Shader = preload("res://shaders/golem_facade_fade.gdshader")
+const FLOOR_PALETTE: Shader = preload("res://shaders/golem_floor_palette.gdshader")
+const MARKER: Script = preload("res://scripts/visual/booster_exclamation.gd")
 const CAMERA_MARGIN: float = 256.0
 var bounds: Rect2 = Rect2()
 var hall: Rect2 = Rect2()
@@ -13,10 +16,8 @@ var platforms: Array[Rect2] = []
 var landing_point: Vector2 = Vector2.INF:
 	set(value):
 		landing_point = value
-		queue_redraw() # Also clear an interrupted leap's marker when combat stops.
-var impact_position: Vector2 = Vector2.ZERO
-var impact_remaining: float = 0.0
-var _elapsed: float = 0.0
+		_update_landing_warning()
+var _landing_warning: AnimatedSprite2D
 var _grid: int = 8
 var _grid_origin: Vector2 = Vector2.ZERO
 var _cells: Dictionary[Vector2i,int] = {}
@@ -98,15 +99,43 @@ func load_map(path: String, level_name: String) -> bool:
 
 func _ready() -> void:
 	texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
-	var backdrop: Polygon2D = Polygon2D.new()
-	backdrop.name = "Void"
-	var area: Rect2 = bounds.grow(2048)
-	backdrop.polygon = PackedVector2Array([area.position,Vector2(area.end.x,area.position.y),area.end,Vector2(area.position.x,area.end.y)])
-	backdrop.color = Color.BLACK
-	backdrop.z_index = -100
-	add_child(backdrop)
+	_add_backdrop("Void", bounds.grow(2048), Color("171721"), -100)
+	var chamber: Rect2 = platforms[0].merge(platforms[2]).merge(platforms[6]).merge(platforms[8])
+	_add_backdrop("ArenaVoid", chamber, Color.BLACK, -99)
 	_tiles.call("build",self,_layers,_tilesets,bounds.position)
+	var facade: ShaderMaterial = ShaderMaterial.new()
+	facade.shader = FACADE_FADE
+	facade.set_shader_parameter(&"room_origin", to_global(bounds.position))
+	var floor_palette: ShaderMaterial = ShaderMaterial.new()
+	floor_palette.shader = FLOOR_PALETTE
+	for child: Node in get_children():
+		var layer: TileMapLayer = child as TileMapLayer
+		if layer == null: continue
+		var layer_name: String = str(layer.name)
+		if layer_name.begins_with("GolemArenaGray_"):
+			layer.material = facade
+		elif layer_name.begins_with("Floor_Elemental_") or layer_name.begins_with("PlatformUnderside_") or layer_name.begins_with("TerrainCliffRim_"):
+			layer.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+			layer.material = floor_palette
 	_build_walls()
+	_landing_warning = AnimatedSprite2D.new()
+	_landing_warning.name = "LandingWarning"
+	_landing_warning.sprite_frames = MARKER.marker_frames(get_tree(), true)
+	_landing_warning.scale = Vector2.ONE * 0.75
+	_landing_warning.z_index = 9
+	add_child(_landing_warning)
+	_update_landing_warning()
+
+
+func _add_backdrop(node_name: String, area: Rect2, color: Color, depth: int) -> void:
+	var backdrop: Polygon2D = Polygon2D.new()
+	backdrop.name = node_name
+	backdrop.polygon = PackedVector2Array([
+		area.position, Vector2(area.end.x, area.position.y), area.end, Vector2(area.position.x, area.end.y),
+	])
+	backdrop.color = color
+	backdrop.z_index = depth
+	add_child(backdrop)
 
 
 func _merge_walls(columns: int, rows: int) -> void:
@@ -204,23 +233,11 @@ func safe_floor_near(point: Vector2) -> Vector2:
 	return to_global(candidate if _value_at(candidate) == region else _closest_floor(candidate,region))
 
 
-func landing_impact(point: Vector2) -> void:
-	impact_position = to_local(point)
-	impact_remaining = 0.42
-	landing_point = Vector2.INF
-
-
-func _process(delta: float) -> void:
-	_elapsed += delta
-	var was_impacting: bool = impact_remaining > 0.0
-	impact_remaining = maxf(0.0, impact_remaining - delta)
-	if was_impacting or landing_point.is_finite(): queue_redraw()
-
-
-func _draw() -> void:
-	if landing_point.is_finite():
-		var local: Vector2 = to_local(landing_point)
-		draw_arc(local, 23.0 + sin(_elapsed*20.0)*2.0, 0, TAU, 24, Color("e9c692"), 1.0)
-	if impact_remaining > 0.0:
-		var progress: float = 1.0 - impact_remaining / 0.42
-		draw_arc(impact_position, 12.0 + progress * 38.0, 0, TAU, 24, Color(0.8,0.72,0.86,1.0-progress), 2.0)
+func _update_landing_warning() -> void:
+	if _landing_warning == null: return
+	_landing_warning.visible = landing_point.is_finite()
+	if _landing_warning.visible:
+		_landing_warning.position = to_local(landing_point).round()
+		_landing_warning.play(&"idle")
+	else:
+		_landing_warning.stop()

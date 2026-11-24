@@ -5,6 +5,11 @@ signal defeated
 const SEGMENT: Script = preload("res://scripts/enemies/flying_centipede_segment.gd")
 const CONTACTS: Script = preload("res://scripts/combat/projectile_enemy_contacts.gd")
 const ATLAS: Texture2D = preload("res://assets/enemies/flying_centipede/spritesheet.png")
+const SFX: Script = preload("res://scripts/audio/horde_audio.gd")
+const CHEWING: AudioStream = preload("res://assets/audio/enemies/elite/flying_centipede/approach_loop.wav")
+const HIT_PLAYER: AudioStream = preload("res://assets/audio/enemies/elite/flying_centipede/hit_player.wav")
+const DEFEAT: AudioStream = preload("res://assets/audio/enemies/elite/flying_centipede/defeat.wav")
+const CHEW_RANGE: float = 235.0
 const SEGMENT_COUNT: int = 8
 const NECK_SPACING: float = 17.0
 const BODY_SPACING: float = 14.0
@@ -20,6 +25,7 @@ const CONTACT_DAMAGE: int = 6
 enum Flight { CIRCLE, DIVE, CHARGE, RETREAT }
 
 var player: Player
+var sfx: SFX
 var entry_heading: Vector2 = Vector2.RIGHT
 var entry_distance: float = 175.0
 var arena_origin: Vector2
@@ -43,6 +49,7 @@ var _charge_aim: Vector2
 var _retreat_distance: float = 0.0
 var _age: float = 0.0
 var _contact_spent: bool = false
+var _chewing: AudioStreamPlayer2D
 
 
 func _ready() -> void:
@@ -56,6 +63,14 @@ func _ready() -> void:
 	head = _new_art(0)
 	add_child(head)
 	head.position = _previous_subject - _heading * entry_distance
+	_chewing = AudioStreamPlayer2D.new()
+	_chewing.stream = CHEWING
+	_chewing.bus = SFX.ELITE_BUS
+	_chewing.max_distance = SFX.ELITE_RANGE
+	_chewing.attenuation = 0.0
+	_chewing.volume_db = -60.0
+	head.add_child(_chewing)
+	_chewing.play()
 	for index: int in range(SEGMENT_COUNT):
 		var segment: SEGMENT = SEGMENT.new()
 		segment.name = "Segment_%d" % (index + 1)
@@ -88,6 +103,9 @@ func _player_center() -> Vector2:
 func _physics_process(delta: float) -> void:
 	if not is_instance_valid(player) or player.dead or player.intro_locked:
 		return
+	for segment: SEGMENT in segments:
+		if segment.is_in_group(&"immobilized_enemies"):
+			return
 	var subject: Vector2 = _player_center()
 	var charging: bool = flight == Flight.CHARGE
 	var before: PackedVector2Array = PackedVector2Array()
@@ -145,12 +163,23 @@ func _physics_process(delta: float) -> void:
 				_orbit_turn = 0.0
 	_speed = move_toward(_speed, next_speed, 240.0 * delta)
 	head.position += _heading * _speed * delta
+	_update_chewing(delta, head.position.distance_to(subject))
 	_trail.append(head.position)
 	_update_joints()
 	if not before.is_empty():
 		_check_charge_contact(before, subject)
 	_previous_subject = subject
 	queue_redraw()
+
+
+func _update_chewing(delta: float, distance: float) -> void:
+	var proximity: float = 1.0 - smoothstep(22.0, CHEW_RANGE, distance)
+	var volume: float = linear_to_db(maxf(0.001, proximity * db_to_linear(-5.0)))
+	var pace: float = 1.35 if flight in [Flight.DIVE, Flight.CHARGE] else 0.90
+	_chewing.volume_db = lerpf(_chewing.volume_db, volume, 1.0 - exp(-18.0 * delta))
+	_chewing.pitch_scale = move_toward(_chewing.pitch_scale, pace, delta * 2.5)
+	if is_instance_valid(sfx) and _chewing.volume_db > -30.0:
+		sfx.feature_elite(head.global_position, 0.12, CHEW_RANGE)
 
 
 func _turn(towards: Vector2, max_radians: float) -> void:
@@ -217,7 +246,10 @@ func _check_charge_contact(before: PackedVector2Array, subject: Vector2) -> void
 		# Redirect a parry of the head or tail to the adjacent vulnerable joint.
 		var joint: SEGMENT = segments[clampi(index - 1, 0, segments.size() - 1)]
 		if not player.try_parry_enemy_attack(joint, player.global_position):
+			var health_before: float = player.health
 			player.receive_contact_damage(CONTACT_DAMAGE, _heading, 80.0, self)
+			if player.health < health_before and is_instance_valid(sfx):
+				sfx.play_elite(HIT_PLAYER, player.surface_world_position(), 2.0)
 		return
 
 
@@ -228,6 +260,9 @@ func _on_segment_broken(part: Node2D) -> void:
 		return
 	segment.final_segment = true
 	set_physics_process(false)
+	_chewing.stop()
+	if is_instance_valid(sfx):
+		sfx.play_elite(DEFEAT, head.global_position, 3.0)
 	remove_from_group(&"flying_centipedes")
 	head.modulate = Color(1.25, 1.15, 1.0)
 	var fade: Tween = create_tween()
@@ -238,6 +273,8 @@ func _on_segment_broken(part: Node2D) -> void:
 
 func dismiss() -> void:
 	set_physics_process(false)
+	if _chewing != null:
+		_chewing.stop()
 	for segment: SEGMENT in segments:
 		segment.remove_from_group(&"enemy_bodies")
 		segment.health = 0.0

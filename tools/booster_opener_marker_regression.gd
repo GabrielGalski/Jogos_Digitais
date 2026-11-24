@@ -101,7 +101,7 @@ func _run() -> void:
 	check(int(marked.get("interaction_count")) == 0, "E cannot activate the marked prop")
 	check(not (marked.get_node("ActionPrompt") as Sprite2D).visible, "Marked prop never shows an E prompt")
 	check(not (marked.get_node("Visuals/Beam") as Node2D).visible and not (marked.get_node("Visuals/ApertureGlow") as Sprite2D).visible, "Marked prop has no opening effect")
-	check(not (marked.get_node("Visuals/Cards/Center") as Sprite2D).visible, "Marked prop has no floating cards")
+	check(not (marked.get_node("Visuals/Cards/Center") as Sprite2D).visible, "Marked prop has no floating card")
 	check(animation_frames.size() > 2 and floating_positions.size() > 1, "Marker both animates its frames and floats vertically")
 	await capture("02-marker-close-up-gameplay")
 	place(Vector2(0, 30))

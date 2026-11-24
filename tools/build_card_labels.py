@@ -3,14 +3,13 @@
 Run: python tools/build_card_labels.py
 Check without writing: python tools/build_card_labels.py --check
 Include a native-resolution overview: python tools/build_card_labels.py --preview
-Only existing catalog folders and explicitly configured temporary cards are eligible.
+Each catalog entry needs a matching card folder.
 Requires Pillow >= 9.1 (python -m pip install Pillow).
 """
 from __future__ import annotations
 
 import argparse
 import hashlib
-import io
 import json
 import re
 import time
@@ -46,12 +45,6 @@ def read_catalog() -> list[dict]:
         catalog[code] = name.strip()
     if not catalog:
         raise ValueError("The GDD card table is empty.")
-    temporary = {card["id"]: card for card in json.loads(LAYOUT.read_text(encoding="utf-8")).get("temporary_cards", [])}
-    for code, card in temporary.items():
-        if code in catalog:
-            raise ValueError(f"Temporary card duplicates the approved catalog: {code}")
-        catalog[code] = card["name"]
-
     cards = []
     seen = set()
     for prefix, (group, aspect) in GROUPS.items():
@@ -67,7 +60,6 @@ def read_catalog() -> list[dict]:
             if normalize(slug) != normalize(catalog[code]):
                 raise ValueError(f"GDD name and folder disagree: {folder.name}")
             cards.append({"id": code, "name": catalog[code], "aspect": aspect,
-                          "blank": temporary.get(code, {}).get("blank", False),
                           "file": (folder / f"{folder.name}.png").relative_to(ROOT).as_posix()})
             seen.add(code)
     if seen != catalog.keys():
@@ -86,15 +78,14 @@ def text_mask(text: str, font: ImageFont.FreeTypeFont) -> Image.Image:
     return mask.crop(ink_bounds)
 
 
-def fit_font(texts: list[str], bounds: list[int], font_path: Path) -> tuple:
+def fit_font(text: str, bounds: list[int], font_path: Path, max_size: int) -> Image.Image:
     width, height = bounds[2] - bounds[0], bounds[3] - bounds[1]
-    for size in range(height * 2, 0, -1):
+    for size in range(max_size, 0, -1):
         font = ImageFont.truetype(str(font_path), size)
-        masks = {text: text_mask(text, font) for text in texts}
-        if all(mask.width <= width and mask.height <= height for mask in masks.values()):
-            widest = max(masks, key=lambda text: masks[text].width)
-            return size, masks, widest
-    raise ValueError("No font size fits the mapped text bounds.")
+        mask = text_mask(text, font)
+        if mask.width <= width and mask.height <= height:
+            return mask
+    raise ValueError(f"No font size fits {text!r} in the mapped bounds.")
 
 
 def validate_mapping(base: Image.Image, layout: dict) -> None:
@@ -114,8 +105,6 @@ def validate_mapping(base: Image.Image, layout: dict) -> None:
 def render_card(base: Image.Image, card: dict, layout: dict, masks: dict) -> tuple:
     image = base.copy()
     placements = {}
-    if card.get("blank", False):
-        return image, placements
     for role, text in (("aspect", card["aspect"]), ("name", card["name"])):
         mask = masks[role][text]
         left, top, right, bottom = layout[role]["text_bounds"]
@@ -139,13 +128,12 @@ def render_card(base: Image.Image, card: dict, layout: dict, masks: dict) -> tup
 
 
 def save_if_changed(image: Image.Image, path: Path) -> bool:
-    buffer = io.BytesIO()
-    image.save(buffer, format="PNG")
-    content = buffer.getvalue()
-    if path.exists() and path.read_bytes() == content:
-        return False
+    if path.exists():
+        with Image.open(path) as current:
+            if current.mode == image.mode and current.size == image.size and current.tobytes() == image.tobytes():
+                return False
     temporary = path.with_suffix(".png.tmp")
-    temporary.write_bytes(content)
+    image.save(temporary, format="PNG")
     temporary.replace(path)
     return True
 
@@ -205,11 +193,13 @@ def main() -> None:
                                for key, rect in layout[role].items()}
     render_layout["border_inner_bounds"] = [coordinate * scale for coordinate in layout["border_inner_bounds"]]
     cards = read_catalog()
-    masks, font_sizes, widest = {}, {}, {}
+    masks, widest = {}, {}
+    font_sizes = {role: size * scale for role, size in layout["font_sizes"].items()}
     for role in ("aspect", "name"):
-        texts = sorted({card[role] for card in cards if not card.get("blank", False)})
-        font_sizes[role], masks[role], widest[role] = fit_font(
-            texts, render_layout[role]["text_bounds"], ROOT / layout["font"])
+        texts = sorted({card[role] for card in cards})
+        masks[role] = {text: fit_font(text, render_layout[role]["text_bounds"], ROOT / layout["font"],
+                                     font_sizes[role]) for text in texts}
+        widest[role] = max(texts, key=lambda text: masks[role][text].width)
     tile_width, tile_height = base.width + 16, base.height + 16
     preview = Image.new("RGBA", (6 * tile_width, ((len(cards) + 5) // 6) * tile_height), "#737373") if args.preview else None
     records, written = [], 0
@@ -230,7 +220,7 @@ def main() -> None:
     if hashlib.sha256(source.read_bytes()).hexdigest() != source_hash:
         raise ValueError("The source base changed during processing.")
     expected = {ROOT / card["file"] for card in cards}
-    existing = {p for p in CARDS.rglob("*.png") if not p.is_relative_to(CARDS / "base")}
+    existing = {p for group, _aspect in GROUPS.values() for p in (CARDS / group).glob("*/*.png")}
     if expected != existing:
         raise ValueError(f"Unexpected PNGs remain in cards: {sorted(str(p) for p in existing - expected)}")
     export_art_layout(base, render_layout, args.check)

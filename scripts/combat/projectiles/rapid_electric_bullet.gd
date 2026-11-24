@@ -41,6 +41,10 @@ func _physics_process(delta: float) -> void:
 	var hit: Dictionary = ENEMY_CONTACTS.sweep(get_tree(), get_world_2d().direct_space_state,
 		global_position, next_position, 4 | obstacle_mask, shape.radius)
 	if not hit.is_empty():
+		if bool(hit.get("sound_block", false)):
+			consumed = true
+			queue_free()
+			return
 		_on_body_entered(hit["collider"] as Node2D)
 		if consumed:
 			return
@@ -61,6 +65,10 @@ func _on_body_entered(area: Node2D) -> void:
 		return
 	consumed = true
 	set_deferred(&"monitoring", false)
+	var shape: CircleShape2D = ($CollisionShape2D as CollisionShape2D).shape as CircleShape2D
+	if not ENEMY_CONTACTS.sound_field_hit(get_tree(), global_position, global_position, shape.radius).is_empty():
+		queue_free()
+		return
 	var hit_position := area.global_position
 	if card_attack != null:
 		if is_instance_valid(combat_effects):

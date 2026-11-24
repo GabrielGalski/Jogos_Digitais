@@ -28,6 +28,8 @@ var _reveal_elapsed: float = 0.0
 var _face: Polygon2D
 var _shadow: Polygon2D
 var _foil: ShaderMaterial
+var _live_face: Sprite2D
+var _live_source_size: Vector2
 
 
 func configure(texture: Texture2D, id: String, group: int, index: int, visible_rect: Rect2, finish: Color = Color.TRANSPARENT) -> void:
@@ -71,6 +73,14 @@ func set_inspected(value: bool) -> void:
 		target_tilt = Vector2.ZERO
 
 
+func use_live_face(face: Sprite2D, source_size: Vector2) -> void:
+	_live_face = face
+	_live_source_size = source_size
+	_face.hide()
+	_shadow.hide()
+	add_child(face)
+
+
 func contains_point(pointer: Vector2) -> bool:
 	return Geometry2D.is_point_in_polygon(pointer - position, _face.polygon)
 
@@ -96,6 +106,9 @@ func _process(delta: float) -> void:
 	_face.polygon = corners
 	_shadow.polygon = corners
 	_shadow.position = Vector2(10.0, 15.0) if inspected else Vector2(2.0, 4.0)
+	if _live_face != null:
+		_live_face.scale = _display_size / _live_source_size * Vector2(cos(current_tilt.y), cos(current_tilt.x))
+		_live_face.rotation = _angle
 
 
 func _project(point: Vector2) -> Vector2:

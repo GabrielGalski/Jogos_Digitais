@@ -66,8 +66,8 @@ func try_enemy_attack(attacker: Node2D, contact_point: Vector2) -> bool:
 	var target: Node2D = attacker
 	if not target.has_method("take_damage"):
 		target = attacker.get_parent() as Node2D
-	if is_instance_valid(target) and target.has_method("take_damage"):
-		target.call("take_damage", reflected_damage)
+	if is_instance_valid(target):
+		player.apply_reflected_damage(target, reflected_damage, player.global_position.direction_to(target.global_position))
 	if is_instance_valid(attacker) and attacker.has_method("receive_impact"):
 		attacker.call("receive_impact", player.global_position.direction_to(attacker.global_position), 105.0, 0.1)
 	return true

@@ -4,8 +4,7 @@
 
 [resource]
 script = ExtResource("1")
+effect = 1
 card_id = &"CARD_INF_002"
 display_name = "Casca Estilhaçante"
-description = "Abates lançam pedras em seis direções com 15% do dano final."
-effect = 1
-cooldown = 0
+description = "Golpes letais espalham flechas de luz que atingem inimigos em várias direções."

@@ -75,9 +75,9 @@ func _draw_beam() -> void:
 		var height_ratio: float = float(rise) / 43.0
 		var half_width: float = roundf(lerpf(_aperture_width * 0.43, 29.0, height_ratio))
 		var fade: float = pow(1.0 - height_ratio, 1.7)
-		draw_rect(Rect2(-half_width, -float(rise) - 2.0, half_width * 2.0, 2), Color(0.08, 0.85, 1.0, fade * 0.13 * strength * breathe))
-		draw_rect(Rect2(-half_width * 0.65, -float(rise) - 2.0, roundf(half_width * 1.3), 2), Color(0.35, 1.0, 1.0, fade * 0.07 * strength))
-	# Three distinct shafts rise out of the slit, framing the card fan.
+		draw_rect(Rect2(-half_width, -float(rise) - 2.0, half_width * 2.0, 2), Color(1.0, 0.74, 0.26, fade * 0.13 * strength * breathe))
+		draw_rect(Rect2(-half_width * 0.65, -float(rise) - 2.0, roundf(half_width * 1.3), 2), Color(1.0, 0.90, 0.53, fade * 0.07 * strength))
+	# Three distinct shafts rise out of the slit around the floating card.
 	for shaft: int in range(3):
 		var side: float = float(shaft - 1)
 		var length: float = 38.0 if shaft == 1 else 30.0
@@ -85,14 +85,14 @@ func _draw_beam() -> void:
 			var ratio: float = float(rise) / length
 			var shaft_x: float = roundf(side * (8.0 + ratio * 7.0))
 			var alpha: float = pow(1.0 - ratio, 0.7) * strength * 0.65
-			draw_rect(Rect2(shaft_x - 2.0, -float(rise) - 2.0, 5, 2), Color(0.08, 0.55, 0.9, alpha * 0.26))
-			draw_rect(Rect2(shaft_x, -float(rise) - 2.0, 1 if shaft != 1 else 2, 2), Color(0.55, 1.0, 1.0, alpha))
+			draw_rect(Rect2(shaft_x - 2.0, -float(rise) - 2.0, 5, 2), Color(0.95, 0.58, 0.16, alpha * 0.26))
+			draw_rect(Rect2(shaft_x, -float(rise) - 2.0, 1 if shaft != 1 else 2, 2), Color(1.0, 0.93, 0.62, alpha))
 	for index: int in range(13):
 		var travel: float = fposmod(_time * (8.0 + float(index % 4)) + float(index) * 7.7, 45.0)
 		var phase: float = float(index) * 2.399
 		var offset_x: float = sin(phase) * (9.0 + travel * 0.25) + sin(_time + phase) * 2.0
 		var mote: Vector2 = Vector2(offset_x, -travel).round()
 		var fade: float = sin(travel / 45.0 * PI) * strength
-		var tint: Color = Color(0.2, 1.0, 1.0, fade * 0.8) if index % 4 != 0 else Color(1.0, 0.03, 0.6, fade * 0.65)
+		var tint: Color = Color(1.0, 0.88, 0.40, fade * 0.8) if index % 4 != 0 else Color(1.0, 0.03, 0.6, fade * 0.65)
 		var size_px: float = 2.0 if index % 5 == 0 else 1.0
 		draw_rect(Rect2(mote, Vector2.ONE * size_px), tint)

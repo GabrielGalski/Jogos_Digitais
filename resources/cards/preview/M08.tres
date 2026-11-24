@@ -10,4 +10,6 @@ projectile_speed = 340.0
 projectile_lifetime = 0.38
 impact_impulse = 60.0
 card_id = &"M08"
-display_name = "Lança-chamas"
+display_name = "Sopro de Dragão"
+description = "Segure o disparo para lançar um leque contínuo de fogo que atinge vários inimigos."
+rarity = 3

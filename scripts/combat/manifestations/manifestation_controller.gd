@@ -23,6 +23,7 @@ var _infusion_remaining: Dictionary[StringName, float] = {}
 var _tick_remaining: Dictionary[StringName, float] = {}
 var _random: RandomNumberGenerator = RandomNumberGenerator.new()
 var _equipment_menu: CanvasLayer = null
+var _spiral_step: int = 0
 
 
 func configure(actor: Player, shooter: Node2D, shots: Node2D, cursor: Node2D) -> void:
@@ -94,6 +95,14 @@ func select_model(index: int) -> bool:
 	return true
 
 
+func _unhandled_key_input(event: InputEvent) -> void:
+	var key: InputEventKey = event as InputEventKey
+	if key == null or not key.pressed or key.echo or (key.keycode != KEY_I and key.physical_keycode != KEY_I):
+		return
+	if get_tree().get_first_node_in_group(&"card_table_modal") == null and open_equipment_menu():
+		get_viewport().set_input_as_handled()
+
+
 func open_equipment_menu() -> bool:
 	if not is_instance_valid(player) or player.dead or player.intro_locked or get_tree().paused or is_instance_valid(_equipment_menu):
 		return false
@@ -147,7 +156,8 @@ func _physics_process(delta: float) -> void:
 	gun.call("_update_rig", 0.0)
 	var muzzle: Marker2D = gun.get_node("WeaponPivot/Muzzle") as Marker2D
 	var direction: Vector2 = gun.get("aim_direction") as Vector2
-	channel.call("advance", delta, muzzle.global_position, direction, requested)
+	var runtime: CardCombatRuntime = gun.get("card_runtime") as CardCombatRuntime
+	channel.call("advance", delta, muzzle.global_position, direction, requested, runtime.infusion_effect() == InfusionCard.GARGOYLE)
 	if requested:
 		_apply_channel_tick(model)
 	elif not bool(channel.get("visible")):
@@ -167,15 +177,59 @@ func fire_once() -> Node2D:
 		return null
 	var muzzle: Marker2D = gun.get_node("WeaponPivot/Muzzle") as Marker2D
 	var direction: Vector2 = gun.get("aim_direction") as Vector2
-	if model.spread_degrees > 0.0:
+	if model.projectile_count == 1 and model.spread_degrees > 0.0:
 		direction = direction.rotated(deg_to_rad(_random.randf_range(-model.spread_degrees, model.spread_degrees)))
 	var effects: CombatEffects = gun.get("effects") as CombatEffects
-	var shot: Node2D = FACTORY.projectile(model, attack, projectiles, muzzle.global_position + direction * 5.0,
-		direction, effects, player, sprites)
-	shot.connect("impacted", _on_impact)
+	var shot: Node2D = _emit_projectiles(model, attack, muzzle.global_position, direction, effects)
 	gun.set("cooldown", attack.fire_interval)
 	_present_shot(model, muzzle.global_position)
 	return shot
+
+
+func _emit_projectiles(model: ProceduralManifestationModel, attack: CardAttack, muzzle: Vector2,
+		direction: Vector2, effects: CombatEffects) -> Node2D:
+	var count: int = model.projectile_count
+	var center_index: int = floori(float(count) * 0.5)
+	var center: Node2D
+	attack.separate_projectile_hits = count > 1
+	for index: int in range(count):
+		var lane: float = float(index - center_index) / float(maxi(center_index, 1))
+		if count == 2:
+			lane = -1.0 if index == 0 else 1.0
+		var angle: float = model.spread_degrees * lane
+		var spiral: float = 0.0
+		if model.spiral_turn_rate > 0.0:
+			spiral = sin(float(_spiral_step) * TAU / 7.0)
+			_spiral_step = (_spiral_step + 1) % 7
+			angle += spiral * 8.0
+		if model.randomize_spread:
+			angle = _random.randf_range(-model.spread_degrees, model.spread_degrees)
+		var aim: Vector2 = direction.rotated(deg_to_rad(angle))
+		var origin: Vector2 = muzzle + direction * (5.0 - absf(lane) * 2.0)
+		origin += direction.orthogonal() * lane * model.muzzle_spread
+		if model.cross_distance > 0.0:
+			aim = origin.direction_to(muzzle + direction * model.cross_distance)
+		var projectile: Node2D = FACTORY.projectile(model, attack, projectiles, origin, aim, effects, player, sprites)
+		projectile.set("turn_rate", spiral * model.spiral_turn_rate)
+		projectile.connect("impacted", _on_impact)
+		if model.split_distance > 0.0:
+			projectile.connect("split_reached", _emit_split_shards.bind(model, attack, effects), CONNECT_ONE_SHOT)
+		if index == center_index:
+			center = projectile
+	return center
+
+
+func _emit_split_shards(at: Vector2, direction: Vector2, lifetime: float, model: ProceduralManifestationModel,
+		attack: CardAttack, effects: CombatEffects) -> void:
+	if not is_instance_valid(projectiles) or not is_instance_valid(effects):
+		return
+	attack.separate_projectile_hits = true
+	_on_impact(at, model, 4.0, direction)
+	for side: float in [-1.0, 1.0]:
+		var aim: Vector2 = direction.rotated(side * deg_to_rad(model.split_half_angle_degrees))
+		var shard: Node2D = FACTORY.projectile(model, attack, projectiles, at, aim, effects, player, sprites)
+		shard.call("configure_split_shard", lifetime)
+		shard.connect("impacted", _on_impact)
 
 
 func _apply_channel_tick(model: ProceduralManifestationModel) -> void:
@@ -193,9 +247,9 @@ func _apply_channel_tick(model: ProceduralManifestationModel) -> void:
 		attack.explosion_damage = 0.0
 	var targets: Array[Node2D] = channel.call("hit_targets") as Array[Node2D]
 	var effects: CombatEffects = gun.get("effects") as CombatEffects
-	var direction: Vector2 = channel.get("direction") as Vector2
 	var contact: Vector2 = channel.global_position + (channel.get("endpoint") as Vector2)
 	for enemy: Node2D in targets:
+		var direction: Vector2 = channel.call("hit_direction", enemy)
 		attack.apply_primary_hit(enemy, contact if model.family == ProceduralManifestationModel.Family.BEAM else effects.CONTACTS.damage_center(enemy), direction, effects)
 	if not targets.is_empty():
 		if infusion_available:
@@ -206,7 +260,7 @@ func _apply_channel_tick(model: ProceduralManifestationModel) -> void:
 			if targets[0].has_method("get_projectile_hurt_capsule"):
 				var capsule: Dictionary = targets[0].call("get_projectile_hurt_capsule") as Dictionary
 				impact_at = targets[0].to_global(capsule.get("center", Vector2.ZERO) as Vector2)
-		_on_impact(impact_at, model, 5.0, direction)
+		_on_impact(impact_at, model, 5.0, channel.call("hit_direction", targets[0]))
 	_present_shot(model, channel.global_position)
 
 

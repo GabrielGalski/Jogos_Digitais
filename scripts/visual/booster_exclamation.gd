@@ -7,8 +7,8 @@ const OUTER_GLOW: Script = preload("res://scripts/visual/sprite_outer_glow.gd")
 const FRAME_PATH: String = "res://assets/tiles/structures/booster_opener/exclamation/exclam%d.png"
 const WARNING_PATH: String = "res://assets/tiles/structures/booster_opener/warning/WarningSign%02d.png"
 const NATIVE_SIZE: int = 32
-const DISPLAY_SIZE: float = 20.0
-const HEIGHT_ABOVE_BODY: float = 36.0
+const DISPLAY_SIZE: float = 16.0
+const HEIGHT_ABOVE_TOP: float = 11.0
 @export var combat_warning: bool = false
 
 var _elapsed: float = 0.0
@@ -29,22 +29,23 @@ func _ready() -> void:
 	var body_image: Image = body_texture.get_image()
 	if body_image.is_compressed():
 		body_image.decompress()
-	_anchor = surface.position - body_texture.get_size() * 0.5 + Rect2(body_image.get_used_rect()).get_center()
+	var bounds: Rect2 = Rect2(body_image.get_used_rect())
+	_anchor = surface.position + surface.offset - body_texture.get_size() * 0.5 +		+ Vector2(bounds.get_center().x, bounds.position.y)
 	_build_animation()
 	_update_placement()
 
 
-func _shared_frames() -> SpriteFrames:
-	var cache_key: StringName = &"booster_warning_frames" if combat_warning else &"booster_exclamation_frames"
-	if get_tree().has_meta(cache_key):
-		return get_tree().get_meta(cache_key) as SpriteFrames
+static func marker_frames(tree: SceneTree, is_warning: bool) -> SpriteFrames:
+	var cache_key: StringName = &"booster_warning_frames" if is_warning else &"booster_exclamation_frames"
+	if tree.has_meta(cache_key):
+		return tree.get_meta(cache_key) as SpriteFrames
 	var frames: SpriteFrames = SpriteFrames.new()
 	frames.remove_animation(&"default")
 	frames.add_animation(&"idle")
 	frames.set_animation_loop(&"idle", true)
 	frames.set_animation_speed(&"idle", 8.0)
-	var path: String = WARNING_PATH if combat_warning else FRAME_PATH
-	for index: int in range(1, 10 if combat_warning else 9):
+	var path: String = WARNING_PATH if is_warning else FRAME_PATH
+	for index: int in range(1, 10 if is_warning else 9):
 		var source: Texture2D = load(path % index) as Texture2D
 		if source.get_size() != Vector2(NATIVE_SIZE, NATIVE_SIZE):
 			var pixels: Image = source.get_image()
@@ -53,12 +54,24 @@ func _shared_frames() -> SpriteFrames:
 			pixels.resize(NATIVE_SIZE, NATIVE_SIZE, Image.INTERPOLATE_NEAREST)
 			source = ImageTexture.create_from_image(pixels)
 		frames.add_frame(&"idle", source)
-	get_tree().set_meta(cache_key, frames)
+	tree.set_meta(cache_key, frames)
 	return frames
 
 
+static func warning_sprite(tree: SceneTree) -> AnimatedSprite2D:
+	var warning: AnimatedSprite2D = AnimatedSprite2D.new()
+	warning.name = "ImpactWarning"
+	warning.sprite_frames = marker_frames(tree, true)
+	warning.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	var unshaded: CanvasItemMaterial = CanvasItemMaterial.new()
+	unshaded.light_mode = CanvasItemMaterial.LIGHT_MODE_UNSHADED
+	warning.material = unshaded
+	warning.scale = Vector2.ONE * 0.75
+	return warning
+
+
 func _build_animation() -> void:
-	var frames: SpriteFrames = _shared_frames()
+	var frames: SpriteFrames = marker_frames(get_tree(), combat_warning)
 	for index: int in range(frames.get_frame_count(&"idle")):
 		_glow_frames.append(OUTER_GLOW.texture_for(frames.get_frame_texture(&"idle", index)))
 	_glow = Sprite2D.new()
@@ -113,6 +126,11 @@ func _update_glow_frame() -> void:
 	_glow.texture = _glow_frames[_sprite.frame]
 
 
+func prompt_world_position() -> Vector2:
+	var parent_visuals: Node2D = get_parent() as Node2D
+	return parent_visuals.to_global(_anchor) - Vector2(0.0, HEIGHT_ABOVE_TOP)
+
+
 func _process(delta: float) -> void:
 	_elapsed += delta
 	_update_placement()
@@ -127,4 +145,4 @@ func _update_placement() -> void:
 	scale = Vector2.ONE / inherited_scale
 	var tick: float = floorf(_elapsed * 12.0) / 12.0
 	var bob: float = roundf(sin(tick * TAU / 1.8) * 2.0)
-	position = _anchor + Vector2(0, (-HEIGHT_ABOVE_BODY + bob) / inherited_scale.y)
+	position = _anchor + Vector2(0, (-HEIGHT_ABOVE_TOP + bob) / inherited_scale.y)

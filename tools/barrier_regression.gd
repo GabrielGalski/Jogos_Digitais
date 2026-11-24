@@ -67,6 +67,25 @@ func _run() -> void:
 	hidden_data["visible"] = false
 	hidden.call("build", [hidden_data], {1: {"relPath": SOURCE, "tileGridSize": 16}}, textures)
 	check(hidden.get_child_count() == 0, "A hidden barrier layer adds no graphics or physics")
+	var elevated: Node2D = BORDERS.new() as Node2D
+	elevated.set("layer_name", "Barriers")
+	elevated.position.y = 200.0
+	world.add_child(elevated)
+	elevated.call("build", [instance], {1: {"relPath": SOURCE, "tileGridSize": 16}}, textures,
+		func(_point: Vector2) -> float: return 56.0)
+	await physics_frame
+	var elevated_layer: TileMapLayer = elevated.get_child(0) as TileMapLayer
+	check(elevated_layer.global_position == Vector2(13.0, 219.0), "An elevated barrier keeps its authored visual position")
+	var differences_elevated: int = 0
+	for flip: int in range(4):
+		for y: int in range(32):
+			for x: int in range(112):
+				var sx: int = floori(x / 16.0) * 16 + (15 - x % 16 if flip & 1 else x % 16)
+				var sy: int = floori(y / 16.0) * 16 + (15 - y % 16 if flip & 2 else y % 16)
+				query.position = Vector2(13.5 + flip * 160 + x, 275.5 + y)
+				if (not space.intersect_point(query, 1).is_empty()) != (image.get_pixel(sx, sy).a >= 0.5):
+					differences_elevated += 1
+	check(differences_elevated == 0, "Elevated collisions shift onto the gameplay plane for all flip combinations")
 	var data: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://monster_booster.ldtk")) as Dictionary
 	var levels: Array = preload("res://scripts/dungeon/ldtk_level_composition.gd").levels(data)
 	var registered: bool = false

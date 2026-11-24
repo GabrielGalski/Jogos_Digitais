@@ -3,6 +3,7 @@
   "source_size": [208, 320],
   "output_scale": 1,
   "font": "assets/font/determination.ttf",
+  "font_sizes": {"aspect": 17, "name": 16},
   "background": "#e9efec",
   "ink": "#211e20",
   "aspect": {
@@ -13,8 +14,5 @@
     "area": [18, 274, 190, 302],
     "text_bounds": [22, 278, 186, 298]
   },
-  "border_inner_bounds": [18, 18, 190, 302],
-  "temporary_cards": [
-    {"id": "M08", "name": "Lança-chamas", "blank": true}
-  ]
+  "border_inner_bounds": [18, 18, 190, 302]
 }

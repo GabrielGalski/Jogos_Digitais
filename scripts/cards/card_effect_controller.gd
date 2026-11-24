@@ -5,19 +5,27 @@ const VISUAL: Script = preload("res://scripts/cards/card_effect_visual.gd")
 const FRAGMENT: Script = preload("res://scripts/cards/card_fragment.gd")
 const SNAKE: Script = preload("res://scripts/cards/medusa_snake.gd")
 const CONTROL: Script = preload("res://scripts/cards/temporary_enemy_control.gd")
+const HERO_SWORD: Script = preload("res://scripts/cards/hero_sword.gd")
+const CALIMSHAN: Script = preload("res://scripts/cards/calimshan_effects.gd")
+const VAMPIRE: Script = preload("res://scripts/cards/vampire_effects.gd")
+const DRAGON: Script = preload("res://scripts/cards/dragon_effects.gd")
+const BITE_RADIUS: float = 28.0
+const GOLEM_IMPACT_DELAY: float = 0.04
 var player: Player
 var gun: Node2D
 var runtime: CardCombatRuntime
 var poisons: Dictionary = {}
 var blasts: Array[Dictionary] = []
 var mouths: Array[Dictionary] = []
-var clouds: Array[Dictionary] = []
 var invisible_remaining: float = 0.0
 var decoy: Node2D
-var _hosted: Node2D
-var _previous_feet: Vector2
-var _trail_distance: float = 0.0
-var _area_tick: float = 0.0
+var _hosts: Array[CONTROL] = []
+var _hero_sword: HERO_SWORD
+var _calimshan: CALIMSHAN
+var _vampire: VAMPIRE
+var _dragon: DRAGON
+var _kill_source: CombatEffects
+var _blast_elapsed: float = 0.0
 var _navigation: EnemyNavigationGrid
 var _navigation_bounds: Rect2
 var _status: Label
@@ -34,7 +42,24 @@ func _ready() -> void:
 	process_physics_priority = 2
 	player.card_effects = self
 	player.damage_received.connect(_on_damage_received)
-	_previous_feet = player.global_position
+	player.dash_moved.connect(_on_dash_moved)
+	player.dash_started.connect(_on_dash_started)
+	_calimshan = CALIMSHAN.new()
+	_calimshan.name = "Calimshan"
+	_calimshan.configure(player, enemies, has_floor, height_at)
+	add_child(_calimshan)
+	_vampire = VAMPIRE.new()
+	_vampire.name = "VampireEffects"
+	_vampire.player = player
+	_vampire.service = self
+	add_child(_vampire)
+	_dragon = DRAGON.new()
+	_dragon.name = "DragonEffects"
+	_dragon.player = player
+	_dragon.service = self
+	_dragon.rewards = get_node("/root/BoosterRewards")
+	_dragon.z_index = 3
+	add_child(_dragon)
 	_bind_runtime()
 	_status_layer = CanvasLayer.new()
 	_status_layer.layer = 55
@@ -48,6 +73,16 @@ func _ready() -> void:
 func _bind_runtime() -> void:
 	runtime = gun.get("card_runtime") as CardCombatRuntime
 	runtime.effect_host = weakref(self)
+	var source: CombatEffects = effects()
+	if source != _kill_source:
+		if is_instance_valid(_kill_source):
+			_kill_source.enemy_eliminated.disconnect(_on_enemy_eliminated)
+			_kill_source.enemy_defeated.disconnect(_calimshan.enemy_defeated)
+		_kill_source = source
+		_calimshan.combat = source
+		if is_instance_valid(_kill_source):
+			_kill_source.enemy_eliminated.connect(_on_enemy_eliminated)
+			_kill_source.enemy_defeated.connect(_calimshan.enemy_defeated)
 
 
 func effects() -> CombatEffects:
@@ -62,7 +97,7 @@ func _physics_process(delta: float) -> void:
 		poisons.clear()
 		blasts.clear()
 		mouths.clear()
-		clouds.clear()
+		_release_hosts()
 		for node: Node in get_children():
 			if node is SNAKE:
 				node.queue_free()
@@ -70,15 +105,18 @@ func _physics_process(delta: float) -> void:
 		player.body.self_modulate.a = _body_alpha
 		gun.visible = _gun_visible
 		_was_invisible = false
-	if player.dead or player.intro_locked or not bool(gun.get("combat_enabled")):
-		_previous_feet = player.global_position
+	var kind: int = runtime.mutation_effect()
+	var can_fight: bool = not player.dead and not player.intro_locked and bool(gun.get("combat_enabled"))
+	_calimshan.advance(delta, runtime, can_fight)
+	_vampire.advance(delta, runtime, can_fight)
+	_dragon.advance(delta, can_fight)
+	_update_hero_sword(can_fight and kind == MutationCard.HERO_SWORD, delta)
+	if not can_fight:
 		_status.hide()
 		return
 	_tick_poison(delta)
-	_drain_blasts()
+	_drain_blasts(delta)
 	_tick_mouths(delta)
-	_tick_clouds(delta)
-	var kind: int = runtime.mutation_effect()
 	if kind == 2 and float(runtime.cooldowns.get(&"U03", 0.0)) <= 0.0:
 		runtime.cooldowns[&"U03"] = 2.0
 		var target: Node2D = nearest_enemy(player.global_position, 180.0)
@@ -86,27 +124,49 @@ func _physics_process(delta: float) -> void:
 			var ground: Vector2 = target.global_position
 			if has_floor(ground):
 				var at: Vector2 = ground - Vector2(0, height_at(ground))
-				visual(&"warning", at, 0.25, 28.0)
-				mouths.append({"at": at, "remaining": 0.25})
-	var travel: float = player.global_position.distance_to(_previous_feet)
-	if kind == 4 and travel < 48.0 and has_floor(player.global_position):
-		_trail_distance += travel
-		if _trail_distance >= 12.0:
-			_trail_distance = fmod(_trail_distance, 12.0)
-			_leave_cloud()
-	else:
-		_trail_distance = 0.0
-	_previous_feet = player.global_position
-	_status.visible = kind in [3, 5]
+				visual(&"warning", at, VISUAL.BITE_WINDUP, BITE_RADIUS)
+				mouths.append({"at": at, "remaining": VISUAL.BITE_WINDUP})
+	var vampire_prompt: String = _vampire.prompt(runtime)
+	_status.visible = not vampire_prompt.is_empty() or kind in [3, 5, MutationCard.PRIMORDIAL_CONVERGENCE]
 	_status.position = Vector2(10, get_viewport_rect().size.y - 17.0)
-	if _status.visible:
+	if not vampire_prompt.is_empty():
+		_status.text = vampire_prompt
+	elif kind == MutationCard.PRIMORDIAL_CONVERGENCE:
+		_status.text = _calimshan.rune_prompt()
+	elif _status.visible:
 		var left: float = float(runtime.cooldowns.get(&"U04" if kind == 3 else &"U06", 0.0))
 		_status.text = ("F  Mandragora" if kind == 3 else "F  Doppelganger") + ("  %.1fs" % left if left > 0.0 else "  Pronto")
+	var packs: int = int(_dragon.rewards.call("pending_count"))
+	if packs > 0:
+		var prompt: String = "B  Abrir booster (%d)" % packs
+		_status.text = _status.text + "   " + prompt if _status.visible else prompt
+		_status.show()
+
+
+func _update_hero_sword(active: bool, delta: float) -> void:
+	if not active:
+		if is_instance_valid(_hero_sword):
+			_hero_sword.hide()
+			_hero_sword.queue_free()
+			_hero_sword = null
+		return
+	if not is_instance_valid(_hero_sword) or _hero_sword.is_queued_for_deletion():
+		_hero_sword = HERO_SWORD.new()
+		_hero_sword.name = "HeroSword"
+		_hero_sword.player = player
+		_hero_sword.effects = effects()
+		add_child(_hero_sword)
+	_hero_sword.advance(delta)
 
 
 func _unhandled_key_input(event: InputEvent) -> void:
 	var key: InputEventKey = event as InputEventKey
-	if key != null and key.pressed and not key.echo and (key.keycode == KEY_F or key.physical_keycode == KEY_F):
+	if key == null or not key.pressed or key.echo:
+		return
+	if key.keycode == KEY_B or key.physical_keycode == KEY_B:
+		if _dragon.rewards.call("open_pending", player):
+			get_viewport().set_input_as_handled()
+	elif key.keycode == KEY_F or key.physical_keycode == KEY_F:
 		if activate_mutation():
 			get_viewport().set_input_as_handled()
 
@@ -116,6 +176,10 @@ func activate_mutation() -> bool:
 	if get_tree().paused or player.dead or player.intro_locked or not bool(gun.get("combat_enabled")):
 		return false
 	var kind: int = runtime.mutation_effect()
+	if kind in [MutationCard.CRIMSON_PULSE, MutationCard.MIDNIGHT_PROCESSION]:
+		return _vampire.activate(runtime)
+	if kind == MutationCard.PRIMORDIAL_CONVERGENCE:
+		return _calimshan.activate_rune()
 	if kind == 3 and float(runtime.cooldowns.get(&"U04", 0.0)) <= 0.0:
 		runtime.cooldowns[&"U04"] = 4.0
 		var popup: VISUAL = visual(&"mandrake", player.surface_world_position() - Vector2(0, 32), 0.65)
@@ -142,6 +206,30 @@ func activate_mutation() -> bool:
 		_doppelganger()
 		return true
 	return false
+
+
+func _on_dash_moved(from: Vector2, to: Vector2) -> void:
+	if runtime.mutation_effect() == MutationCard.ASH_STEP and not player.dead and bool(gun.get("combat_enabled")):
+		_calimshan.dash_moved(from, to)
+
+
+func _on_dash_started() -> void:
+	if runtime.mutation_effect() == MutationCard.CRIMSON_WINGS and not player.dead and bool(gun.get("combat_enabled")):
+		_dragon.dash_started()
+
+
+func inflict_fire(target: Node2D, attack: CardAttack) -> void:
+	_calimshan.inflict_fire(target, attack)
+
+
+func weapon_hit(attack: CardAttack, target: Node2D) -> void:
+	_vampire.primary_hit(runtime, attack, target)
+	_dragon.primary_hit(runtime, attack, target)
+
+
+func adjust_incoming_damage(amount: float, source: Node2D, enemy_attack: bool) -> float:
+	_bind_runtime()
+	return _vampire.incoming_damage(runtime, amount, source, enemy_attack)
 
 
 func prevent_death() -> bool:
@@ -199,41 +287,64 @@ func _on_damage_received(_amount: float) -> void:
 	add_child(snake)
 
 
-func weapon_kill(attack: CardAttack, at: Vector2, ground: Vector2, damage: float, depth: int) -> void:
+func weapon_kill(attack: CardAttack, at: Vector2, impact: Vector2, damage: float, depth: int) -> void:
 	if player.dead:
 		return
+	_dragon.enemy_kill(runtime, attack)
 	match attack.infusion_effect:
-		0:
-			blasts.append({"attack": attack, "at": at, "ground": ground, "depth": depth})
+		InfusionCard.GOLEM:
+			_queue_golem_blast(attack, at, depth)
 		1:
-			for index: int in range(6):
-				if get_tree().get_nodes_in_group(&"card_fragments").size() >= 24:
-					break
+			var available: int = 24 - get_tree().get_nodes_in_group(&"card_fragments").size()
+			for index: int in range(clampi(available, 0, 6)):
 				var fragment: FRAGMENT = FRAGMENT.new()
 				fragment.attack = attack
 				fragment.effects = effects()
 				fragment.damage = damage * 0.15
+				fragment.speed = 250.0
+				fragment.remaining = 0.4
 				fragment.direction = Vector2.from_angle(TAU * float(index) / 6.0)
-				fragment.position = at
+				fragment.position = impact
 				add_child(fragment)
 		2:
 			if attack.infusion_generation == runtime.infusion_generation:
 				player.heal_fraction(0.03)
 
 
-func _drain_blasts() -> void:
+func _on_enemy_eliminated(at: Vector2) -> void:
+	_dragon.enemy_kill(runtime)
+	if player.dead or runtime.infusion_effect() != InfusionCard.GOLEM:
+		return
+	var attack: CardAttack = runtime.create_attack()
+	if attack != null:
+		_queue_golem_blast(attack, at, 0)
+
+
+func _queue_golem_blast(attack: CardAttack, at: Vector2, depth: int) -> void:
+	visual(&"blast", at, 0.4, attack.explosion_radius)
+	blasts.append({"attack": attack, "at": at, "depth": depth, "impact_time": _blast_elapsed + GOLEM_IMPACT_DELAY})
+
+
+func _drain_blasts(delta: float) -> void:
+	_blast_elapsed += delta
+	if blasts.is_empty() or float(blasts[0].impact_time) > _blast_elapsed:
+		return
+	var candidates: Array[Node2D] = enemies()
 	var processed: int = 0
-	while not blasts.is_empty() and processed < 64:
+	while not blasts.is_empty() and processed < 64 and float(blasts[0].impact_time) <= _blast_elapsed:
 		processed += 1
 		var blast: Dictionary = blasts.pop_front()
 		var attack: CardAttack = blast.attack as CardAttack
 		var depth: int = int(blast.depth)
 		var damage: float = 18.0 if depth == 0 else 9.0 if depth == 1 else 3.0
-		visual(&"blast", blast.at as Vector2, 0.22, 18.0)
-		for enemy: Node2D in enemies():
+		var center: Vector2 = blast.at as Vector2
+		var radius_squared: float = attack.explosion_radius * attack.explosion_radius
+		for enemy: Node2D in candidates:
+			if not is_instance_valid(enemy) or not valid_enemy(enemy):
+				continue
 			var at: Vector2 = CONTACTS.damage_center(enemy)
-			if at.distance_to(blast.at as Vector2) <= 18.0:
-				attack.apply_secondary_hit(enemy, damage, (blast.at as Vector2).direction_to(at), effects(), depth + 1)
+			if at.distance_squared_to(center) <= radius_squared:
+				attack.apply_secondary_hit(enemy, damage, center.direction_to(at), effects(), depth + 1)
 
 
 func poison(target: Node2D, dps: float, duration: float, attack: CardAttack = null) -> void:
@@ -285,48 +396,35 @@ func _tick_mouths(delta: float) -> void:
 		mouth.remaining = float(mouth.remaining) - delta
 		if float(mouth.remaining) <= 0.0:
 			var at: Vector2 = mouth.at as Vector2
-			visual(&"mouth", at, 0.4, 28.0)
+			visual(&"mouth", at, VISUAL.BITE_RECOVERY, BITE_RADIUS)
 			for enemy: Node2D in enemies():
-				if CONTACTS.damage_center(enemy).distance_to(at) <= 28.0:
+				if CONTACTS.damage_center(enemy).distance_to(at) <= BITE_RADIUS:
 					mutation_hit(enemy, 6.0)
 			mouths.remove_at(index)
 
 
-func _leave_cloud() -> void:
-	if clouds.size() >= 24:
-		return
-	var ground: Vector2 = player.global_position
-	var at: Vector2 = ground - Vector2(0, height_at(ground))
-	visual(&"smoke", at, 3.0)
-	clouds.append({"ground": ground, "remaining": 3.0})
-
-
-func _tick_clouds(delta: float) -> void:
-	for index: int in range(clouds.size() - 1, -1, -1):
-		clouds[index].remaining = float(clouds[index].remaining) - delta
-		if float(clouds[index].remaining) <= 0.0:
-			clouds.remove_at(index)
-	_area_tick -= delta
-	if _area_tick > 0.0:
-		return
-	_area_tick = 0.25
-	for enemy: Node2D in enemies():
-		for cloud: Dictionary in clouds:
-			var at: Vector2 = cloud.ground as Vector2
-			if enemy.global_position.distance_to(at) <= 17.0 and absf(height_at(enemy.global_position) - height_at(at)) < 8.0:
-				poison(enemy, 1.5, 2.0)
-				break
-
-
-func attach_slaad(enemy: Node2D) -> void:
+func attach_slaad(enemy: Node2D) -> bool:
 	if not valid_enemy(enemy) or is_boss(enemy) or not enemy is CharacterBody2D or enemy.has_meta(&"card_control"):
-		return
-	if is_instance_valid(_hosted):
-		_hosted.free()
+		return false
 	var control: CONTROL = CONTROL.new()
 	control.service = self
+	_hosts.append(control)
+	control.tree_exiting.connect(func() -> void: _hosts.erase(control), CONNECT_ONE_SHOT)
 	enemy.add_child(control)
-	_hosted = control
+	return true
+
+
+func expire_slaad(enemy: CharacterBody2D) -> void:
+	enemy.remove_from_group(&"controlled_monsters")
+	if enemy.has_method("get_current_health"):
+		effects().apply_hit(enemy, float(enemy.call("get_current_health")), Vector2.ZERO, 0.0)
+
+
+func _release_hosts() -> void:
+	for control: CONTROL in _hosts:
+		if is_instance_valid(control):
+			control.queue_free()
+	_hosts.clear()
 
 
 func controlled_attack(enemy: Node2D, target: Node2D) -> void:
@@ -350,7 +448,7 @@ func mutation_hit(enemy: Node2D, damage: float) -> void:
 
 
 func valid_enemy(enemy: Node2D) -> bool:
-	return is_instance_valid(enemy) and not enemy.is_queued_for_deletion() and enemy.has_method("is_alive") and bool(enemy.call("is_alive"))
+	return is_instance_valid(enemy) and not enemy.is_queued_for_deletion() and not enemy.is_in_group(&"controlled_monsters") and enemy.has_method("is_alive") and bool(enemy.call("is_alive"))
 
 
 func is_boss(enemy: Node2D) -> bool:
@@ -370,7 +468,7 @@ func nearest_enemy(point: Vector2, radius: float, excluded: Node2D = null) -> No
 	var result: Node2D
 	var best: float = radius * radius
 	for enemy: Node2D in enemies():
-		if enemy == excluded or enemy.is_in_group(&"controlled_monsters"):
+		if enemy == excluded:
 			continue
 		var distance: float = enemy.global_position.distance_squared_to(point)
 		if distance < best:
@@ -421,8 +519,7 @@ func visual(kind: StringName, at: Vector2, lifetime: float, radius: float = 18.0
 
 
 func _exit_tree() -> void:
-	if is_instance_valid(_hosted):
-		_hosted.queue_free()
+	_release_hosts()
 	if is_instance_valid(player):
 		player.mutation_invisible = false
 		if player.card_effects == self:

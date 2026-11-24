@@ -6,4 +6,4 @@
 script = ExtResource("1_pb3gd")
 card_id = &"CARD_MUT_001"
 display_name = "Coração de Fúria"
-description = "Abates pela arma aumentam o movimento em 20% por 3 segundos. Novos abates renovam a duração."
+description = "Abates com a arma aceleram Nox por um tempo. Novos abates renovam o efeito."

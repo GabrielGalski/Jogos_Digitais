@@ -11,7 +11,7 @@ func _initialize() -> void:
 func _run() -> void:
 	for central: bool in [false, true]:
 		var viewport: SubViewport = SubViewport.new()
-		viewport.size = Vector2i(192, 256) if central else Vector2i(96, 96)
+		viewport.size = Vector2i(VISUAL.CENTRAL_TEXTURE.get_size() if central else VISUAL.SOURCE_SIZE)
 		viewport.transparent_bg = true
 		viewport.render_target_update_mode = SubViewport.UPDATE_ALWAYS
 		root.add_child(viewport)

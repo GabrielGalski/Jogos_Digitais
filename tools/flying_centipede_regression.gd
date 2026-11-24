@@ -119,6 +119,7 @@ func _run() -> void:
 	var world: Node2D = await play("res://scenes/maps/open_world.tscn")
 	var player: Player = world.get_node("Nox") as Player
 	player.set_physics_process(false)
+	player.card_effects.set_physics_process(false)
 	player.contact_invulnerability = 0.0
 	var effects: CombatEffects = player.get_node("BoosterShooter").get("effects") as CombatEffects
 	var totems: Array = world.get_node("HordePedestals").get("pedestals") as Array

@@ -6,6 +6,7 @@
 script = ExtResource("1")
 card_id = &"CARD_MUT_003"
 display_name = "Chão Carnívoro"
-description = "Marca um círculo sob inimigos próximos e ataca após 0,25 s."
+description = "O chão se abre sob inimigos próximos e os morde após um breve aviso."
+rarity = 3
 effect = 2
 cooldown = 2

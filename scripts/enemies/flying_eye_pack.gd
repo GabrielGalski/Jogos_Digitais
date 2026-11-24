@@ -193,12 +193,16 @@ func _line_clear(member: CharacterBody2D) -> bool:
 
 
 func _update_attack(delta: float) -> void:
+	if is_instance_valid(_attacker) and _attacker.is_in_group(&"immobilized_enemies"):
+		_stop_attack()
+		return
 	_attack_left -= delta
 	if _attack_left > 0.0: return
 	if _attack == Attack.READY:
 		for offset: int in range(members.size()):
 			var index: int = (_turn_cursor + offset) % members.size()
 			var candidate: CharacterBody2D = members[index]
+			if candidate.is_in_group(&"immobilized_enemies"): continue
 			var distance: float = candidate.global_position.distance_to(target.global_position)
 			if distance < profile.retreat_distance or distance > minf(profile.attack_range, profile.preferred_distance + 38.0) or not _line_clear(candidate): continue
 			_attacker = candidate

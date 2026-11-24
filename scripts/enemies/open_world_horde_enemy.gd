@@ -69,7 +69,8 @@ func _ready() -> void:
 
 
 func _process(delta: float) -> void:
-	_age += delta
+	if not is_in_group(&"immobilized_enemies"):
+		_age += delta
 	hit_time = maxf(0.0, hit_time - delta)
 	var t: float = 1.0 - hit_time / 0.20
 	var bounce: float = sin(PI * t)

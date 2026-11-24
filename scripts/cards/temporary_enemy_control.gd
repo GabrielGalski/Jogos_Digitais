@@ -9,7 +9,7 @@ const SLAAD: Array[Texture2D] = [
 var service: Node
 var decoy: Node2D
 var parasite: bool = true
-var duration: float = 4.0
+var duration: float = 12.0
 var enemy: CharacterBody2D
 var previous_processing: bool
 var elapsed: float = 0.0
@@ -27,6 +27,7 @@ func _ready() -> void:
 	if parasite:
 		enemy.add_to_group(&"controlled_monsters")
 		visual = Sprite2D.new()
+		visual.texture = SLAAD[0]
 		visual.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 		visual.z_index = 5
 		add_child(visual)
@@ -34,7 +35,12 @@ func _ready() -> void:
 
 func _physics_process(delta: float) -> void:
 	elapsed += delta
-	if not is_instance_valid(service) or not bool(enemy.call("is_alive")) or elapsed >= duration:
+	if not is_instance_valid(service) or not bool(enemy.call("is_alive")):
+		queue_free()
+		return
+	if elapsed >= duration:
+		if parasite:
+			service.call("expire_slaad", enemy)
 		queue_free()
 		return
 	var target: Node2D = service.call("nearest_enemy", enemy.global_position, 320.0, enemy) as Node2D if parasite else decoy

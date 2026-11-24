@@ -8,4 +8,4 @@ fire_interval = 0.2782608695652174
 projectile_speed = 360.0
 card_id = &"CARD_MAN_001"
 display_name = "Gotas de Slime"
-description = "Dispara um projétil de slime pelo caster."
+description = "Dispara uma gota de slime que causa dano ao atingir um inimigo."

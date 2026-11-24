@@ -37,7 +37,7 @@ class PedestalMigrationTests(unittest.TestCase):
         fields = lambda e:{f["__identifier"]:f["__value"] for f in e["fieldInstances"]}
         self.assertEqual((pedestal["width"],pedestal["height"]),(80,40))
         self.assertEqual(pedestal["px"], choose_center(room, area))
-        self.assertEqual((pedestal["__tile"]["w"],pedestal["__tile"]["h"]),(128,64))
+        self.assertEqual((pedestal["__tile"]["w"],pedestal["__tile"]["h"]),(112,112))
         self.assertEqual(pedestal["__pivot"],[0.5,0.5])
         self.assertEqual(fields(pedestal)["HeightPx"],0)
         self.assertEqual(fields(pedestal)["EncounterId"],fields(area)["EncounterId"])

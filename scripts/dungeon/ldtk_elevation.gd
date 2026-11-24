@@ -26,12 +26,14 @@ func configure(layers: Array) -> void:
 				areas.append(entry)
 
 
-func height_at(world_point: Vector2) -> float:
+func height_at(world_point: Vector2, project_ramps: bool = true) -> float:
 	var point: Vector2 = to_local(world_point)
 	for ramp: Dictionary in ramps:
 		var rect: Rect2 = ramp.rect as Rect2
 		if not rect.has_point(point):
 			continue
+		if not project_ramps:
+			return 0.0
 		var fraction: Vector2 = (point - rect.position) / rect.size
 		var progress: float = 1.0 - fraction.y
 		match str(ramp.direction):

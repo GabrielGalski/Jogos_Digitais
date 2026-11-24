@@ -9,8 +9,9 @@
 /render/
 /renders/
 
-# Documentação ativa: três documentos canônicos e a apresentação one-page
+# Documentação ativa
 /docs/*
+!/docs/CARTAS.md
 !/docs/GDD.md
 !/docs/TDD.md
 !/docs/GUIA.md

@@ -1,6 +1,8 @@
 extends Node2D
 ## Swept red orb. Monster shots ignore monster bodies; parry changes ownership.
 
+signal player_hit(point: Vector2, damage: float)
+
 const AFFILIATION: Script = preload("res://scripts/combat/combat_affiliation.gd")
 const CONTACTS: Script = preload("res://scripts/combat/projectile_enemy_contacts.gd")
 var target: Player = null
@@ -39,14 +41,20 @@ func _physics_process(delta: float) -> void:
 	if remaining <= 0.0 or not is_instance_valid(target) or target.dead or target.intro_locked:
 		dismiss()
 		return
-	var endpoint: Vector2 = global_position + direction * speed * delta
+	var endpoint: Vector2 = global_position + _flight_motion(delta)
 	var space: PhysicsDirectSpaceState2D = get_world_2d().direct_space_state
-	var query: PhysicsRayQueryParameters2D = PhysicsRayQueryParameters2D.create(global_position, endpoint, 5 if reflected else 1)
-	query.exclude = [target.get_rid()]
+	var exclusions: Array[RID] = [target.get_rid()]
 	if not reflected and is_instance_valid(shooter) and shooter is CollisionObject2D:
-		query.exclude.append((shooter as CollisionObject2D).get_rid())
-	var hit: Dictionary = space.intersect_ray(query)
+		exclusions.append((shooter as CollisionObject2D).get_rid())
+	var visual_offset: Vector2 = Vector2(0.0, -8.0 - _visual_height)
+	var hit: Dictionary = CONTACTS.terrain_ray(get_tree(), space, global_position, endpoint,
+		5 if reflected else 1, exclusions, visual_offset)
 	var wall_fraction: float = global_position.distance_to(hit.get("position", endpoint) as Vector2) / maxf(global_position.distance_to(endpoint), 0.001) if not hit.is_empty() else 1.01
+	var barrier: Dictionary = CONTACTS.sound_field_hit(get_tree(), global_position + visual_offset, endpoint + visual_offset, radius)
+	if not barrier.is_empty() and float(barrier.fraction) <= wall_fraction:
+		wall_fraction = float(barrier.fraction)
+		hit = barrier
+		hit.position = (barrier.position as Vector2) - visual_offset
 	var special: Dictionary = _special_contact(endpoint) if not reflected else {}
 	if not reflected and not target.is_dashing():
 		var capsule: CapsuleShape2D = (target.get_node("CollisionShape2D") as CollisionShape2D).shape as CapsuleShape2D
@@ -56,7 +64,11 @@ func _physics_process(delta: float) -> void:
 		if not contact.is_empty() and float(contact.fraction) <= wall_fraction and (special.is_empty() or float(contact.fraction) < float(special.fraction)):
 			global_position = global_position.lerp(endpoint, float(contact.fraction))
 			if target.try_parry_projectile(self): return
-			if AFFILIATION.can_damage(faction, target): target.receive_projectile_damage(damage, shooter if is_instance_valid(shooter) else null)
+			if AFFILIATION.can_damage(faction, target):
+				var before: float = target.health
+				target.receive_projectile_damage(damage, shooter if is_instance_valid(shooter) else null)
+				if target.health < before:
+					player_hit.emit(target.surface_world_position(), before - target.health)
 			_impact()
 			return
 	if not special.is_empty() and float(special.fraction) <= wall_fraction:
@@ -68,15 +80,19 @@ func _physics_process(delta: float) -> void:
 		return
 	if not hit.is_empty():
 		global_position = hit.position as Vector2
-		var body: Node = hit.get("collider") as Node
-		if reflected and AFFILIATION.can_damage(faction, body) and body.has_method("take_damage"):
-			body.call("take_damage", float(damage))
+		var body: Node2D = hit.get("collider") as Node2D
+		if reflected and not bool(hit.get("sound_block", false)) and AFFILIATION.can_damage(faction, body):
+			target.apply_reflected_damage(body, float(damage), direction)
 		_impact()
 		return
 	global_position = endpoint
 	_previous_target = target.global_position
 	_visual_height = float(height_query.call(global_position)) if height_query.is_valid() else _visual_height
 	queue_redraw()
+
+
+func _flight_motion(delta: float) -> Vector2:
+	return direction * speed * delta
 
 
 func _special_contact(endpoint: Vector2) -> Dictionary:

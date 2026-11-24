@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="ManifestationCard" format=3]
+
+[ext_resource type="Script" path="res://scripts/cards/manifestation_card.gd" id="card"]
+
+[resource]
+script = ExtResource("card")
+card_id = &"M09"
+display_name = "Prisma Fendido"
+description = "Dispara um cristal que se divide em dois estilhaços durante o voo."
+damage = 4.0
+fire_interval = 0.34
+projectile_speed = 380.0
+projectile_lifetime = 0.44
+impact_impulse = 72.0

@@ -1,16 +1,16 @@
 extends Node2D
 ## Source-space mapping scaled to the LDtk entity, with relief and Y-sorted solid pillars.
 
-const SOURCE_CENTER: Vector2 = Vector2(96, 106)
+const VISUAL: Script = preload("res://scripts/visual/warp_visual.gd")
+const CONTACTS: Script = preload("res://scripts/combat/projectile_enemy_contacts.gd")
+const PROP_COVER: Script = preload("res://scripts/combat/projectile_prop_cover.gd")
+const SOURCE_CENTER: Vector2 = VISUAL.CENTRAL_SOURCE_CENTER
 const ACTOR_BASELINE_OFFSET: float = 8.0
 var _top: PackedVector2Array = PackedVector2Array([
 	Vector2(48, 31), Vector2(144, 31), Vector2(190, 76), Vector2(190, 140),
 	Vector2(144, 184), Vector2(48, 184), Vector2(2, 140), Vector2(2, 76)])
-const PILLARS: Array[Dictionary] = [
-	{"label": "NorthWest", "crop": Rect2(25, 5, 24, 67), "foot": Vector2(37, 63), "baseline": Vector2(37, 70)},
-	{"label": "NorthEast", "crop": Rect2(143, 5, 25, 67), "foot": Vector2(155, 63), "baseline": Vector2(155, 70)},
-	{"label": "SouthWest", "crop": Rect2(25, 115, 24, 67), "foot": Vector2(37, 173), "baseline": Vector2(37, 180)},
-	{"label": "SouthEast", "crop": Rect2(143, 115, 25, 67), "foot": Vector2(155, 173), "baseline": Vector2(155, 180)}]
+const PILLAR_NAMES: Array[String] = ["NorthWest", "NorthEast", "SouthWest", "SouthEast"]
+const PILLAR_FEET: Array[Vector2] = [Vector2(37, 63), Vector2(155, 63), Vector2(37, 162), Vector2(155, 162)]
 var elevation: float = 8.0
 var ramp_width: float = 8.0
 var display_scale: float = 1.0
@@ -22,42 +22,33 @@ func configure(presentation: Node2D, description: Dictionary) -> void:
 	ramp_width = clampf(float(description.get("RampWidth", 8)), 1.0, 24.0)
 	display_scale = presentation.scale.x
 	y_sort_enabled = true
-	var plate: Sprite2D = presentation.get("plate") as Sprite2D
-	var stone: ShaderMaterial = plate.material as ShaderMaterial
-	var crops: PackedVector4Array = PackedVector4Array()
-	for entry: Dictionary in PILLARS:
-		var crop: Rect2 = entry.crop as Rect2
-		crops.append(Vector4(crop.position.x, crop.position.y, crop.size.x, crop.size.y))
+	for index: int in range(PILLAR_FEET.size()):
+		var foot: Vector2 = (PILLAR_FEET[index] - SOURCE_CENTER) * display_scale
 		var column: Node2D = Node2D.new()
-		column.name = str(entry.label)
+		column.name = PILLAR_NAMES[index]
 		column.z_index = 2
 		column.z_as_relative = false
-		column.position = ((entry.baseline as Vector2) - SOURCE_CENTER) * display_scale + Vector2(0, elevation - ACTOR_BASELINE_OFFSET)
-		column.set_meta(&"source_rect", crop)
-		var footprint_center: Vector2 = ((entry.foot as Vector2) - SOURCE_CENTER) * display_scale + Vector2(0, elevation)
+		column.position = foot + Vector2(0.0, elevation + (7.0 * display_scale) - ACTOR_BASELINE_OFFSET)
+		var footprint_center: Vector2 = foot + Vector2(0.0, elevation)
 		column.set_meta(&"footprint", Rect2(footprint_center - Vector2(10, 5) * display_scale, Vector2(20, 10) * display_scale))
 		add_child(column)
 		var sprite: Sprite2D = Sprite2D.new()
 		sprite.name = "PillarSprite"
-		sprite.texture = plate.texture
-		var pillar_material: ShaderMaterial = stone.duplicate() as ShaderMaterial
-		pillar_material.set_shader_parameter(&"hide_pillars", false)
-		pillar_material.set_shader_parameter(&"pillar_only", true)
-		pillar_material.set_shader_parameter(&"pillar_rect", Vector4(crop.position.x, crop.position.y, crop.size.x, crop.size.y))
-		sprite.material = pillar_material
+		sprite.texture = VISUAL.CENTRAL_PILLARS[index]
 		sprite.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 		sprite.centered = false
-		# Identical full-size quad/UVs prevent subpixel crop seams under camera zoom.
-		# The material clips to the mapped column; sorting still uses its foot.
+		# All four files are aligned to the same full-size canvas as the base.
 		sprite.scale = Vector2.ONE * display_scale
-		sprite.position = -SOURCE_CENTER * display_scale - column.position
+		sprite.position = presentation.position - SOURCE_CENTER * display_scale - column.position
 		column.add_child(sprite)
+		PROP_COVER.attach(sprite)
 		var solid: StaticBody2D = StaticBody2D.new()
 		solid.name = "SolidBase"
 		solid.collision_layer = 1
 		solid.collision_mask = 0
 		solid.position = footprint_center - column.position
 		solid.add_to_group(&"central_warp_pillars")
+		solid.add_to_group(CONTACTS.MOVEMENT_ONLY)
 		var shape: CapsuleShape2D = CapsuleShape2D.new()
 		shape.radius = 5.0 * display_scale
 		shape.height = 20.0 * display_scale
@@ -68,8 +59,6 @@ func configure(presentation: Node2D, description: Dictionary) -> void:
 		solid.add_child(collider)
 		column.add_child(solid)
 		pillars.append(column)
-	stone.set_shader_parameter(&"pillar_rects", crops)
-	stone.set_shader_parameter(&"hide_pillars", true)
 
 
 func _stairs() -> Rect2:

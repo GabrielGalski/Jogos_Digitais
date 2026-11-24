@@ -74,6 +74,10 @@ func _ready() -> void:
 
 func _physics_process(delta: float) -> void:
 	if dying: return
+	if is_in_group(&"immobilized_enemies"):
+		velocity = Vector2.ZERO
+		hit_velocity = Vector2.ZERO
+		return
 	_cooldown = maxf(_cooldown - delta, 0.0)
 	_splash_age += delta
 	if not engaged and global_position.distance_squared_to(home_position) < 9.0 and _movement.is_zero_approx() and hit_velocity.is_zero_approx(): return

@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="InfusionCard" format=3]
+
+[ext_resource type="Script" path="res://scripts/cards/infusion_card.gd" id="card"]
+
+[resource]
+script = ExtResource("card")
+card_id = &"CARD_INF_011"
+display_name = "Carapaça de Gárgula"
+description = "Seus disparos ricocheteiam ao atingir uma parede."
+rarity = 0
+effect = 10

@@ -6,7 +6,7 @@ const LAYER_NAME: String = "Borders"
 @export_range(0.5, 3.0, 0.05) var brightness: float = 1.0
 
 
-func build(layers: Array, definitions: Dictionary, textures: RefCounted) -> void:
+func build(layers: Array, definitions: Dictionary, textures: RefCounted, terrain_height: Callable = Callable()) -> void:
 	z_index = -16
 	texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	modulate = Color(brightness, brightness, brightness, 1.0)
@@ -38,6 +38,8 @@ func build(layers: Array, definitions: Dictionary, textures: RefCounted) -> void
 		tile_set.add_source(atlas, 0)
 		var stack_counts: Dictionary[Vector2i, int] = {}
 		var render_layers: Array[TileMapLayer] = []
+		var collision_variants: Dictionary[Vector3i, int] = {}
+		var layer_offset: Vector2 = Vector2(float(layer.get("__pxTotalOffsetX", 0)), float(layer.get("__pxTotalOffsetY", 0)))
 		for tile_variant: Variant in tiles:
 			var tile: Dictionary = tile_variant
 			var pixel: Array = tile.get("px", [])
@@ -49,9 +51,10 @@ func build(layers: Array, definitions: Dictionary, textures: RefCounted) -> void
 				push_error("Borders: tile fora do atlas: " + str(source))
 				continue
 			var atlas_cell: Vector2i = Vector2i(Vector2(source) / float(grid))
+			var region: Rect2i = Rect2i(source, Vector2i(grid, grid))
 			if not atlas.has_tile(atlas_cell):
 				atlas.create_tile(atlas_cell)
-				add_alpha_collision(atlas.get_tile_data(atlas_cell, 0), image, Rect2i(source, Vector2i(grid, grid)))
+				add_alpha_collision(atlas.get_tile_data(atlas_cell, 0), image, region)
 			var cell: Vector2i = Vector2i(floori(float(pixel[0]) / grid), floori(float(pixel[1]) / grid))
 			var depth: int = stack_counts.get(cell, 0)
 			stack_counts[cell] = depth + 1
@@ -59,7 +62,7 @@ func build(layers: Array, definitions: Dictionary, textures: RefCounted) -> void
 				var render_layer: TileMapLayer = TileMapLayer.new()
 				render_layer.name = layer_name + "_" + str(render_layers.size())
 				render_layer.tile_set = tile_set
-				render_layer.position = Vector2(float(layer.get("__pxTotalOffsetX", 0)), float(layer.get("__pxTotalOffsetY", 0)))
+				render_layer.position = layer_offset
 				render_layer.modulate.a = float(layer.get("__opacity", 1))
 				add_child(render_layer)
 				render_layers.append(render_layer)
@@ -69,10 +72,34 @@ func build(layers: Array, definitions: Dictionary, textures: RefCounted) -> void
 				flags |= TileSetAtlasSource.TRANSFORM_FLIP_H
 			if flip & 2:
 				flags |= TileSetAtlasSource.TRANSFORM_FLIP_V
-			render_layers[depth].set_cell(cell, 0, atlas_cell, flags)
+			var alternative: int = 0
+			if terrain_height.is_valid():
+				# LDtk shows the barrier in screen coordinates. Feet and physics remain on the ground plane.
+				var center: Vector2 = render_layers[depth].to_global(Vector2(cell * grid) + Vector2.ONE * grid * 0.5)
+				var height: int = roundi(float(terrain_height.call(center)))
+				if height != 0:
+					var offset_y: int = -height if flip & 2 else height
+					var key: Vector3i = Vector3i(atlas_cell.x, atlas_cell.y, offset_y)
+					if not collision_variants.has(key):
+						var variant_id: int = atlas.create_alternative_tile(atlas_cell)
+						add_alpha_collision(atlas.get_tile_data(atlas_cell, variant_id), image, region, offset_y)
+						collision_variants[key] = variant_id
+					alternative = collision_variants[key]
+			render_layers[depth].set_cell(cell, 0, atlas_cell, alternative | flags)
 
 
-static func add_alpha_collision(data: TileData, image: Image, region: Rect2i) -> void:
+static func add_alpha_collision(data: TileData, image: Image, region: Rect2i, offset_y: int = 0) -> void:
+	for rect: Rect2i in alpha_rectangles(image, region):
+		var top_left: Vector2 = Vector2(rect.position) - Vector2(region.size) * 0.5 + Vector2(0, offset_y)
+		var bottom_right: Vector2 = top_left + Vector2(rect.size)
+		var polygon_index: int = data.get_collision_polygons_count(0)
+		data.add_collision_polygon(0)
+		data.set_collision_polygon_points(0, polygon_index, PackedVector2Array([
+			top_left, Vector2(bottom_right.x, top_left.y), bottom_right, Vector2(top_left.x, bottom_right.y)
+		]))
+
+
+static func alpha_rectangles(image: Image, region: Rect2i) -> Array[Rect2i]:
 	# Merge equal opaque runs vertically; never fill the transparent openings of a stamp.
 	var rectangles: Array[Rect2i] = []
 	var previous: Dictionary[Vector2i, int] = {}
@@ -97,11 +124,4 @@ static func add_alpha_collision(data: TileData, image: Image, region: Rect2i) ->
 				rectangles.append(Rect2i(start, y, x - start, 1))
 			current[run] = index
 		previous = current
-	for rect: Rect2i in rectangles:
-		var top_left: Vector2 = Vector2(rect.position) - Vector2(region.size) * 0.5
-		var bottom_right: Vector2 = top_left + Vector2(rect.size)
-		var polygon_index: int = data.get_collision_polygons_count(0)
-		data.add_collision_polygon(0)
-		data.set_collision_polygon_points(0, polygon_index, PackedVector2Array([
-			top_left, Vector2(bottom_right.x, top_left.y), bottom_right, Vector2(top_left.x, bottom_right.y)
-		]))
+	return rectangles

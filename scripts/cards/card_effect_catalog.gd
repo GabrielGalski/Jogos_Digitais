@@ -1,5 +1,13 @@
 extends RefCounted
 
+const DRAGON_PACK: int = 4
+const PACK_CODES: Array = [
+	[&"M01", &"I01", &"U01", &"M02", &"I03", &"U06"],
+	[&"M05", &"I02", &"U02", &"M06", &"I04", &"U05"],
+	[&"M07", &"U03", &"U04", &"M04", &"I05", &"I11"],
+	[&"M11", &"U12", &"I12", &"I13", &"U13", &"M08"],
+]
+
 const MANIFESTATIONS: Array[ProceduralManifestationModel] = [
 	preload("res://resources/weapons/procedural/M01.tres"),
 	preload("res://resources/weapons/procedural/M02.tres"),
@@ -7,6 +15,10 @@ const MANIFESTATIONS: Array[ProceduralManifestationModel] = [
 	preload("res://resources/weapons/procedural/M06.tres"),
 	preload("res://resources/weapons/procedural/M07.tres"),
 	preload("res://resources/weapons/procedural/M08.tres"),
+	preload("res://resources/weapons/procedural/M05.tres"),
+	preload("res://resources/weapons/procedural/M09.tres"),
+	preload("res://resources/weapons/procedural/M10.tres"),
+	preload("res://resources/weapons/procedural/M11.tres"),
 ]
 const INFUSIONS: Array[InfusionCard] = [
 	preload("res://resources/cards/golem_core.tres"),
@@ -14,6 +26,14 @@ const INFUSIONS: Array[InfusionCard] = [
 	preload("res://resources/cards/infusions/I03.tres"),
 	preload("res://resources/cards/infusions/I04.tres"),
 	preload("res://resources/cards/infusions/I05.tres"),
+	preload("res://resources/cards/infusions/I06.tres"),
+	preload("res://resources/cards/infusions/I07.tres"),
+	preload("res://resources/cards/infusions/I08.tres"),
+	preload("res://resources/cards/infusions/I09.tres"),
+	preload("res://resources/cards/infusions/I10.tres"),
+	preload("res://resources/cards/infusions/I11.tres"),
+	preload("res://resources/cards/infusions/I12.tres"),
+	preload("res://resources/cards/infusions/I13.tres"),
 ]
 const MUTATIONS: Array[MutationCard] = [
 	preload("res://resources/cards/fury_heart.tres"),
@@ -22,7 +42,33 @@ const MUTATIONS: Array[MutationCard] = [
 	preload("res://resources/cards/mutations/U04.tres"),
 	preload("res://resources/cards/mutations/U05.tres"),
 	preload("res://resources/cards/mutations/U06.tres"),
+	preload("res://resources/cards/mutations/U07.tres"),
+	preload("res://resources/cards/mutations/U08.tres"),
+	preload("res://resources/cards/mutations/U09.tres"),
+	preload("res://resources/cards/mutations/U10.tres"),
+	preload("res://resources/cards/mutations/U11.tres"),
+	preload("res://resources/cards/mutations/U12.tres"),
+	preload("res://resources/cards/mutations/U13.tres"),
 ]
+
+
+static func draw_pack(volume: int) -> Array[CardDefinition]:
+	var cards: Array[CardDefinition] = []
+	for card: CardDefinition in implemented_cards():
+		if alias(card) in PACK_CODES[volume - 1]:
+			cards.append(card)
+	cards.shuffle()
+	return cards.slice(0, 3)
+
+
+static func draw_horde_pack(volume: int) -> Array[CardDefinition]:
+	var cards: Array[CardDefinition] = []
+	for card: CardDefinition in implemented_cards():
+		var code: StringName = alias(card)
+		if code not in PACK_CODES[DRAGON_PACK - 1] and (code != &"I11" or volume == 3):
+			cards.append(card)
+	cards.shuffle()
+	return cards.slice(0, 3)
 
 
 static func implemented_cards() -> Array[CardDefinition]:

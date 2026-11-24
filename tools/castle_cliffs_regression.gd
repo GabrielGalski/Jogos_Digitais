@@ -123,6 +123,15 @@ func _authored_checks(data: Dictionary) -> void:
 					if layer_id in ["Gameplay", "GameplayAreas", "TerrainStairs"]:
 						var after_layer: Dictionary = _layer(_level(data, level_id), layer_id)
 						var before_layer: Dictionary = old_layer
+						if layer_id == "Gameplay" and level_id == "Room_2":
+							# Northern MapLimits were painted after the cliff migration.
+							before_layer = old_layer.duplicate(true)
+							var cells: Array = before_layer.intGridCsv
+							var width: int = int(before_layer.__cWid)
+							for x: int in range(160, 2608, 16):
+								cells[5 * width + x / 16] = 1.0
+							for x: int in range(2592, 2944, 16):
+								cells[4 * width + x / 16] = 1.0
 						if layer_id == "GameplayAreas" and level_id == "Room_2":
 							after_layer = _restore_elevation_fields(after_layer, old_layer)
 							# The central Warp became CentralWarp after this historical snapshot.

@@ -140,13 +140,20 @@ func _run() -> void:
 	stage = table.get("_stage") as Control
 	await create_timer(0.7).timeout
 	var cards: Array[CardTableCard] = table.get("cards")
-	check(cards.size() == 19, "The 18 authored cards and explicit temporary M08 are present")
+	check(cards.size() == 37, "The 36 playable cards and the M03 preview are present")
 	var correct_geometry: bool = true
 	var correct_finishes: bool = true
 	var special_count: int = 0
 	var special_cards: Array[CardTableCard] = []
 	var finishes: Dictionary = {"M04": Color("#b678ff"), "I04": Color("#65e6a0"), "U04": Color("#f4c45c")}
+	var rarity_faces: Dictionary[String, bool] = {}
 	for card: CardTableCard in cards:
+		var live_face: CardFace = card.get("_live_face") as CardFace
+		if live_face != null:
+			correct_geometry = correct_geometry and live_face.texture != null
+			if card.card_id in ["U03", "I11"]:
+				rarity_faces[card.card_id] = live_face.material != null
+			continue
 		var face: Polygon2D = card.get("_face") as Polygon2D
 		correct_geometry = correct_geometry and face.texture.get_size() == Vector2(208.0, 320.0)
 		correct_geometry = correct_geometry and face.uv[0] == Vector2(2.0, 2.0) and face.uv[2] == Vector2(206.0, 318.0)
@@ -156,17 +163,18 @@ func _run() -> void:
 			correct_finishes = correct_finishes and card.foil_tint == finishes[card.card_id] and face.material != null
 		else:
 			correct_finishes = correct_finishes and face.material == null
-	check(correct_geometry, "All cards use the native 208x320 texture and source-derived crop")
+	check(correct_geometry, "Authored card crops and live faces are both present")
+	check(rarity_faces == {"U03": true, "I11": false}, "Chão Carnívoro has a legendary finish and Carapaça has a matte finish")
 	check(correct_finishes and special_count == 3, "Only the three documented candidates have purple, green and gold foil")
 	var piles: Array[Array] = table.get("_piles")
-	check(piles[0].size() == 8 and piles[1].size() == 5 and piles[2].size() == 6, "Three piles contain 8 / 5 / 6 cards")
+	check(piles[0].size() == 11 and piles[1].size() == 13 and piles[2].size() == 13, "Three piles contain 11 / 13 / 13 cards")
 	check(paused, "World is paused while the table is open")
 	await _capture("01_stacks")
 	await _key(KEY_TAB)
 	check(current_scene == map and is_instance_valid(table), "Tab cannot jump away from the modal")
 	var first: CardTableCard = piles[0][0] as CardTableCard
 	await _click(first.position)
-	check(first.on_table and piles[0].size() == 7, "A click deals exactly one card")
+	check(first.on_table and piles[0].size() == 10, "A click deals exactly one card")
 	check(table.get("selected_card") == null, "Dealing does not immediately inspect")
 	var second: CardTableCard = piles[0][0] as CardTableCard
 	await _drag(second.position, Vector2(390.0, 395.0))

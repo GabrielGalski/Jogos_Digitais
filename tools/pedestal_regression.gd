@@ -113,7 +113,7 @@ func _run() -> void:
 		ghost.call("take_damage", 1000.0)
 	check(int(horde.get("phase")) == 2 and not warning.visible, "Final kill turns off the warning")
 	await ticks(85)
-	check(str(opener.get("state")) == "opened" and (opener.get_node("Visuals/Cards/Center") as Sprite2D).visible, "Tutorial victory reveals the cards on approach")
+	check(str(opener.get("state")) == "opened" and (opener.get_node("Visuals/Cards/Center") as Sprite2D).visible, "Tutorial victory reveals the card on approach")
 	check(not bool(arena.get_node("Gameplay").call("is_door_cell_locked", Vector2i(52, 43))), "Completed horde opens the exit")
 	key(KEY_E, true)
 	await ticks(2)

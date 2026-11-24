@@ -10,7 +10,7 @@ const JUMPER: Script = preload("res://scripts/debug/scene_jumper.gd")
 
 var entry_player_state: Dictionary = {}
 var entrance_complete: bool = false
-var _world_jump_requested: bool = false
+var _elemental_jump_requested: bool = false
 var _departing: bool = false
 @onready var player: Player = $Mox
 
@@ -53,25 +53,22 @@ func request_scene_jump() -> void:
 	if _departing:
 		return
 	if player.dead:
-		get_node("/root/SceneJumper").call("travel_to_scene", self, JUMPER.WORLD_SCENE)
+		get_node("/root/SceneJumper").call("travel_to_scene", self, JUMPER.ELEMENTAL_SCENE)
 		return
 	var encounter: Node = get_node("MinotaurChair/TutorialEncounter")
-	if bool(encounter.call("request_boss_skip")):
-		return
-	else:
-		var completion: Node = encounter.get("completion") as Node
-		completion.call("_dismiss_elite_lesson")
-		get_tree().paused = false
-		_world_jump_requested = true
+	var completion: Node = encounter.get("completion") as Node
+	completion.call("_dismiss_elite_lesson")
+	get_tree().paused = false
+	_elemental_jump_requested = true
 
 
 func _process(_delta: float) -> void:
-	if _world_jump_requested and entrance_complete and not _departing:
-		_world_jump_requested = false
-		_depart_to_world.call_deferred()
+	if _elemental_jump_requested and entrance_complete and not _departing:
+		_elemental_jump_requested = false
+		_depart_to_elemental.call_deferred()
 
 
-func _depart_to_world() -> void:
+func _depart_to_elemental() -> void:
 	if _departing:
 		return
 	_departing = true
@@ -84,7 +81,7 @@ func _depart_to_world() -> void:
 	var transition: CanvasLayer = get_node("WarpTransition") as CanvasLayer
 	transition.call("play", false, player)
 	await transition.finished
-	get_node("/root/SceneJumper").call("travel_to_scene", self, JUMPER.WORLD_SCENE, player)
+	get_node("/root/SceneJumper").call("travel_to_scene", self, JUMPER.ELEMENTAL_SCENE, player)
 
 
 func _restore_player_state() -> void:

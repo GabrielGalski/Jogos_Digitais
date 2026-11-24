@@ -16,7 +16,7 @@ from configure_ldtk_spirit_horde import convert_data as configure_horde, ENTRY_I
 from clean_ldtk_model import LAYER_DOCS
 from ldtk_field_values import set_value, preserve_editor_values
 
-SOURCE = "assets/tiles/structures/booster_opener/closed1.png"
+SOURCE = "assets/tiles/structures/booster_opener/new/pedestal.png"
 TOTEM_DOC = "ENCONTRO / Totem abridor. Aproxime-se e pressione E para iniciar a horda. O aviso acompanha o combate. Depois da vitoria o totem abre por proximidade."
 ENCOUNTER = "spirit_horde_1"
 AREA_FIELDS = (

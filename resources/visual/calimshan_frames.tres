@@ -1,0 +1,129 @@
+[gd_resource type="SpriteFrames" format=3]
+
+[ext_resource type="Texture2D" path="res://assets/cards/sets/elementais_de_calimshan/infusao/nucleo_de_eletricidade I06/lightining/light1/lightining1.png" id="lightning_a_1"]
+[ext_resource type="Texture2D" path="res://assets/cards/sets/elementais_de_calimshan/infusao/nucleo_de_eletricidade I06/lightining/light1/lightining2.png" id="lightning_a_2"]
+[ext_resource type="Texture2D" path="res://assets/cards/sets/elementais_de_calimshan/infusao/nucleo_de_eletricidade I06/lightining/light1/lightining3.png" id="lightning_a_3"]
+[ext_resource type="Texture2D" path="res://assets/cards/sets/elementais_de_calimshan/infusao/nucleo_de_eletricidade I06/lightining/light1/lightining4.png" id="lightning_a_4"]
+[ext_resource type="Texture2D" path="res://assets/cards/sets/elementais_de_calimshan/infusao/nucleo_de_eletricidade I06/lightining/light1/lightining5.png" id="lightning_a_5"]
+[ext_resource type="Texture2D" path="res://assets/cards/sets/elementais_de_calimshan/infusao/nucleo_de_eletricidade I06/lightining/light1/lightining6.png" id="lightning_a_6"]
+[ext_resource type="Texture2D" path="res://assets/cards/sets/elementais_de_calimshan/infusao/nucleo_de_eletricidade I06/lightining/light2/lightining1.png" id="lightning_b_1"]
+[ext_resource type="Texture2D" path="res://assets/cards/sets/elementais_de_calimshan/infusao/nucleo_de_eletricidade I06/lightining/light2/lightining2.png" id="lightning_b_2"]
+[ext_resource type="Texture2D" path="res://assets/cards/sets/elementais_de_calimshan/infusao/nucleo_de_eletricidade I06/lightining/light2/lightining3.png" id="lightning_b_3"]
+[ext_resource type="Texture2D" path="res://assets/cards/sets/elementais_de_calimshan/infusao/nucleo_de_eletricidade I06/lightining/light2/lightining4.png" id="lightning_b_4"]
+[ext_resource type="Texture2D" path="res://assets/cards/sets/elementais_de_calimshan/infusao/nucleo_de_eletricidade I06/lightining/light2/lightining5.png" id="lightning_b_5"]
+[ext_resource type="Texture2D" path="res://assets/cards/sets/elementais_de_calimshan/infusao/nucleo_de_eletricidade I06/lightining/light2/lightining6.png" id="lightning_b_6"]
+[ext_resource type="Texture2D" path="res://assets/cards/sets/elementais_de_calimshan/infusao/nucleo_de_eletricidade I06/spread/spread1.png" id="discharge_1"]
+[ext_resource type="Texture2D" path="res://assets/cards/sets/elementais_de_calimshan/infusao/nucleo_de_eletricidade I06/spread/spread2.png" id="discharge_2"]
+[ext_resource type="Texture2D" path="res://assets/cards/sets/elementais_de_calimshan/infusao/nucleo_de_eletricidade I06/spread/spread3.png" id="discharge_3"]
+[ext_resource type="Texture2D" path="res://assets/cards/sets/elementais_de_calimshan/infusao/nucleo_de_eletricidade I06/spread/spread4.png" id="discharge_4"]
+[ext_resource type="Texture2D" path="res://assets/cards/sets/elementais_de_calimshan/infusao/nucleo_de_eletricidade I06/spread/spread5.png" id="discharge_5"]
+[ext_resource type="Texture2D" path="res://assets/cards/sets/elementais_de_calimshan/infusao/nucleo_de_fogo I07/smoke/smoke1.png" id="burn_1"]
+[ext_resource type="Texture2D" path="res://assets/cards/sets/elementais_de_calimshan/infusao/nucleo_de_fogo I07/smoke/smoke2.png" id="burn_2"]
+[ext_resource type="Texture2D" path="res://assets/cards/sets/elementais_de_calimshan/infusao/nucleo_de_fogo I07/smoke/smoke3.png" id="burn_3"]
+[ext_resource type="Texture2D" path="res://assets/cards/sets/elementais_de_calimshan/infusao/nucleo_de_fogo I07/smoke/smoke4.png" id="burn_4"]
+[ext_resource type="Texture2D" path="res://assets/cards/sets/elementais_de_calimshan/infusao/nucleo_de_fogo I07/smoke/smoke5.png" id="burn_5"]
+[ext_resource type="Texture2D" path="res://assets/cards/sets/elementais_de_calimshan/infusao/nucleo_de_fogo I07/smoke/smoke6.png" id="burn_6"]
+[ext_resource type="Texture2D" path="res://assets/cards/sets/elementais_de_calimshan/infusao/nucleo_de_fogo I07/smoke/smoke7.png" id="burn_7"]
+[ext_resource type="Texture2D" path="res://assets/cards/sets/elementais_de_calimshan/infusao/nucleo_de_gelo I08/spikes/ice_spikes1.png" id="spikes_1"]
+[ext_resource type="Texture2D" path="res://assets/cards/sets/elementais_de_calimshan/infusao/nucleo_de_gelo I08/spikes/ice_spikes2.png" id="spikes_2"]
+[ext_resource type="Texture2D" path="res://assets/cards/sets/elementais_de_calimshan/infusao/nucleo_de_gelo I08/spikes/ice_spikes3.png" id="spikes_3"]
+[ext_resource type="Texture2D" path="res://assets/cards/sets/elementais_de_calimshan/infusao/nucleo_de_gelo I08/spikes/ice_spikes4.png" id="spikes_4"]
+[ext_resource type="Texture2D" path="res://assets/cards/sets/elementais_de_calimshan/infusao/nucleo_de_gelo I08/spikes/ice_spikes5.png" id="spikes_5"]
+[ext_resource type="Texture2D" path="res://assets/cards/sets/elementais_de_calimshan/infusao/nucleo_de_gelo I08/spikes/ice_spikes6.png" id="spikes_6"]
+[ext_resource type="Texture2D" path="res://assets/cards/sets/elementais_de_calimshan/infusao/nucleo_de_gelo I08/spikes/ice_spikes7.png" id="spikes_7"]
+[ext_resource type="Texture2D" path="res://assets/cards/sets/elementais_de_calimshan/infusao/nucleo_de_gelo I08/spikes/ice_spikes8.png" id="spikes_8"]
+[ext_resource type="Texture2D" path="res://assets/cards/sets/elementais_de_calimshan/infusao/nucleo_de_gelo I08/stun effect/snow_swirl_32x32.png" id="frozen_32"]
+[ext_resource type="Texture2D" path="res://assets/cards/sets/elementais_de_calimshan/infusao/nucleo_de_gelo I08/stun effect/snow_swirl_32x33.png" id="frozen_33"]
+[ext_resource type="Texture2D" path="res://assets/cards/sets/elementais_de_calimshan/infusao/nucleo_de_gelo I08/stun effect/snow_swirl_32x34.png" id="frozen_34"]
+[ext_resource type="Texture2D" path="res://assets/cards/sets/elementais_de_calimshan/infusao/nucleo_de_gelo I08/stun effect/snow_swirl_32x35.png" id="frozen_35"]
+[ext_resource type="Texture2D" path="res://assets/cards/sets/elementais_de_calimshan/infusao/nucleo_de_gelo I08/stun effect/snow_swirl_32x36.png" id="frozen_36"]
+[ext_resource type="Texture2D" path="res://assets/cards/sets/elementais_de_calimshan/infusao/nucleo_de_gelo I08/stun effect/snow_swirl_32x37.png" id="frozen_37"]
+[ext_resource type="Texture2D" path="res://assets/cards/sets/elementais_de_calimshan/infusao/nucleo_de_gelo I08/stun effect/snow_swirl_32x38.png" id="frozen_38"]
+[ext_resource type="Texture2D" path="res://assets/cards/sets/elementais_de_calimshan/infusao/nucleo_de_gelo I08/stun effect/snow_swirl_32x39.png" id="frozen_39"]
+[ext_resource type="Texture2D" path="res://assets/cards/sets/elementais_de_calimshan/infusao/nucleo_de_gelo I08/stun effect/snow_swirl_32x40.png" id="frozen_40"]
+[ext_resource type="Texture2D" path="res://assets/cards/sets/elementais_de_calimshan/infusao/nucleo_de_gelo I08/stun effect/snow_swirl_32x41.png" id="frozen_41"]
+[ext_resource type="Texture2D" path="res://assets/cards/sets/elementais_de_calimshan/infusao/nucleo_de_gelo I08/stun effect/snow_swirl_32x42.png" id="frozen_42"]
+[ext_resource type="Texture2D" path="res://assets/cards/sets/elementais_de_calimshan/infusao/nucleo_de_gelo I08/stun effect/snow_swirl_32x43.png" id="frozen_43"]
+
+[resource]
+animations = [{
+"frames": [
+{"duration": 1.0, "texture": ExtResource("lightning_a_1")},
+{"duration": 1.0, "texture": ExtResource("lightning_a_2")},
+{"duration": 1.0, "texture": ExtResource("lightning_a_3")},
+{"duration": 1.0, "texture": ExtResource("lightning_a_4")},
+{"duration": 1.0, "texture": ExtResource("lightning_a_5")},
+{"duration": 1.0, "texture": ExtResource("lightning_a_6")}
+],
+"loop": false,
+"name": &"lightning_a",
+"speed": 24.0
+}, {
+"frames": [
+{"duration": 1.0, "texture": ExtResource("lightning_b_1")},
+{"duration": 1.0, "texture": ExtResource("lightning_b_2")},
+{"duration": 1.0, "texture": ExtResource("lightning_b_3")},
+{"duration": 1.0, "texture": ExtResource("lightning_b_4")},
+{"duration": 1.0, "texture": ExtResource("lightning_b_5")},
+{"duration": 1.0, "texture": ExtResource("lightning_b_6")}
+],
+"loop": false,
+"name": &"lightning_b",
+"speed": 24.0
+}, {
+"frames": [
+{"duration": 1.0, "texture": ExtResource("discharge_1")},
+{"duration": 1.0, "texture": ExtResource("discharge_2")},
+{"duration": 1.0, "texture": ExtResource("discharge_3")},
+{"duration": 1.0, "texture": ExtResource("discharge_4")},
+{"duration": 1.0, "texture": ExtResource("discharge_5")}
+],
+"loop": false,
+"name": &"discharge",
+"speed": 22.0
+}, {
+"frames": [
+{"duration": 1.0, "texture": ExtResource("burn_1")},
+{"duration": 1.0, "texture": ExtResource("burn_2")},
+{"duration": 1.0, "texture": ExtResource("burn_3")},
+{"duration": 1.0, "texture": ExtResource("burn_4")},
+{"duration": 1.0, "texture": ExtResource("burn_5")},
+{"duration": 1.0, "texture": ExtResource("burn_6")},
+{"duration": 1.0, "texture": ExtResource("burn_7")}
+],
+"loop": true,
+"name": &"burn",
+"speed": 10.0
+}, {
+"frames": [
+{"duration": 1.0, "texture": ExtResource("spikes_1")},
+{"duration": 1.0, "texture": ExtResource("spikes_2")},
+{"duration": 1.0, "texture": ExtResource("spikes_3")},
+{"duration": 1.0, "texture": ExtResource("spikes_4")},
+{"duration": 1.0, "texture": ExtResource("spikes_5")},
+{"duration": 1.0, "texture": ExtResource("spikes_6")},
+{"duration": 1.0, "texture": ExtResource("spikes_7")},
+{"duration": 1.0, "texture": ExtResource("spikes_8")}
+],
+"loop": false,
+"name": &"spikes",
+"speed": 22.0
+}, {
+"frames": [
+{"duration": 1.0, "texture": ExtResource("frozen_32")},
+{"duration": 1.0, "texture": ExtResource("frozen_33")},
+{"duration": 1.0, "texture": ExtResource("frozen_34")},
+{"duration": 1.0, "texture": ExtResource("frozen_35")},
+{"duration": 1.0, "texture": ExtResource("frozen_36")},
+{"duration": 1.0, "texture": ExtResource("frozen_37")},
+{"duration": 1.0, "texture": ExtResource("frozen_38")},
+{"duration": 1.0, "texture": ExtResource("frozen_39")},
+{"duration": 1.0, "texture": ExtResource("frozen_40")},
+{"duration": 1.0, "texture": ExtResource("frozen_41")},
+{"duration": 1.0, "texture": ExtResource("frozen_42")},
+{"duration": 1.0, "texture": ExtResource("frozen_43")}
+],
+"loop": true,
+"name": &"frozen",
+"speed": 15.0
+}]

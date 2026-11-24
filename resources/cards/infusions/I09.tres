@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="InfusionCard" format=3]
+
+[ext_resource type="Script" path="res://scripts/cards/infusion_card.gd" id="card"]
+
+[resource]
+script = ExtResource("card")
+card_id = &"CARD_INF_009"
+display_name = "Sede da Cripta"
+description = "Com menos da metade da vida, seu próximo acerto recupera um pouco de vida quando a recarga termina."
+rarity = 0
+effect = 8

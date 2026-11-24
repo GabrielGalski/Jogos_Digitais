@@ -4,6 +4,8 @@ extends Node
 const WORLD_SCENE: String = "res://scenes/maps/open_world.tscn"
 const SPIRIT_SCENE: String = "res://scenes/dungeon/ldtk_arena.tscn"
 const ASTERION_SCENE: String = "res://scenes/tutorial_arena.tscn"
+const ELEMENTAL_SCENE: String = "res://scenes/bosses/elemental_golem_arena.tscn"
+const VAMPIRE_SCENE: String = "res://scenes/bosses/vampire_arena.tscn"
 var _dispatch_queued: bool = false
 var _requested_scene: WeakRef = null
 var _swapping: bool = false

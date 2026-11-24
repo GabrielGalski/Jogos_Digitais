@@ -34,7 +34,6 @@ func build(layers: Array, player: Player, encounters: Array, terrain_height: Cal
 			var footprint: Rect2 = ENTITIES.entity_rect(entity, offset)
 			config["position"] = footprint.get_center()
 			config["TerrainHeight"] = terrain_height.call(to_global(footprint.get_center()))
-			config["BodyWidth"] = footprint.size.x * 0.792
 			var pedestal: Node2D = PEDESTAL.new() as Node2D
 			pedestal.name = "Pedestal_%d" % pedestals.size()
 			add_child(pedestal)

@@ -2,7 +2,7 @@ extends SceneTree
 ## Play the LDtk encounters through activation, real kills and proximity-based completion.
 
 const WORLD: String = "res://scenes/maps/open_world.tscn"
-const CLOSED: Texture2D = preload("res://assets/tiles/structures/booster_opener/closed1.png")
+const PEDESTAL_MODEL: Texture2D = preload("res://assets/tiles/structures/booster_opener/new/pedestal.png")
 const VIEWER: PackedScene = preload("res://scenes/cards/booster_viewer.tscn")
 const CENTIPEDE: Script = preload("res://scripts/enemies/flying_centipede.gd")
 const OUT: String = "res://output/horde_totems/"
@@ -86,18 +86,20 @@ func _run() -> void:
 	check(bool(world.get("entry_complete")), "World entry finishes")
 	player = world.get_node("Nox") as Player
 	player.contact_invulnerability = 1000.0
+	player.card_effects.set_physics_process(false)
 	var totems: Array = world.get_node("HordePedestals").get("pedestals") as Array
 	check(totems.size() == 6, "Six authored encounters")
-	var source: Image = CLOSED.get_image()
+	var source: Image = PEDESTAL_MODEL.get_image()
 	if source.is_compressed():
 		source.decompress()
 	var bounds: Rect2 = Rect2(source.get_used_rect())
 	for totem: Node2D in totems:
 		var surface: AnimatedSprite2D = totem.get_node("BoosterOpener/Visuals/Surface") as AnimatedSprite2D
-		var center: Vector2 = surface.to_global(bounds.get_center() - CLOSED.get_size() * 0.5)
+		check(surface.sprite_frames.get_frame_texture(&"closed", 0) == PEDESTAL_MODEL, "Totem uses the new stone model")
+		var center: Vector2 = surface.to_global(bounds.get_center() - PEDESTAL_MODEL.get_size() * 0.5)
 		var terrain_height: float = float(world.call("_terrain_and_warp_height", totem.global_position))
 		check(center.distance_to(totem.global_position - Vector2(0, terrain_height)) < 0.01, "Totem centered on its terrain")
-		check(is_equal_approx(surface.global_scale.x * bounds.size.x, 63.36), "World body keeps the approved scale")
+		check(is_equal_approx(surface.global_scale.x * bounds.size.x, 39.375), "World altar uses the approved body width")
 		check(not totem.has_node("Plate"), "Old platform removed")
 		check(totem.get("encounter") != null, "LDtk encounter ID resolves")
 	var first: Node2D = totems[0] as Node2D
@@ -132,9 +134,26 @@ func _run() -> void:
 			break
 		await ticks(1)
 	check(int(encounter.get("phase")) == 1 and not (encounter.get("actors") as Array).is_empty(), "E starts actual enemy spawns")
+	key(KEY_I, true)
+	key(KEY_I, false)
+	await ticks(2)
+	check(paused and world.has_node("EquipmentMenu"), "I opens card selection during an active horde")
+	var elapsed_when_paused: float = float(encounter.get("elapsed_seconds"))
+	await ticks(4)
+	check(float(encounter.get("elapsed_seconds")) == elapsed_when_paused, "Card selection pauses the horde timer")
+	key(KEY_I, true)
+	key(KEY_I, false)
+	await ticks(3)
+	check(not paused and not world.has_node("EquipmentMenu") and int(encounter.get("phase")) == 1, "I closes card selection and resumes the same horde")
 	check(warning.visible and not action.visible and not idle.visible, "Combat replaces E with warning")
 	check(warning_sprite.sprite_frames.get_frame_count(&"idle") == 9 and warning_sprite.is_playing(), "Authored nine-frame warning loops")
-	check((warning.get_node("WarningLight") as PointLight2D).enabled and not (idle.get_node("YellowLight") as PointLight2D).enabled, "Only the warning light is active")
+	check((warning.get_node("WarningLight") as PointLight2D).enabled and not (idle.get_node("YellowLight") as PointLight2D).enabled, "Combat marker replaces the idle marker light")
+	var engraving: Sprite2D = opener.get_node("Visuals/ApertureGlow") as Sprite2D
+	var engraving_material: ShaderMaterial = engraving.material as ShaderMaterial
+	var mask: Image = engraving.texture.get_image()
+	check(engraving.visible and engraving_material.get_shader_parameter("glow_tint") == Color("#52192d"), "Active horde lights the engraving in matching burgundy neon")
+	check(mask.get_pixel(56, 26).a > 0.9 and mask.get_pixel(48, 32).a < 0.1, "Light mask covers the etched card and leaves the stone face unlit")
+	check(not (opener.get_node("Visuals/Cards/Center") as Sprite2D).visible, "Active horde keeps the reward card hidden")
 	if rendered:
 		await ticks(120)
 	await capture("03-combate")
@@ -165,22 +184,26 @@ func _run() -> void:
 	await ticks(4)
 	check(int(encounter.get("phase")) == 2 and not warning.visible and not idle.visible, "Final kill ends encounter and clears markers")
 	check(str(opener.get("state")) == "closed", "Distant cleared machine stays closed")
+	check(not engraving.visible, "Combat neon turns off when the horde ends")
 	place(first.global_position + Vector2(36, 16))
 	await ticks(85)
 	camera.reset_smoothing()
 	camera.force_update_scroll()
-	var cards: Array[Node] = opener.get_node("Visuals/Cards").get_children()
-	check(str(opener.get("state")) == "opened" and cards.size() == 3, "Nearby cleared machine opens")
-	for card: Sprite2D in cards:
-		check(card.visible and card.modulate.a > 0.99, "All three cards are visible")
-	check(not first.has_node("PackOpening") and not paused, "Proximity presents the cards without opening the pack")
+	var floating_card: Sprite2D = opener.get_node("Visuals/Cards/Center") as Sprite2D
+	check(str(opener.get("state")) == "opened" and floating_card.visible and floating_card.modulate.a > 0.99,
+		"Nearby cleared altar presents the floating card")
+	check(floating_card.texture.resource_path.ends_with("/card2.png") and floating_card.get_parent().get_child_count() == 1,
+		"Only the original center card is visible")
+	check((opener.get_node("Visuals/GroundGlow") as Node2D).visible, "The original ground animation returns")
+	check(engraving_material.get_shader_parameter("glow_tint") == Color("#ffd45d"), "The reward glow is gold")
+	check(not first.has_node("PackOpening") and not paused, "Proximity presents the card without opening the booster")
 	var reward_surface: AnimatedSprite2D = opener.get_node("Visuals/Surface") as AnimatedSprite2D
 	var machine_point: Vector2 = reward_surface.get_global_transform_with_canvas().origin
 	mouse_button(machine_point + Vector2(0, 85), true)
 	mouse_button(machine_point + Vector2(0, 85), false)
 	await ticks(3)
 	check(not first.has_node("PackOpening"), "A ground click leaves the pack closed")
-	check((opener.get_node("ActionPrompt") as Sprite2D).visible, "The cleared opener shows E when the cards are ready")
+	check((opener.get_node("ActionPrompt") as Sprite2D).visible, "The cleared altar shows E when the reward card is ready")
 	var game_cursor: CanvasLayer = root.get_node("GameCursor") as CanvasLayer
 	var previous_mouse_mode: Input.MouseMode = Input.mouse_mode
 	key(KEY_E, true)
@@ -220,13 +243,12 @@ func _run() -> void:
 	await ticks(3)
 	check(not paused and int(first.get("_reward_volume")) == volume, "Cancel keeps the previously rolled reward")
 	check(game_cursor.visible and Input.mouse_mode == previous_mouse_mode, "Cancel restores the gameplay cursor")
-	var floating_card: Sprite2D = cards[1] as Sprite2D
 	var card_point: Vector2 = floating_card.get_global_transform_with_canvas().origin
 	mouse_button(card_point, true)
 	mouse_button(card_point, false)
 	await ticks(3)
 	viewer = first.get_node_or_null("PackOpening/BoosterViewer") as BoosterViewer
-	check(viewer != null and paused, "Clicking a floating card resumes a dismissed opening")
+	check(viewer != null and paused, "Clicking the floating card resumes a dismissed opening")
 	if viewer == null:
 		quit(1)
 		return
@@ -286,7 +308,7 @@ func _run() -> void:
 	check(game_cursor.visible and Input.mouse_mode == previous_mouse_mode, "Closing the reveal restores the gameplay cursor")
 	place(first.global_position + Vector2(110, 0))
 	await ticks(85)
-	check(str(opener.get("state")) == "closed", "Leaving retracts cards")
+	check(str(opener.get("state")) == "closed", "Leaving retracts the card")
 	place(first.global_position + Vector2(36, 16))
 	await ticks(85)
 	check(not first.has_node("PackOpening"), "Returning to a claimed pedestal does not grant another pack")

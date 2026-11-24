@@ -136,11 +136,28 @@ func _run() -> void:
 	var primary: Target = add_target(origin + Vector2(60, 0))
 	var nearby: Target = add_target(origin + Vector2(60, 19))
 	var outside: Target = add_target(origin + Vector2(60, 60))
+	var pierced_a: Target = add_target(origin + Vector2(109, 0))
+	var pierced_b: Target = add_target(origin + Vector2(114, 0))
+	var stop_wall: StaticBody2D = StaticBody2D.new()
+	stop_wall.collision_layer = 1
+	var stop_shape: RectangleShape2D = RectangleShape2D.new()
+	stop_shape.size = Vector2(8, 54)
+	var stop_collision: CollisionShape2D = CollisionShape2D.new()
+	stop_collision.shape = stop_shape
+	stop_wall.add_child(stop_collision)
+	arena.add_child(stop_wall)
+	stop_wall.global_position = origin + Vector2(150, 0)
+	targets.append(stop_wall)
+	var behind_wall: Target = add_target(origin + Vector2(190, 0))
 	await settle()
-	gun.call("fire_once")
-	await create_timer(0.4).timeout
-	check(is_equal_approx(primary.health, 92.5) and is_equal_approx(nearby.health, 92.5), "M02 has its native area blast")
-	check(outside.health == 100.0, "M02 blast is bounded")
+	shot = gun.call("fire_once") as Node2D
+	var mass: CardAttack = shot.get("attack") as CardAttack
+	check(is_equal_approx(mass.fire_interval, 0.56 / 0.9975) and is_equal_approx(mass.projectile_speed, 897.75), "M02 uses the adjusted cadence and projectile speed")
+	await settle(8)
+	check(is_equal_approx(primary.health, 92.5) and primary.hits == 1 and is_equal_approx(nearby.health, 92.5), "M02 triggers the first impact blast and damages each enemy once")
+	check(pierced_a.hits == 1 and pierced_b.hits == 1, "M02 pierces two subsequent bodies in the same sweep")
+	await settle(6)
+	check(outside.health == 100.0 and behind_wall.health == 100.0 and not is_instance_valid(shot), "M02 blast stays bounded and the projectile stops at terrain")
 	await clear_fixture()
 	origin = select(3)
 	shot = gun.call("fire_once") as Node2D
@@ -153,18 +170,58 @@ func _run() -> void:
 	check(attached.health <= 95.0 and attached.health >= 94.0, "M06 adds periodic damage after its primary hit")
 	await clear_fixture()
 	origin = select(4)
-	var fire_target: Target = add_target(origin + Vector2(55, 0))
+	var fire_target: Target = add_target(origin + (gun.get("aim_direction") as Vector2) * 20.0)
 	await settle()
-	gun.call("fire_once")
+	shot = gun.call("fire_once") as Node2D
+	var origins: Dictionary = {}
+	var aims: Dictionary = {}
+	var volley: CardAttack = shot.get("attack") as CardAttack
+	for pellet: Node2D in get_nodes_in_group(&"manifestation_projectiles"):
+		origins[pellet.global_position] = true
+		aims[pellet.get("direction")] = true
+		var sprite: Sprite2D = pellet.get_node("ProceduralVisual/Core32") as Sprite2D
+		check(pellet.get("attack") == volley and sprite.texture.resource_path.ends_with("/projectile/base.png"), "Each pellet uses the authored art and shared emission snapshot")
+	check(origins.size() == 5 and aims.size() == 5 and gun.call("fire_once") == null, "One M07 shot emits five pellets with separate launch positions and angles")
 	await create_timer(0.22).timeout
-	check(fire_target.health == 96.0, "M07 fireball keeps its own damage and short reach")
+	check(fire_target.hits >= 3 and is_equal_approx(fire_target.health, 100.0 - 1.2 * float(fire_target.hits)), "Multiple pellets deal damage to the same target at close range")
 	await clear_fixture()
 	origin = select(4)
 	var distant: Target = add_target(origin + Vector2(155, 0))
 	await settle()
 	shot = gun.call("fire_once") as Node2D
+	if "--capture" in OS.get_cmdline_user_args():
+		await settle(6)
+		await RenderingServer.frame_post_draw
+		DirAccess.make_dir_recursive_absolute("res://output/card_effects")
+		root.get_texture().get_image().save_png("res://output/card_effects/09-efreeti-shotgun.png")
 	await create_timer(0.32).timeout
 	check(not is_instance_valid(shot) and distant.health == 100.0, "M07 expires at the existing quarter-second lifetime")
+	await clear_fixture()
+	origin = select(6)
+	var basilisk: ProceduralManifestationModel = controller.call("selected_model") as ProceduralManifestationModel
+	var slime: ManifestationCard = (controller.get("MODELS")[0] as ProceduralManifestationModel).card
+	check(basilisk.code() == &"M05" and basilisk.card.display_name == "Fragmentos de Basilisco", "The new manifestation keeps the M05 identity")
+	check(is_equal_approx(basilisk.card.projectile_speed * basilisk.card.projectile_lifetime, slime.projectile_speed * slime.projectile_lifetime), "Basilisk stones travel the same distance as a Slime Drop")
+	check(is_equal_approx(basilisk.card.fire_interval * 0.9975, slime.fire_interval), "Basilisk firing rate is 0.25 percent below Slime Drops")
+	shot = gun.call("fire_once") as Node2D
+	var first_fan: Array[Vector2] = []
+	var forward: Vector2 = gun.get("aim_direction") as Vector2
+	for stone: Node2D in get_nodes_in_group(&"manifestation_projectiles"):
+		var travel_aim: Vector2 = stone.get("direction") as Vector2
+		first_fan.append(travel_aim)
+		check(travel_aim.dot(forward) >= cos(deg_to_rad(42.01)), "Basilisk stones stay in the forward cone")
+	check(first_fan.size() == 5, "Basilisk launches five separate stones")
+	if "--capture" in OS.get_cmdline_user_args():
+		await settle(9)
+		await RenderingServer.frame_post_draw
+		root.get_texture().get_image().save_png("res://output/card_effects/11-basilisk-fragments.png")
+	await clear_fixture()
+	select(6)
+	gun.call("fire_once")
+	var next_fan: Array[Vector2] = []
+	for stone: Node2D in get_nodes_in_group(&"manifestation_projectiles"):
+		next_fan.append(stone.get("direction") as Vector2)
+	check(next_fan.size() == 5 and first_fan != next_fan, "Basilisk chooses fresh directions on each shot")
 	await clear_fixture()
 	origin = select(2)
 	var laser_target: Target = add_target(origin + Vector2(100, 0))
@@ -202,16 +259,25 @@ func _run() -> void:
 	await settle()
 	controller.call("set_trigger", true)
 	await create_timer(0.4).timeout
+	var flame: Node2D = controller.get("channel") as Node2D
+	var jet: CPUParticles2D = flame.get_node_or_null("Jet") as CPUParticles2D if is_instance_valid(flame) else null
+	var sparks: CPUParticles2D = flame.get_node_or_null("EdgeSparks") as CPUParticles2D if is_instance_valid(flame) else null
+	check(jet != null and jet.emitting and jet.amount == 144 and not jet.local_coords
+		and jet.color_ramp.sample(0.0).is_equal_approx(Color("#fffc40")),
+		"M08 uses the restored world-space flame particles")
+	check(sparks != null and sparks.emitting and sparks.amount == 32, "M08 emits the restored sparks")
 	check(in_cone.health < 100.0 and beside_cone.health == 100.0, "M08 grows a directional damage cone")
 	controller.call("set_trigger", false)
 	await settle()
+	check(is_instance_valid(jet) and is_instance_valid(sparks) and not jet.emitting and not sparks.emitting and flame.visible,
+		"M08 keeps only its dissipating particles on release")
 	var health_after_stream: float = in_cone.health
 	await create_timer(0.2).timeout
 	check(in_cone.health == health_after_stream, "Dissipating flames do not keep dealing damage")
 	await clear_fixture()
 	await _combination_contract()
 	await _real_input_contract()
-	check(not controller.get("MODELS").any(func(model: ProceduralManifestationModel) -> bool: return model.code() in [&"M03", &"M05"]), "M03 and M05 are outside the implemented selector")
+	check(not controller.get("MODELS").any(func(model: ProceduralManifestationModel) -> bool: return model.code() == &"M03"), "M03 remains outside the implemented selector")
 	controller.call("cancel_attacks")
 	print("PROCEDURAL_WEAPONS_REGRESSION " + ("PASS" if failures.is_empty() else "FAIL " + str(failures.size())))
 	quit(0 if failures.is_empty() else 1)
@@ -220,6 +286,12 @@ func _run() -> void:
 func _palette_contracts() -> void:
 	var factory: ProceduralWeaponSpriteFactory = controller.get("sprites") as ProceduralWeaponSpriteFactory
 	for model: ProceduralManifestationModel in controller.get("MODELS"):
+		if model.family == ProceduralManifestationModel.Family.STREAM:
+			continue
+		if model.projectile_texture != null:
+			var art: Image = model.projectile_texture.get_image()
+			check(art.get_used_rect().size == Vector2i(8, 8) and is_equal_approx(model.visual_scale, 0.75), "Authored pellet has a six-pixel display size: " + String(model.code()))
+			continue
 		var presentation: Texture2D = factory.texture_for(model, 0, Vector2.RIGHT)
 		check(presentation.get_size() == Vector2(96, 96), "Smooth presentation uses 3x raster density: " + String(model.code()))
 		check(model.visual_scale >= 0.3 and model.visual_scale <= 0.65, "Compact presentation remains independent of collision: " + String(model.code()))

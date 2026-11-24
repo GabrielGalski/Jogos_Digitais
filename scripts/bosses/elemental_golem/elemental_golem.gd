@@ -18,8 +18,6 @@ const FRAMES: Array[SpriteFrames] = [
 	preload("res://resources/enemies/elemental_golem/fire.tres"),
 	preload("res://resources/enemies/elemental_golem/lightning.tres"),
 ]
-const STYLE: Script = preload("res://scripts/bosses/elemental_golem/elemental_style.gd")
-const COLORS: Array[Color] = STYLE.COLORS
 enum State { DORMANT, MOVING, CHARGING, FIRING, RECOVERING, JUMP_PREP, JUMPING, LANDING, SPECIAL, DEAD }
 
 @export var max_health: float = 360.0
@@ -103,6 +101,8 @@ func _physics_process(delta: float) -> void:
 	sprite.modulate = Color(2.0,1.65,1.9) if _hit_remaining > 0.0 else Color.WHITE
 	if state == State.DEAD or state == State.DORMANT or not is_instance_valid(target) or target.dead or target.intro_locked:
 		queue_redraw()
+		return
+	if is_in_group(&"immobilized_enemies"):
 		return
 	_remaining -= delta
 	sprite.flip_h = target.global_position.x < global_position.x
@@ -260,7 +260,7 @@ func _land() -> void:
 	air_height = 0.0
 	sprite.position.y = 0.0
 	(get_node("BodyCollision") as CollisionShape2D).position.y = -20.0
-	layout.call("landing_impact",global_position)
+	layout.set("landing_point",Vector2.INF)
 	state = State.LANDING
 	_remaining = 0.24
 	sprite.play(&"fall") # Authored pose 7 on the descent and landing.
@@ -400,22 +400,6 @@ func receive_impact(_direction: Vector2, _impulse: float, _recovery: float = 0.0
 func _draw() -> void:
 	if state == State.DEAD: return
 	draw_ellipse_shadow()
-	if shielded:
-		var tint: Color = COLORS[element]
-		var center: Vector2 = Vector2(0,-30.0-air_height)
-		# Thin energized rim; no opaque polygon covering the sprite.
-		var rim: PackedVector2Array = PackedVector2Array()
-		for index: int in range(97):
-			var angle: float = float(index)*TAU/96.0
-			rim.append(center+Vector2.from_angle(angle)*Vector2(39,43))
-		for layer: int in range(4,0,-1):
-			draw_polyline(rim,Color(tint,0.025),float(layer)*2.0,true)
-		draw_polyline(rim,Color(tint,0.55),1.2,true)
-		var sheen: PackedVector2Array = PackedVector2Array()
-		for index: int in range(25):
-			var angle: float = PI*1.05+float(index)*PI/48.0
-			sheen.append(center+Vector2.from_angle(angle)*Vector2(39,43))
-		draw_polyline(sheen,Color(STYLE.CORE,0.7),0.65,true)
 
 
 func draw_ellipse_shadow() -> void:

@@ -8,6 +8,7 @@ const NEUTRAL: StringName = &"neutral"
 
 static func faction_of(actor: Node) -> StringName:
 	if not is_instance_valid(actor): return NEUTRAL
+	if actor.is_in_group(&"controlled_monsters"): return PLAYER
 	if actor.has_method("get_combat_faction"):
 		return StringName(str(actor.call("get_combat_faction")))
 	if actor is Player: return PLAYER

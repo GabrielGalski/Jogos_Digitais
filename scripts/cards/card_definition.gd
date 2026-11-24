@@ -3,7 +3,7 @@ extends Resource
 ## Shared authored data. Combat state belongs to CardCombatRuntime, never this resource.
 
 enum Kind { MANIFESTATION, INFUSION, MUTATION }
-enum Rarity { COMMON, UNCOMMON, RARE }
+enum Rarity { COMMON, UNCOMMON, RARE, LEGENDARY }
 
 @export var card_id: StringName
 @export var display_name: String

@@ -59,7 +59,7 @@ func _menu_contract(first_scene: bool) -> void:
 	var previous: StringName = (controller.call("selected_model") as ProceduralManifestationModel).code()
 	var health: float = actor.health
 	var at: Vector2 = actor.position
-	check(bool(controller.call("open_equipment_menu")), "Shared menu entry is available")
+	await key(KEY_I)
 	await process_frame
 	var menu: CanvasLayer = scene.get_node_or_null("EquipmentMenu") as CanvasLayer
 	check(menu != null and paused, "Equipment menu pauses " + scene.scene_file_path)
@@ -74,30 +74,33 @@ func _menu_contract(first_scene: bool) -> void:
 	await click(menu.get("manifestation_slot") as Button)
 	await create_timer(0.4).timeout
 	var choices: Dictionary = menu.get("model_buttons") as Dictionary
-	check(choices.size() == 6, "All six existing models appear together")
+	check(choices.size() == 8, "All eight models fit in the manifestation picker")
 	if first_scene:
 		await capture("02_cards")
 	await click(choices[1] as Button)
 	check((controller.call("selected_model") as ProceduralManifestationModel).code() == &"M02", "Clicking Massa de Slime equips its existing model")
 	check((choices[1] as Button).button_pressed, "The selected card remains visibly selected")
+	await click(choices[6] as Button)
+	check((controller.call("selected_model") as ProceduralManifestationModel).code() == &"M05", "The Basilisk card equips its new projectile model")
 	await click(choices[5] as Button)
-	check((controller.call("selected_model") as ProceduralManifestationModel).code() == &"M08", "The blank temporary card equips the flamethrower")
+	var dragon: ProceduralManifestationModel = controller.call("selected_model") as ProceduralManifestationModel
+	check(dragon.code() == &"M08" and dragon.card.display_name == "Garganta de Dragão", "The Dragon Throat card equips its channel")
 	menu.call("show_aspect", 1)
 	await process_frame
 	choices = menu.get("model_buttons") as Dictionary
-	check(choices.size() == 5, "All five infusions are available")
+	check(choices.size() == 8, "All eight infusions are available")
 	await click(choices[2] as Button)
 	check((gun.get("card_runtime") as CardCombatRuntime).copy_loadout().infusion.card_id == &"CARD_INF_003", "Infusion selector equips Odopi")
 	menu.call("show_aspect", 2)
 	await process_frame
 	choices = menu.get("model_buttons") as Dictionary
-	check(choices.size() == 6, "All six mutations are available")
+	check(choices.size() == 8, "All eight mutations are available")
 	await click(choices[3] as Button)
 	check((gun.get("card_runtime") as CardCombatRuntime).copy_loadout().mutation.card_id == &"CARD_MUT_004", "Mutation selector equips Mandrake")
 	check(actor.position == at and actor.health == health, "Simulation stays paused during selection")
-	await key(KEY_BACKSPACE)
+	await key(KEY_I)
 	await process_frame
-	check(not paused and scene.get_node_or_null("EquipmentMenu") == null, "Backspace closes the screen and resumes the same scene")
+	check(not paused and scene.get_node_or_null("EquipmentMenu") == null, "I closes the screen and resumes the same scene")
 	check(bool(gun.get("require_mouse_release")) or not Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT), "Closing cannot automatically fire from the card click")
 
 

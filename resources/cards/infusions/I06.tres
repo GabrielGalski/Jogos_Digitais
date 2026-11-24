@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="InfusionCard" format=3]
+
+[ext_resource type="Script" path="res://scripts/cards/infusion_card.gd" id="card"]
+
+[resource]
+script = ExtResource("card")
+card_id = &"CARD_INF_006"
+display_name = "Núcleo de Eletricidade"
+description = "Um raio atordoa um inimigo próximo. Se ele for derrotado sob o efeito, uma descarga atinge os vizinhos."
+rarity = 2
+effect = 5
+cooldown = 4.5

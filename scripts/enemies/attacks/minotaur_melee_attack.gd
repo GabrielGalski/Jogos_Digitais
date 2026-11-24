@@ -66,7 +66,7 @@ func _on_body_entered(body: Node2D) -> void:
 func _hit_player() -> void:
 	if consumed:
 		return
-	if not is_instance_valid(attacker) or not attacker.is_alive() or target.intro_locked:
+	if not is_instance_valid(attacker) or not attacker.is_alive() or attacker.is_in_group(&"immobilized_enemies") or target.intro_locked:
 		return
 	var query: PhysicsRayQueryParameters2D = PhysicsRayQueryParameters2D.create(attacker.global_position, target.global_position, 1)
 	query.exclude = [target.get_rid(), (attacker as CharacterBody2D).get_rid()]

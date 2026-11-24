@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="ManifestationCard" format=3]
+
+[ext_resource type="Script" path="res://scripts/cards/manifestation_card.gd" id="card"]
+
+[resource]
+script = ExtResource("card")
+card_id = &"M10"
+display_name = "Presas Rubras"
+description = "Dispara duas lâminas rubras que se cruzam à frente da mira. Ambas podem atingir o mesmo inimigo."
+rarity = 0
+damage = 2.5
+fire_interval = 0.32
+projectile_speed = 270.0
+projectile_lifetime = 0.64
+impact_impulse = 20.0

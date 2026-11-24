@@ -9,7 +9,7 @@ const ROOM_LIGHTING: Script = preload("res://scripts/visual/room_lighting.gd")
 const LIGHTING_PROFILE: Resource = preload("res://resources/visual/room_1_lighting.tres")
 const LIGHTING_SETUPS: Resource = preload("res://resources/visual/room_lighting_setups.tres")
 const MARKED_POSITION: Vector2 = Vector2(136, 0)
-const OPENER_WORLD_WIDTH: float = 63.36
+const REWARD_PEDESTAL: Script = preload("res://scripts/structures/booster_reward_pedestal.gd")
 
 @onready var player: Player = $Actors/Nox
 @onready var platform: Node2D = $Actors/HordePlatform
@@ -39,13 +39,13 @@ func _ready() -> void:
 	plate.scale = Vector2.ONE * 0.5
 	plate.z_index = -12
 	platform.add_child(plate)
-	platform.call("configure", {"position": Vector2.ZERO, "BodyWidth": OPENER_WORLD_WIDTH})
+	platform.call("configure", {"position": Vector2.ZERO})
 	altar = platform.get_node("BoosterOpener") as Node2D
 	altar.get_node("Visuals/ExclamationMarker").call("set_active", false)
 	altar.set("interaction_enabled", true)
 	altar.set("action_prompt_enabled", true)
 	altar.call("bind_player", player)
-	marked_opener.call("fit_on_platform", OPENER_WORLD_WIDTH, MARKED_POSITION, 0.0)
+	marked_opener.call("fit_on_platform", REWARD_PEDESTAL.WORLD_BODY_WIDTH, MARKED_POSITION, 0.0)
 	marked_opener.call("bind_player", player)
 	var lighting: CanvasLayer = ROOM_LIGHTING.new() as CanvasLayer
 	lighting.name = "RoomLighting"

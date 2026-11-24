@@ -1,4 +1,6 @@
 extends Node2D
+
+const JUMPER: Script = preload("res://scripts/debug/scene_jumper.gd")
 ## Composition root for the castle encounter, its arrival, defeat and return.
 
 const LAYOUT: Script = preload("res://scripts/bosses/elemental_golem/arena_layout.gd")
@@ -7,7 +9,6 @@ const STATE: Script = preload("res://scripts/bosses/elemental_golem/player_state
 const PLAYER: PackedScene = preload("res://scenes/player.tscn")
 const KIT: Script = preload("res://scripts/combat/player_gameplay_kit.gd")
 const GATE: Script = preload("res://scripts/dungeon/warp_gate.gd")
-const WARP_ART: Texture2D = preload("res://assets/tiles/structures/warp.png")
 const TRANSITION: Script = preload("res://scripts/visual/warp_transition.gd")
 const DEFEAT: Script = preload("res://scripts/visual/player_defeat.gd")
 const PLAYER_HUD: PackedScene = preload("res://scenes/ui/player_life_hud.tscn")
@@ -70,7 +71,10 @@ func _ready() -> void:
 	STATE.apply(player,entry_player_state)
 	entrance = GATE.new() as Node2D
 	entrance.name = "EntranceWarp"
-	entrance.call("configure",layout.get("entrance_data"),WARP_ART)
+	var gate_data: Dictionary = (layout.get("entrance_data") as Dictionary).duplicate()
+	gate_data["Interact"] = true
+	gate_data["TargetScene"] = "res://scenes/maps/open_world.tscn"
+	entrance.call("configure",gate_data)
 	add_child(entrance)
 	entrance.set("actor",player)
 	entrance.connect("travel_requested",_on_return_requested)
@@ -204,7 +208,12 @@ func _on_return_requested(_gate: Node2D) -> void:
 
 
 func request_scene_jump() -> void:
-	leave_arena()
+	if _leaving:
+		return
+	var suspended_world: Node = return_controller.get("world") as Node if is_instance_valid(return_controller) else null
+	var jumper: Node = get_node("/root/SceneJumper")
+	if bool(jumper.call("travel_to_scene", self, JUMPER.VAMPIRE_SCENE, player)) and is_instance_valid(suspended_world):
+		suspended_world.queue_free()
 
 
 func leave_arena() -> void:
