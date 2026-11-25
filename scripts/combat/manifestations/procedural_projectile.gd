@@ -28,7 +28,7 @@ var _collision_radius: float
 var _damage_scale: float = 1.0
 var _homing_target: Node2D
 var _homing_acquired: bool = false
-var _wall_reflected: bool = false
+var _reflected: bool = false
 var _flight_speed: float
 
 
@@ -88,7 +88,7 @@ func _physics_process(delta: float) -> void:
 	if remaining <= 0.0:
 		_finish(false)
 		return
-	if not _wall_reflected and model.homing_range > 0.0:
+	if not _reflected and model.homing_range > 0.0:
 		_steer_toward_enemy(delta)
 	if not is_zero_approx(turn_rate):
 		direction = direction.rotated(turn_rate * delta)
@@ -111,32 +111,42 @@ func _physics_process(delta: float) -> void:
 			return
 		global_position = contact.get("position") as Vector2
 		var body: Node2D = contact.get("collider") as Node2D
-		if model.pierces_enemies and not bool(contact.get("sound_block", false)) and _valid_enemy(body):
-			_pierce(body)
-			continue
 		var unused: float = global_position.distance_to(endpoint)
-		if not _valid_enemy(body) and _reflect_at_wall(contact):
-			travel = unused * CONTACTS.WALL_RICOCHET_SPEED
+		var incoming_speed: float = _flight_speed
+		if _try_reflect(contact, body):
+			travel = unused * _flight_speed / incoming_speed
 			endpoint = global_position + direction * travel
 			if travel > 0.01:
 				continue
 			return
+		if model.pierces_enemies and not bool(contact.get("sound_block", false)) and _valid_enemy(body):
+			_pierce(body)
+			continue
 		_impact(contact, body)
 		return
 
 
-func _reflect_at_wall(contact: Dictionary) -> bool:
-	if _wall_reflected or attack.infusion_effect != InfusionCard.GARGOYLE:
+func _try_reflect(contact: Dictionary, body: Node2D) -> bool:
+	if _reflected or attack.infusion_effect != InfusionCard.GARGOYLE or bool(contact.get("sound_block", false)):
 		return false
-	var reflected: Vector2 = CONTACTS.wall_reflection(contact, direction)
+	var enemy_hit: bool = _valid_enemy(body)
+	var reflected: Vector2 = CONTACTS.contact_reflection(contact, direction) if enemy_hit else CONTACTS.wall_reflection(contact, direction)
 	if reflected.is_zero_approx():
 		return false
-	if is_instance_valid(effects):
-		effects.notify_surface_hit(global_position, direction)
-	impacted.emit(global_position, model, 5.0, reflected)
-	_wall_reflected = true
+	if enemy_hit:
+		if model.blast_radius > 0.0 and not _blast_resolved:
+			_pierce(body)
+		else:
+			_passed_enemies[body.get_instance_id()] = true
+			attack.apply_primary_hit(body, global_position, direction, effects, _damage_scale)
+			impacted.emit(global_position, model, 5.0, reflected)
+	else:
+		if is_instance_valid(effects):
+			effects.notify_surface_hit(global_position, direction)
+		impacted.emit(global_position, model, 5.0, reflected)
+		_flight_speed *= CONTACTS.WALL_RICOCHET_SPEED
+	_reflected = true
 	_distance_before_split = INF
-	_flight_speed *= CONTACTS.WALL_RICOCHET_SPEED
 	turn_rate = 0.0
 	direction = reflected
 	global_position += (contact.normal as Vector2) * 0.6

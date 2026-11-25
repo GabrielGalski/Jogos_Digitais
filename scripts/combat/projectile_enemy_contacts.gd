@@ -12,7 +12,11 @@ static func wall_reflection(contact: Dictionary, incoming: Vector2) -> Vector2:
 		return Vector2.ZERO
 	if (PhysicsServer2D.body_get_collision_layer(contact.rid) & (1 | SCENERY_LAYER)) == 0:
 		return Vector2.ZERO
-	var normal: Vector2 = contact.normal
+	return contact_reflection(contact, incoming)
+
+
+static func contact_reflection(contact: Dictionary, incoming: Vector2) -> Vector2:
+	var normal: Vector2 = contact.get("normal", Vector2.ZERO) as Vector2
 	if normal.is_zero_approx() or incoming.dot(normal) >= -0.001:
 		return Vector2.ZERO
 	return incoming.bounce(normal).normalized()

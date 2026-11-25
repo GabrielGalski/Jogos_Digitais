@@ -325,7 +325,7 @@ func _build_ldtk_level() -> bool:
 		if BRIDGES.is_bridge_decoration(layer_name):
 			continue
 		var is_floor: bool = layer_name == "Floor" or layer_name.begins_with("Floor_")
-		var project_ramps: bool = layer_name not in ["Floor_Paths", "Floor_GrassBorders"]
+		var project_ramps: bool = layer_name not in ["Floor_Paths", "Floor_Grass", "Floor_GrassBorders"]
 		if layer_name.begins_with("Walls") or layer_name.begins_with("Objects") or layer_name in ["Borders", "Barriers", "Fences"]:
 			continue
 		var source_id: int = int(layer.get("__tilesetDefUid", -1))
@@ -382,7 +382,8 @@ func _build_ldtk_level() -> bool:
 				tile_layer.tile_set = tile_set
 				tile_layer.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 				var art_path: String = str((tileset_defs.get(source_id, {}) as Dictionary).get("relPath", ""))
-				var palette: int = 4 if art_path.ends_with("/ground_base.png") else 1 if art_path.ends_with("/grass_tileset.png") or art_path.ends_with("/grass_border_tileset.png") else 2 if art_path.ends_with("/path_tileset.png") else 0
+				var palette: int = 4 if art_path.ends_with("/ground_base.png") else 1 if art_path.ends_with("/grass_border_tileset.png") else 2 if art_path.ends_with("/path_tileset.png") else 0
+				if art_path.ends_with("/grass_tileset.png"): palette = 6
 				if art_path.ends_with("/cliff_tileset.png") or art_path.ends_with("/water_bank_tileset_64.png") or art_path.ends_with("/water_bank_tileset_64_mapped.png"): palette = 5
 				tile_layer.set_meta(&"asset_palette", palette)
 				tile_layer.z_index = _layer_z_index(layer_name) + depth

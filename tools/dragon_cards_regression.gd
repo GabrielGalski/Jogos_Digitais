@@ -64,6 +64,7 @@ func run() -> void:
 	rewards = root.get_node("BoosterRewards")
 	await ticks(2)
 	await test_reflections()
+	await test_enemy_reflections()
 	await test_spiral()
 	await test_infusions_and_mutations()
 	test_pack()
@@ -122,6 +123,43 @@ func test_reflections() -> void:
 	wall.queue_free()
 	enemy.queue_free()
 	blocked.queue_free()
+	await ticks(2)
+
+
+func test_enemy_reflections() -> void:
+	var first: Enemy = spawn(Vector2(34, 0))
+	var second: Enemy = spawn(Vector2(-24, 0))
+	var next_target: Enemy = spawn(Vector2(46, 0))
+	driver.call("select_infusion", InfusionCard.GARGOYLE)
+	await ticks(2)
+	var shots: Node = driver.get("projectiles")
+	var sprites: ProceduralWeaponSpriteFactory = driver.get("sprites")
+	var drop: ProceduralManifestationModel = equip(&"M01")
+	var shot: Node2D = FACTORY.projectile(drop, runtime.create_attack(), shots, Vector2.ZERO, Vector2.RIGHT, combat, player, sprites)
+	await ticks(30)
+	check(first.health < 100.0 and second.health < 100.0 and next_target.health == 100.0,
+		"An enemy bounce hits the first and reflected target without bouncing forward again")
+	check(not is_instance_valid(shot), "The non-piercing projectile ends at the second enemy")
+	for code: StringName in [&"M04", &"M08"]:
+		var model: ProceduralManifestationModel = equip(code)
+		first.health = 100.0
+		var channel: Node2D = FACTORY.channel(model, shots, player, sprites)
+		driver.set("channel", channel)
+		channel.call("advance", 0.35, Vector2.ZERO, Vector2.RIGHT, true, true)
+		var hits: Array[Node2D] = channel.call("hit_targets")
+		check(first in hits and second in hits and next_target not in hits, "%s reflects off the first enemy" % code)
+		first.health = 0.0
+		channel.call("advance", 0.1, Vector2.ZERO, Vector2.RIGHT, true, true)
+		hits = channel.call("hit_targets")
+		check(next_target in hits and second not in hits, "%s does not transfer the bounce after the target dies" % code)
+		channel.call("advance", 0.0, Vector2.ZERO, Vector2.RIGHT, false, true)
+		channel.call("advance", 0.35, Vector2.ZERO, Vector2.RIGHT, true, true)
+		hits = channel.call("hit_targets")
+		check(next_target in hits and second in hits, "%s can reflect after a fresh trigger press" % code)
+		driver.call("cancel_attacks")
+	first.queue_free()
+	second.queue_free()
+	next_target.queue_free()
 	await ticks(2)
 
 

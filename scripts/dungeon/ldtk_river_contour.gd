@@ -2,6 +2,7 @@ extends Node2D
 ## LDtk adapter and scene wiring. River geometry itself is engine-data only.
 
 const CONTOUR: Script = preload("res://scripts/visual/river_contour.gd")
+const ENTITIES: Script = preload("res://scripts/dungeon/ldtk_door_blocks.gd")
 var contour: RefCounted = null
 var diagnostics: Array[String] = []
 var edge_softness_px: float = 1.0
@@ -15,8 +16,9 @@ func configure(layers: Array, descriptions: Array, softness: float) -> bool:
 		if str(description.get("preset", "")) == "River":
 			rivers.append(description)
 	var wet: Dictionary = {}
+	var west_cells: Dictionary[int, int] = {}
 	var decks: Dictionary = {}
-	var west_lock: float = -INF
+	var elevations: Array[Rect2] = []
 	west_bank_start_y = -INF
 	for layer: Dictionary in layers:
 		if not bool(layer.get("visible", true)): continue
@@ -25,19 +27,32 @@ func configure(layers: Array, descriptions: Array, softness: float) -> bool:
 			var width: int = int(layer.get("__cWid", 1))
 			var values: Array = layer.get("intGridCsv", []) as Array
 			for index: int in range(values.size()):
-				if int(values[index]) == 1: wet[Vector2i(index % width, floori(float(index) / width))] = true
+				if int(values[index]) != 1:
+					continue
+				var cell: Vector2i = Vector2i(index % width, floori(float(index) / width))
+				wet[cell] = true
+				west_cells[cell.y] = mini(cell.x, int(west_cells.get(cell.y, cell.x)))
 		if name_in_map == "Floor_Bridges":
 			for tile: Dictionary in layer.get("gridTiles", []): decks[Vector2i(int(tile.px[0]), int(tile.px[1]))] = true
 		for entity: Dictionary in layer.get("entityInstances", []):
-			if str(entity.get("__identifier", "")) == "ElevationArea":
-				west_bank_start_y = maxf(west_bank_start_y, float(entity.px[1]) + float(entity.height))
-				west_lock = maxf(west_lock, float(entity.px[1]) + float(entity.height) + 32.0)
+			if str(entity.get("__identifier", "")) != "ElevationArea": continue
+			var fields: Dictionary = ENTITIES.fields(entity)
+			if not bool(fields.get("Enabled", true)) or float(fields.get("HeightPx", 24.0)) <= 0.0: continue
+			var offset: Vector2 = Vector2(float(layer.get("__pxTotalOffsetX", 0)), float(layer.get("__pxTotalOffsetY", 0)))
+			elevations.append(ENTITIES.entity_rect(entity, offset))
 	if wet.is_empty():
 		diagnostics.append("RiverMask ausente/vazia; margem original mantida.")
 		return false
 	if rivers.size() != 1:
 		diagnostics.append("O contorno do rio exige uma unica WaterArea com preset River.")
 		return false
+	# Only a plateau that touches the western shore can hold it in place.
+	for area: Rect2 in elevations:
+		for row: int in west_cells:
+			var western_land: Vector2 = Vector2(float(west_cells[row] * 16 - 1), float(row * 16 + 8))
+			if not area.has_point(western_land): continue
+			west_bank_start_y = maxf(west_bank_start_y, area.end.y)
+			break
 	var spans: Array[Rect2] = []
 	while not decks.is_empty():
 		var first: Vector2i = decks.keys()[0] as Vector2i
@@ -56,7 +71,7 @@ func configure(layers: Array, descriptions: Array, softness: float) -> bool:
 		spans.append(Rect2(Vector2(start), Vector2(ending - start + Vector2i(16, 16))))
 	spans.sort_custom(func(a: Rect2, b: Rect2) -> bool: return a.position.y < b.position.y)
 	contour = CONTOUR.new()
-	if not bool(contour.call("configure", wet, rivers[0].rect as Rect2, spans, west_lock)):
+	if not bool(contour.call("configure", wet, rivers[0].rect as Rect2, spans, west_bank_start_y)):
 		diagnostics.assign(contour.get("diagnostics") as Array[String])
 		contour = null
 		return false

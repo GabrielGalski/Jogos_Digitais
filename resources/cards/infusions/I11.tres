@@ -6,6 +6,6 @@
 script = ExtResource("card")
 card_id = &"CARD_INF_011"
 display_name = "Carapaça de Gárgula"
-description = "Seus disparos ricocheteiam ao atingir uma parede."
+description = "Seus disparos ricocheteiam uma vez em uma parede ou inimigo. Ataques contínuos refletem no mesmo inimigo enquanto ele viver."
 rarity = 0
 effect = 10

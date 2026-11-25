@@ -12,6 +12,7 @@
 # Documentação ativa
 /docs/*
 !/docs/CARTAS.md
+!/docs/PLANO_SHOWCASE_CARTAS.md
 !/docs/GDD.md
 !/docs/TDD.md
 !/docs/GUIA.md

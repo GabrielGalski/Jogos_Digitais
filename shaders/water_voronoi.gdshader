@@ -192,6 +192,7 @@ void fragment() {
 	vec3 river_bank = river_contour_enabled ? river_fields_at(world_position) : vec3(0.0);
 	float bank_amount = bank_enabled ? river_bank.z : 0.0;
 	bool has_bank = bank_amount > 0.0;
+	float effective_bank_width = bank_width_px * bank_amount;
 	float coast_amount = max(river_bank.y, bank_amount);
 	bool has_coast = use_shore_field || coast_amount > 0.0;
 	if (coast_amount > 0.0) {
@@ -200,7 +201,7 @@ void fragment() {
 		mask_alpha = mix(mask_alpha, 1.0, coast_amount);
 		// The authored edge remains the collision boundary. Water/foam begin
 		// at the foot of the decorative face, four pixels farther inside.
-		field = vec4(river_bank.x - (has_bank ? bank_width_px : 0.0), coast_amount, 1.0, coast_amount);
+		field = vec4(river_bank.x - effective_bank_width, coast_amount, 1.0, coast_amount);
 		coast_aa = max(0.25, river_edge_softness_px * 0.5);
 	}
 	if (mask_alpha < 0.001 || surface_modulate.a <= 0.0) {
@@ -239,11 +240,12 @@ void fragment() {
 			river_bank_water(water_color, mid_color.rgb, field.r, shore_shadow_strength), bank_amount);
 	}
 	if (combined_foam && has_coast && field.r < foam_reach_px && field.g > 0.0) {
-		water_color = mix(water_color, foam_color.rgb, coast_foam(world_position, field, elapsed, coast_aa));
+		float foam_amount = bank_enabled && river_bank.y > 0.0 ? bank_amount : 1.0;
+		water_color = mix(water_color, foam_color.rgb, coast_foam(world_position, field, elapsed, coast_aa) * foam_amount);
 	}
 	if (has_bank) {
 		// Cover foam on the face itself; only its foot touches the surface.
-		float face = river_bank_face(river_bank.x, coast_aa) * bank_amount * bank_color.a;
+		float face = river_bank_face(river_bank.x, coast_aa, effective_bank_width) * bank_amount * bank_color.a;
 		water_color = mix(water_color, bank_color.rgb, face);
 	}
 	COLOR = vec4(water_color * surface_modulate.rgb, mask_alpha * surface_modulate.a);

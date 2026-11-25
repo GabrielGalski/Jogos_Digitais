@@ -26,6 +26,11 @@ var _jet: CPUParticles2D
 var _sparks: CPUParticles2D
 var _ricochet: bool
 var _beam_reflected: bool
+var _beam_reflected_from_enemy: bool
+var _reflected_beam_target: Node2D
+var _enemy_bounce_claimed: bool
+var _enemy_bounce_target: Node2D
+var _stream_contact_target: Node2D
 var _beam_out: Vector2
 var _bend: Vector2
 var _reflected_jet: CPUParticles2D
@@ -84,6 +89,11 @@ func advance(delta: float, origin: Vector2, aim: Vector2, requested: bool, ricoc
 	firing = requested
 	_ricochet = ricochet
 	beam_target = null
+	_reflected_beam_target = null
+	_stream_contact_target = null
+	if not requested or not _ricochet:
+		_enemy_bounce_claimed = false
+		_enemy_bounce_target = null
 	if model.family == ProceduralManifestationModel.Family.STREAM:
 		_update_flame()
 		return
@@ -137,6 +147,7 @@ func _exclusions() -> Array[RID]:
 
 func _update_beam_contact() -> void:
 	_beam_reflected = false
+	_beam_reflected_from_enemy = false
 	_beam_out = direction
 	endpoint = direction * model.reach
 	var hit: Dictionary = CONTACTS.sweep(get_tree(), get_world_2d().direct_space_state,
@@ -150,29 +161,52 @@ func _update_beam_contact() -> void:
 	var body: Node2D = hit.get("collider") as Node2D
 	if _valid_enemy(body):
 		beam_target = body
-		return
 	if not _ricochet:
 		return
-	var reflected: Vector2 = CONTACTS.wall_reflection(hit, direction)
 	var remaining_reach: float = model.reach - length
-	if reflected.is_zero_approx() or remaining_reach <= 1.0:
+	if remaining_reach <= 1.0:
+		return
+	var reflected: Vector2 = _channel_reflection(hit, beam_target)
+	if reflected.is_zero_approx():
 		return
 	_beam_reflected = true
+	_beam_reflected_from_enemy = beam_target != null
 	_beam_out = reflected
 	_bend = endpoint
 	var start: Vector2 = global_position + _bend + (hit.normal as Vector2) * 0.6
 	var end: Vector2 = start + reflected * remaining_reach
+	var passed: Dictionary[int, bool] = {}
+	if is_instance_valid(beam_target):
+		passed[beam_target.get_instance_id()] = true
 	hit = CONTACTS.sweep(get_tree(), get_world_2d().direct_space_state,
-		start, end, 5, model.hit_radius, _exclusions())
+		start, end, 5, model.hit_radius, _exclusions(), passed)
 	endpoint = (hit.get("position", end) as Vector2) - global_position
 	if not bool(hit.get("sound_block", false)):
 		body = hit.get("collider") as Node2D
 		if _valid_enemy(body):
-			beam_target = body
+			if beam_target == null:
+				beam_target = body
+			else:
+				_reflected_beam_target = body
+
+
+func _channel_reflection(contact: Dictionary, enemy: Node2D) -> Vector2:
+	if not _valid_enemy(enemy):
+		return CONTACTS.wall_reflection(contact, direction)
+	# Claim one enemy for the entire held attack, even after it dies.
+	if _enemy_bounce_claimed and _enemy_bounce_target != enemy:
+		return Vector2.ZERO
+	var reflected: Vector2 = CONTACTS.contact_reflection(contact, direction)
+	if not reflected.is_zero_approx():
+		_enemy_bounce_claimed = true
+		_enemy_bounce_target = enemy
+	return reflected
 
 
 func hit_direction(target: Node2D = null) -> Vector2:
 	if model.family == ProceduralManifestationModel.Family.BEAM:
+		if _beam_reflected_from_enemy and target != null and target == beam_target:
+			return direction
 		return _beam_out
 	if is_instance_valid(target):
 		return _stream_hit_directions.get(target.get_instance_id(), direction)
@@ -187,11 +221,21 @@ func _update_flame() -> void:
 		var travel: float = minf(model.reach, firing_age * speed)
 		var wall: Dictionary = _trace_stream(global_position, direction, model.reach)
 		var clear_reach: float = model.reach
-		if not wall.is_empty():
+		if _ricochet and (not _enemy_bounce_claimed or _valid_enemy(_enemy_bounce_target)):
+			var contact: Dictionary = CONTACTS.sweep(get_tree(), get_world_2d().direct_space_state,
+				global_position, global_position + direction * travel, 5, 0.0, _exclusions())
+			var enemy: Node2D = contact.get("collider") as Node2D
+			if not bool(contact.get("sound_block", false)) and _valid_enemy(enemy):
+				var reflected: Vector2 = _channel_reflection(contact, enemy)
+				if not reflected.is_zero_approx():
+					_stream_contact_target = enemy
+					clear_reach = global_position.distance_to(contact.position as Vector2)
+					_update_reflected_flame(contact, reflected, clear_reach, travel, speed)
+		if _stream_contact_target == null and not wall.is_empty():
 			var wall_distance: float = global_position.distance_to(wall.position as Vector2)
 			clear_reach = maxf(0.0, wall_distance - 1.0)
 			if _ricochet and travel > wall_distance:
-				_update_reflected_flame(wall, wall_distance, travel, speed)
+				_update_reflected_flame(wall, CONTACTS.wall_reflection(wall, direction), wall_distance, travel, speed)
 		length = minf(clear_reach, travel)
 		endpoint = direction * length
 		var lifetime: float = model.card.projectile_lifetime
@@ -213,11 +257,11 @@ func _trace_stream(start: Vector2, aim: Vector2, reach: float) -> Dictionary:
 		start, start + aim * reach, 1, 0.0, _exclusions())
 
 
-func _update_reflected_flame(wall: Dictionary, wall_distance: float, travel: float, speed: float) -> void:
-	_reflected_direction = CONTACTS.wall_reflection(wall, direction)
+func _update_reflected_flame(contact: Dictionary, reflected: Vector2, wall_distance: float, travel: float, speed: float) -> void:
+	_reflected_direction = reflected
 	if _reflected_direction.is_zero_approx():
 		return
-	_reflected_origin = (wall.position as Vector2) + (wall.normal as Vector2) * 0.6
+	_reflected_origin = (contact.position as Vector2) + (contact.normal as Vector2) * 0.6
 	var reach: float = model.reach - wall_distance
 	var obstacle: Dictionary = _trace_stream(_reflected_origin, _reflected_direction, reach)
 	if not obstacle.is_empty():
@@ -247,6 +291,8 @@ func hit_targets() -> Array[Node2D]:
 	if model.family == ProceduralManifestationModel.Family.BEAM:
 		if is_instance_valid(beam_target) and _valid_enemy(beam_target):
 			targets.append(beam_target)
+		if _valid_enemy(_reflected_beam_target):
+			targets.append(_reflected_beam_target)
 		return targets
 	_stream_hit_directions.clear()
 	var exclusions: Array[RID] = _exclusions()
@@ -261,7 +307,7 @@ func hit_targets() -> Array[Node2D]:
 			var capsule: Dictionary = enemy.call("get_projectile_hurt_capsule") as Dictionary
 			point = enemy.to_global(capsule.get("center", Vector2.ZERO) as Vector2)
 			radius = float(capsule.get("radius", 3.0))
-		if _stream_reaches(global_position, direction, length, STREAM_REAR_REACH, point, radius, space, exclusions):
+		if enemy == _stream_contact_target or _stream_reaches(global_position, direction, length, STREAM_REAR_REACH, point, radius, space, exclusions):
 			targets.append(enemy)
 		elif _reflected_length > 0.0 and _stream_reaches(_reflected_origin, _reflected_direction,
 				_reflected_length, 0.0, point, radius, space, exclusions):

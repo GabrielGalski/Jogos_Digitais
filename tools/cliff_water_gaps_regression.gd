@@ -64,6 +64,7 @@ func _run() -> void:
 		var local: Vector2i = point - Vector2i(rect.position)
 		check(mask.get_pixelv(local).a8 == 0, "No water through the internal cliff joint at " + str(point))
 		check(mask.get_pixelv(local + Vector2i(32, 0)).a8 == 255, "The irregular exterior still exposes the river beside " + str(point))
+	check(mask.get_pixelv(Vector2i(2552, 1087) - Vector2i(rect.position)).a8 == 0, "The last 16 px cliff tile joins the lower floor without a water slit")
 	check(mask.get_pixelv(Vector2i(2592, 1086) - Vector2i(rect.position)).a8 == 255, "Actual water at the cliff foot remains visible")
 	if "--capture" in OS.get_cmdline_user_args():
 		DirAccess.make_dir_recursive_absolute(OUTPUT)

@@ -46,6 +46,24 @@ static func _seal_cliff_joints(mask: Image, cliff: Image, floor_image: Image, fa
 				mask.fill_rect(Rect2i(first, y, last - first + 1, 1), Color.TRANSPARENT)
 
 
+static func _seal_cliff_feet(mask: Image, cliff: Image, floor_image: Image, feet: Array[Rect2i]) -> void:
+	const MAX_SEAM: int = 5
+	for foot: Rect2i in feet:
+		for x: int in range(foot.position.x, foot.end.x):
+			var last_rock: int = -1
+			for y: int in range(maxi(0, foot.position.y - MAX_SEAM), foot.end.y):
+				if cliff.get_pixel(x, y).r > 0.5:
+					last_rock = y
+				if floor_image.get_pixel(x, y).r <= 0.5:
+					continue
+				# Keep the open shore. Only short vertical seams bounded by rock
+				# above and a rendered landing directly below can hide the water.
+				if last_rock >= 0 and y - last_rock <= MAX_SEAM + 1:
+					if y > last_rock + 1:
+						mask.fill_rect(Rect2i(x, last_rock + 1, 1, y - last_rock - 1), Color.TRANSPARENT)
+				last_rock = -1
+
+
 static func build(rect: Rect2, floor_cells: Dictionary, layers: Array, definitions: Dictionary, textures: RefCounted, height_at: Callable) -> ImageTexture:
 	var size: Vector2i = Vector2i(ceili(rect.size.x), ceili(rect.size.y))
 	# LA8 stores luminance + alpha: two bytes per pixel, nearest, no mipmaps.
@@ -66,6 +84,7 @@ static func build(rect: Rect2, floor_cells: Dictionary, layers: Array, definitio
 	opaque_cliff.fill(Color.BLACK)
 	var coast_rects: Array[Rect2i] = []
 	var face_rects: Array[Rect2i] = []
+	var foot_rects: Array[Rect2i] = []
 	var projection: int = 0
 	for layer: Dictionary in layers:
 		if str(layer.get("__identifier", "")) == "TerrainCliffRim" and bool(layer.get("visible", true)):
@@ -93,6 +112,8 @@ static func build(rect: Rect2, floor_cells: Dictionary, layers: Array, definitio
 				coast_rects.append(bounds)
 			var source_point: Vector2i = Vector2i(int(tile.src[0]), int(tile.src[1]))
 			var flip: int = int(tile.get("f", 0))
+			if str(layer.get("__identifier", "")) == "TerrainFaces" and source_point.y == source.get_height() - GRID and (flip & 2) == 0:
+				foot_rects.append(bounds)
 			var opacity: float = float(tile.get("a", 1.0)) * float(layer.get("__opacity", 1.0))
 			for y: int in range(bounds.position.y, bounds.end.y):
 				for x: int in range(bounds.position.x, bounds.end.x):
@@ -107,4 +128,5 @@ static func build(rect: Rect2, floor_cells: Dictionary, layers: Array, definitio
 				var hidden: bool = projected_floor.get_pixel(x, y).r > 0.5 or opaque_cliff.get_pixel(x, y).r > 0.5
 				mask.set_pixel(x, y, Color.TRANSPARENT if hidden else Color.WHITE)
 	_seal_cliff_joints(mask, opaque_cliff, projected_floor, face_rects)
+	_seal_cliff_feet(mask, opaque_cliff, projected_floor, foot_rects)
 	return ImageTexture.create_from_image(mask)

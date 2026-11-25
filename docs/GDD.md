@@ -92,6 +92,8 @@ Em 75%, 50% e 25% de vida restante, o boss interrompe a ação, fica invulneráv
 
 ## Direção visual
 
+**Paleta de gameplay.** Verde menta na vida de Nox, âmbar nos avisos e dourado nas runas dos warps. O roxo do piso, os tons frios dos inimigos e os reflexos claros da arma ajudam a separar essas informações em combate.
+
 O mundo usa vinho, roxo e sombras profundas. Os poderes podem destoar da paleta de propósito: cor funcional forte ajuda a reconhecer origem e comportamento. A unidade vem dos contornos, tratamento de sombra, escala dos pixels, brilho contido e duração dos efeitos, não de recolorir todos os tiros como o cenário.
 
 O tutorial mantém o chão e a trilha originais até a cadeira; sombras fracas de nuvens passam apenas pelo piso claro. No tutorial, luzes suaves acompanham as duas crateras, as correntes e Asterion; sem feixes geométricos explícitos. No mercante, o ambiente mais escuro destaca os neons da fachada e da porta, a água e Tin. Folhas são uma cobertura visual de primeiro plano, sem física e sem luz projetada própria.
@@ -99,6 +101,8 @@ O tutorial mantém o chão e a trilha originais até a cadeira; sombras fracas d
 A vida de Nox aparece somente na barra, sem números, com verde `#2cf7a3` e aviso vermelho ao cruzar um bloco. Com 60 de vida e seis blocos, cada bloco representa **10 pontos, ou 16,7%**, não 10% da vida total. A barra usa pixels nítidos, sem filtro bilinear. A barra de Asterion usa a moldura própria e o nome centralizado acima; a redução usa `#b14c47`, `#a0251f` e `#841f1a`.
 
 ## Abertura de boosters e ambientação
+
+Os boosters dos Dark Lords usam embalagens foil. Cada pacote mantém a paleta e a ilustração do seu domínio: [Elementais de Calimshan](../assets/boosters/sets/elemental/base.png), [Dragão](../assets/boosters/sets/dragon/base.png) e [Príncipe da Valáquia](../assets/boosters/sets/dracula/base.png). O acabamento iridescente percorre a arte e a logo de cada embalagem.
 
 Direção para a abertura: segurar o mouse em qualquer ponto da tela e atravessar a linha pontilhada do pacote, aceitando ambos os sentidos e desenhando o rastro desde fora dele. Confirmar o gesto uma única vez, comprimir e sacudir o booster, então rasgar o pacote e fazer surgir a stack de cartas junto a uma explosão densa de partículas. Priorizar partículas atrás das cartas, com detalhes à frente e expansão luminosa local. A cena usa fundo vinho/roxo, partículas maiores em creme, dourado, lilás e rosa vivos e cursor local visível. Sem sons nesta etapa; os pontos de futura sonorização ficam mapeados no TDD. Na mesa de estudo, os três acabamentos descritos no catálogo permitem comparar a direção visual das candidatas a destaque.
 

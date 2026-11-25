@@ -18,6 +18,6 @@ vec3 river_bank_water(vec3 water_color, vec3 shallow_color, float water_distance
 	return color * (1.0 - contact * contact_strength);
 }
 
-float river_bank_face(float ground_distance, float aa) {
-	return 1.0 - smoothstep(bank_width_px - aa, bank_width_px + aa, ground_distance);
+float river_bank_face(float ground_distance, float aa, float width) {
+	return 1.0 - smoothstep(width - aa, width + aa, ground_distance);
 }

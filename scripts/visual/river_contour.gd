@@ -12,7 +12,7 @@ var profile_texture: ImageTexture = null
 var diagnostics: Array[String] = []
 var topology_counts: Dictionary[int, int] = {}
 var valid_y: Vector2 = Vector2.ZERO
-var locked_west_y: float = 1120.0
+var locked_west_y: float = -INF
 var max_visible_shift: float = 0.0
 var build_usec: int = 0
 var _raw: Dictionary[int, Vector2] = {}
@@ -60,6 +60,8 @@ func configure(wet_cells: Dictionary, rect: Rect2, spans: Array[Rect2], west_loc
 		diagnostics.append("RiverMask possui uma interrupcao entre linhas.")
 		return false
 	valid_y = Vector2(float(int(sorted_y[0]) * GRID), float((int(sorted_y[-1]) + 1) * GRID))
+	var west_runs: Dictionary[int, Vector3] = _flat_runs(sorted_y, 0)
+	var east_runs: Dictionary[int, Vector3] = _flat_runs(sorted_y, 1)
 	var count: int = ceili(bounds.size.y / STEP) + 1
 	var image: Image = Image.create_empty(1, count, false, Image.FORMAT_RGBAF)
 	for index: int in range(count):
@@ -74,22 +76,16 @@ func configure(wet_cells: Dictionary, rect: Rect2, spans: Array[Rect2], west_loc
 			smoothed += raw_at(y + distance) * weight
 			weight_sum += weight
 		smoothed /= weight_sum
+		smoothed.x += _bank_bow(west_runs, y)
+		smoothed.y += _bank_bow(east_runs, y)
 		smoothed = Vector2(_limit_to_authored(smoothed.x, original.x, y, 0, max_shift), _limit_to_authored(smoothed.y, original.y, y, 1, max_shift))
-		# Preserve the elevated west bank and meet its existing foot exactly.
-		var west_blend: float = smoothstep(locked_west_y, locked_west_y + radius * 2.0, y)
+		# Keep the rock, then ease from its inset end cap into the low bank.
+		var west_blend: float = smoothstep(locked_west_y + 32.0, locked_west_y + 32.0 + radius * 2.0, y) if is_finite(locked_west_y) else 1.0
 		smoothed.x = lerpf(original.x, smoothed.x, west_blend)
-		var underneath_deck: bool = false
-		for deck: Rect2 in bridges:
-			if y < deck.position.y - 48.0 or y > deck.end.y + 48.0: continue
-			var target: Vector2 = raw_at(deck.position.y + 16.0)
-			var influence: float = smoothstep(deck.position.y - 48.0, deck.position.y, y) * (1.0 - smoothstep(deck.end.y, deck.end.y + 48.0, y))
-			var pinned: Vector2 = smoothed.lerp(target, influence)
-			underneath_deck = y >= deck.position.y and y <= deck.end.y
-			# Straighten freely beneath opaque decking; visible banks stay within
-			# half a tile of the author's edge, including bridge approaches.
-			smoothed = pinned if underneath_deck else Vector2(_limit_to_authored(pinned.x, original.x, y, 0, max_shift), _limit_to_authored(pinned.y, original.y, y, 1, max_shift))
-		if not underneath_deck:
-			max_visible_shift = maxf(max_visible_shift, maxf(authored_distance(Vector2(smoothed.x, y), 0), authored_distance(Vector2(smoothed.y, y), 1)))
+		if is_finite(locked_west_y) and y >= locked_west_y and y < locked_west_y + 32.0:
+			smoothed.x -= 2.0 * (1.0 - smoothstep(locked_west_y, locked_west_y + 32.0, y))
+		# Banks pass under the deck without a forced bend at either approach.
+		max_visible_shift = maxf(max_visible_shift, maxf(authored_distance(Vector2(smoothed.x, y), 0), authored_distance(Vector2(smoothed.y, y), 1)))
 		var active: float = 1.0 if y >= valid_y.x and y <= valid_y.y else 0.0
 		var value: Vector4 = Vector4(smoothed.x, smoothed.y, active if y >= locked_west_y else 0.0, active)
 		samples.append(value)
@@ -97,6 +93,40 @@ func configure(wet_cells: Dictionary, rect: Rect2, spans: Array[Rect2], west_loc
 	profile_texture = ImageTexture.create_from_image(image)
 	build_usec = Time.get_ticks_usec() - started
 	return true
+
+
+func _flat_runs(rows: Array, side: int) -> Dictionary[int, Vector3]:
+	var runs: Dictionary[int, Vector3] = {}
+	var first: int = 0
+	var direction: float = -1.0 if side == 0 else 1.0
+	while first < rows.size():
+		var last: int = first + 1
+		var start_row: int = int(rows[first])
+		var bank: Vector2 = _raw[start_row] as Vector2
+		while last < rows.size():
+			var next_bank: Vector2 = _raw[int(rows[last])] as Vector2
+			if next_bank[side] != bank[side]:
+				break
+			last += 1
+		if (last - first) * GRID >= 128:
+			# Keep the ends tangent to the smoothed corners. Only long flat
+			# stretches get a shallow bow, within the same authored tolerance.
+			var span: Vector3 = Vector3(float(start_row * GRID + 24), float((int(rows[last - 1]) + 1) * GRID - 24), direction)
+			for row: int in range(first, last):
+				runs[int(rows[row])] = span
+			direction = -direction
+		first = last
+	return runs
+
+
+func _bank_bow(runs: Dictionary[int, Vector3], y: float) -> float:
+	var row: int = floori(y / GRID)
+	if not runs.has(row):
+		return 0.0
+	var span: Vector3 = runs[row] as Vector3
+	var progress: float = clampf(inverse_lerp(span.x, span.y, y), 0.0, 1.0)
+	var arch: float = sin(PI * progress)
+	return span.z * minf(6.0, (span.y - span.x) * 0.03) * arch * arch
 
 
 func raw_at(y: float) -> Vector2:

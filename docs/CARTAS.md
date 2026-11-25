@@ -39,7 +39,7 @@ O pacote combina leque e feixe com uma Infusão de ricochete para explorar os â
 | U04 — Mandrágora de Bolso | Mutação | Normal | Com F, a mandrágora surge sobre Nox e afasta os inimigos comuns próximos. |
 | M04 — Olho de Beholder | Manifestação | Rara | Mantém um feixe preciso no primeiro alvo até a mira mudar, o disparo cessar ou uma parede bloquear o caminho. |
 | I05 — Essência de Quimera | Infusão | Rara | Alterna fogo, veneno e empurrão por disparo ou pulso de ataque contínuo. |
-| I11 — Carapaça de Gárgula | Infusão | Normal | Projéteis ricocheteiam na primeira parede. Feixes e sopros continuam na direção refletida pelo alcance restante. |
+| I11 — Carapaça de Gárgula | Infusão | Normal | Projéteis ricocheteiam uma vez em uma parede ou inimigo. Ataques contínuos mantêm o ricochete no primeiro inimigo enquanto ele viver. |
 
 ## Elementais de Calimshan
 
@@ -86,7 +86,7 @@ Cada derrota do Dragão libera um único booster com três cartas do seu set no 
 
 ### Ricochete do Vol. 3
 
-A Carapaça de Gárgula permite uma reflexão na primeira parede que cada projétil atinge e aumenta sua velocidade em 75%. O Olho de Beholder e o Sopro de Dragão continuam na direção refletida pelo alcance restante. O feixe para no primeiro alvo, enquanto o sopro pode atingir vários inimigos ao longo do trajeto.
+A Carapaça de Gárgula permite uma reflexão por projétil, na primeira parede ou inimigo que ele atinge. O ricochete na parede aumenta a velocidade do projétil em 75%. O Olho de Beholder e o Sopro de Dragão usam o alcance restante para refletir. Enquanto o disparo contínuo estiver ativo, apenas o primeiro inimigo que refletiu o ataque pode voltar a fazê-lo. Se ele morrer, é preciso soltar e disparar novamente para refletir em outro inimigo.
 
 ## Catálogo e sorteio
 

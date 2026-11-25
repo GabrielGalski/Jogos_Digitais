@@ -45,7 +45,7 @@ void fragment() {
 	}
 	// Grass and cliff tops share the exact solid ground colour. Preserve it
 	// so decorative atlas backgrounds join the floor without darker patches.
-	bool ground_background = (asset_palette == 1 || asset_palette == 5) && palette_match(soil.rgb, vec3(83.0, 48.0, 72.0));
+	bool ground_background = (asset_palette == 1 || asset_palette == 5 || asset_palette == 6) && palette_match(soil.rgb, vec3(83.0, 48.0, 72.0));
 	if (asset_palette != 4 && !ground_background) {
 		soil.rgb = scenery_colour(asset_colour(soil.rgb));
 	}
